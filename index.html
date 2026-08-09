@@ -634,6 +634,46 @@ async function doAuth(){
   await enterApp(si.data.user);
 }
 async function logout(){ try{ if(SBc) await SBc.auth.signOut(); }catch(e){} DB.user=null; DB.players=[]; DB.ctx={}; DB.view='login'; render(); }
+/* ---- password reset ---- */
+async function forgotPassword(){
+  if(!SBc){ toast('Cloud not reachable'); return; }
+  var email=fval('f_email').toLowerCase();
+  if(!email){ toast('Type your email above first, then tap Forgot password'); return; }
+  var opts={}; if(typeof location!=='undefined' && String(location.protocol).indexOf('http')===0) opts.redirectTo=location.origin;
+  var r=await SBc.auth.resetPasswordForEmail(email, opts);
+  if(r.error){ toast(r.error.message); return; }
+  pendingEmail=email; DB.view='resetSent'; render();
+}
+function viewResetSent(){
+  return '<div class="login">'
+    +'<div class="logo-wrap">'+logoSVG(80)+'</div>'
+    +'<h2>CHECK YOUR <em>EMAIL</em></h2>'
+    +'<p class="sub">We sent a password reset link to<br><b style="color:#fff">'+esc(pendingEmail)+'</b></p>'
+    +'<p class="hint" style="margin-top:14px;line-height:1.6">Open it and click the link to set a new password.</p>'
+    +'<button class="btn" style="margin-top:16px" onclick="authMode=\'login\';go(\'login\')">Back to Log In</button>'
+  +'</div>';
+}
+function viewNewPassword(){
+  return '<div class="login">'
+    +'<div class="logo-wrap">'+logoSVG(80)+'</div>'
+    +'<h2>SET NEW <em>PASSWORD</em></h2>'
+    +'<p class="sub">Choose a new password for your account.</p>'
+    +'<div class="field"><label>New Password</label><input id="np1" type="password" placeholder="••••••"></div>'
+    +'<div class="field"><label>Confirm Password</label><input id="np2" type="password" placeholder="••••••"></div>'
+    +'<button class="btn" onclick="submitNewPassword()">Update Password</button>'
+  +'</div>';
+}
+async function submitNewPassword(){
+  if(!SBc){ toast('Cloud not reachable'); return; }
+  var pw=fval('np1'), pw2=fval('np2');
+  if(pw.length<6){ toast('Password must be at least 6 characters'); return; }
+  if(pw!==pw2){ toast('Passwords do not match'); return; }
+  var r=await SBc.auth.updateUser({ password:pw });
+  if(r.error){ toast(r.error.message); return; }
+  toast('Password updated');
+  try{ var s=await SBc.auth.getSession(); if(s.data&&s.data.session){ await enterApp(s.data.session.user); return; } }catch(e){}
+  authMode='login'; DB.view='login'; render();
+}
 
 /* ---------- shared bits ---------- */
 function topbar(right){ return '<div class="topbar"><div class="brand">'+logoSVG(34)+'<h1>HPL <em>HITTERS</em></h1></div>'+(right||'')+'</div>'; }
@@ -696,6 +736,7 @@ function viewLogin(){
     +((su&&loginRole==='coach')?'<div class="field"><label>Coach Code</label><input id="f_code" type="password" placeholder="Staff code from HPL"></div>':'')
     +'<div class="field"><label>Email</label><input id="f_email" type="email" placeholder="you@email.com"></div>'
     +'<div class="field"><label>Password</label><input id="f_pass" type="password" placeholder="••••••"></div>'
+    +(!su?'<div style="text-align:right;margin:-6px 2px 10px"><a onclick="forgotPassword()" style="color:var(--green);font-size:12px;cursor:pointer">Forgot password?</a></div>':'')
     +'<button class="btn" onclick="doAuth()">'+(su?'Create Account':'Log In')+'</button>'
     +'<p class="hint">'+(su?'Already have an account? ':"Don't have an account? ")
       +'<a onclick="authMode=\''+(su?'login':'signup')+'\';render()">'+(su?'Log in':'Sign up')+'</a></p>'
@@ -1168,6 +1209,8 @@ function render(){
     var h='';
     if(v==='login') h=viewLogin();
     else if(v==='confirm') h=viewConfirm();
+    else if(v==='resetSent') h=viewResetSent();
+    else if(v==='newPassword') h=viewNewPassword();
     else if(v==='roster') h=viewRoster();
     else if(v==='profile') h=viewProfile();
     else if(v==='editProfile') h=viewEditProfile();
@@ -1202,6 +1245,9 @@ if(typeof window!=='undefined'){
 }
 
 /* ================= BOOT ================= */
+if(typeof SBc!=='undefined' && SBc){
+  SBc.auth.onAuthStateChange(function(event){ if(event==='PASSWORD_RECOVERY'){ DB.view='newPassword'; DB.ctx={}; render(); } });
+}
 render();      /* paint login immediately */
 cloudBoot();   /* then restore session / route by role */
 </script>
