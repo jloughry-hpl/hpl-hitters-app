@@ -541,7 +541,12 @@ function ageFrom(iso){ if(!iso) return ''; const b=new Date(iso), n=new Date(); 
 var POSITIONS=['P','C','1B','2B','3B','SS','LF','CF','RF','OF','DH','UTIL'];
 var BLOCK_LABELS=['Weeks 1–5','Weeks 6–10','Weeks 11–15','Weeks 16–20','Weeks 21–25'];
 function emptyRap(){ return {maxEV:0,avgEV:0,maxDist:0,avgDist:0,avgLA:0,hardHitPct:0}; }
-function emptyBlocks(){ return BLOCK_LABELS.map(function(l,i){ return {n:i+1,label:l,date:null,test:null,rap:emptyRap()}; }); }
+function emptyBlocks(){ return BLOCK_LABELS.map(function(l,i){ return {n:i+1,label:l,date:null,entries:[]}; }); }
+/* session accessors (each block holds many dated entries: hitting tests + rapsodo) */
+function blockEntries(b){ return (b&&b.entries)||[]; }
+function lastRap(b){ var r=null; blockEntries(b).forEach(function(e){ if(e.type==='rapsodo') r=e; }); return r; }
+function lastTest(b){ var t=null; blockEntries(b).forEach(function(e){ if(e.type==='test') t=e; }); return t; }
+function entryById(b,id){ return blockEntries(b).filter(function(e){return e.id===id;})[0]; }
 
 /* ---------- store (Supabase cloud) ---------- */
 var DB={ view:'login', ctx:{}, user:null, players:[], search:'' };
@@ -636,10 +641,10 @@ function miniStat(k,v,u){ var show=(v||v===0)&&v!==''; return '<div style="flex:
 /* personal best across sessions (Avg LA just shows the latest number as-is) */
 function bestMetric(p,key){
   var best=null,bestDate=null,latest=null,latestDate=null;
-  (p.blocks||[]).forEach(function(b){ if(b.date&&b.rap&&b.rap[key]>0){
-    if(latestDate===null||b.date>=latestDate){ latest=b.rap[key]; latestDate=b.date; }
-    if(best===null||b.rap[key]>best){ best=b.rap[key]; bestDate=b.date; }
-  }});
+  (p.blocks||[]).forEach(function(b){ (b.entries||[]).forEach(function(e){ if(e.type==='rapsodo'&&e.rap&&e.rap[key]>0){
+    if(latestDate===null||e.date>=latestDate){ latest=e.rap[key]; latestDate=e.date; }
+    if(best===null||e.rap[key]>best){ best=e.rap[key]; bestDate=e.date; }
+  }});});
   if(key==='avgLA'){ if(latest!==null) return {value:latest,date:latestDate,latest:true}; }
   else if(best!==null){ return {value:best,date:bestDate}; }
   if(p.rap && p.rap[key]) return {value:p.rap[key],date:null,latest:(key==='avgLA')};
@@ -647,8 +652,30 @@ function bestMetric(p,key){
 }
 function rnBest(k,bm,u){ var show=(bm&&bm.value!=null&&bm.value!==0); var v=show?bm.value:'—'; var lab=(bm&&bm.latest)?'latest':'best'; var d=(show&&bm.date)?shortDate(bm.date):''; return '<div class="rn"><div class="k">'+k+'</div><div class="v">'+v+'<small> '+u+'</small></div>'+(d?'<div style="font-size:9px;color:var(--grey);letter-spacing:.3px;margin-top:3px">'+lab+' · '+d+'</div>':'')+'</div>'; }
 /* test-page Rapsodo input (bound to TEST.rap for this session) */
-function rapIn(lbl,key,u){ var v=(TEST&&TEST.rap&&TEST.rap[key])?TEST.rap[key]:''; return '<div class="field" style="flex:1"><label>'+lbl+' ('+u+')</label><input type="number" step="0.1" value="'+v+'" oninput="setRapField(\''+key+'\',this.value)"></div>'; }
-function setRapField(key,v){ if(TEST&&TEST.rap) TEST.rap[key]=(v===''?0:+v); }
+var RAP=null;
+function rapField(lbl,key,u){ var v=(RAP&&RAP[key])?RAP[key]:''; return '<div class="field" style="flex:1"><label>'+lbl+' ('+u+')</label><input type="number" step="0.1" value="'+v+'" oninput="setRap(\''+key+'\',this.value)"></div>'; }
+function setRap(key,v){ if(RAP) RAP[key]=(v===''?0:+v); }
+function startRapsodo(pid,n){ DB.ctx.playerId=pid; DB.ctx.blockN=n; RAP=emptyRap(); go('rapsodo'); }
+function viewRapsodo(){
+  var p=curPlayer(); if(!p) return viewLogin(); var n=DB.ctx.blockN; var b=p.blocks[n-1];
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+n+'})">'+IC.back+'</button>')
+    +'<div class="logger-head"><h2>RAPSODO <em>RESULTS</em></h2><div class="desc">Block '+n+' · '+b.label+' · enter this session\'s numbers</div></div>'
+    +'<div class="pad">'
+      +'<div style="display:flex;gap:10px">'+rapField('Max EV','maxEV','mph')+rapField('Avg EV','avgEV','mph')+rapField('Hard Hit','hardHitPct','%')+'</div>'
+      +'<div style="display:flex;gap:10px;margin-top:6px">'+rapField('Max Dist','maxDist','ft')+rapField('Avg Dist','avgDist','ft')+rapField('Avg LA','avgLA','°')+'</div>'
+      +'<button class="btn" style="margin-top:14px" onclick="saveRapsodo()">Save Rapsodo Results</button>'
+      +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+n+'})">Cancel</button>'
+    +'</div></div>';
+}
+async function saveRapsodo(){
+  var p=curPlayer(); var n=DB.ctx.blockN; var b=p.blocks[n-1];
+  var rap={maxEV:+RAP.maxEV||0,avgEV:+RAP.avgEV||0,maxDist:+RAP.maxDist||0,avgDist:+RAP.avgDist||0,avgLA:+RAP.avgLA||0,hardHitPct:+RAP.hardHitPct||0};
+  var entry={ id:nid(), type:'rapsodo', date:new Date().toISOString().slice(0,10), rap:rap };
+  if(!b.entries) b.entries=[]; b.entries.push(entry); b.date=entry.date;
+  p.rap=Object.assign({}, rap);
+  await savePlayer(p); toast('Rapsodo results saved'); go('results',{blockN:n, entryId:entry.id});
+}
 
 /* ================= LOGIN ================= */
 function viewLogin(){
@@ -742,14 +769,14 @@ function viewProfile(){
       +rnBest('Max Dist',bestMetric(p,'maxDist'),'ft')+rnBest('Avg Dist',bestMetric(p,'avgDist'),'ft')+rnBest('Avg LA',bestMetric(p,'avgLA'),'°')
     +'</div>'
     +'<div class="section-lbl">Test Blocks · 25-Week Program</div>'
+    +'<div class="wk-note" style="margin-bottom:6px">Tap a block to log a hitting test or Rapsodo results.</div>'
     +'<div class="assess" style="flex-wrap:wrap;gap:8px">'
-      +p.blocks.map(function(b){ return '<button class="a '+(b.date?'cur':'')+'" style="cursor:pointer;width:auto;flex:1 1 30%;min-width:88px" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+b.n+'})">'
+      +p.blocks.map(function(b){ var cnt=(b.entries||[]).length; return '<button class="a '+(cnt?'cur':'')+'" style="cursor:pointer;width:auto;flex:1 1 30%;min-width:88px" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+b.n+'})">'
         +'<div class="wk">Block '+b.n+'</div><div class="dt">'+b.label.replace('Weeks ','Wk ')+'</div>'
-        +'<div class="ev">'+(b.date?((b.rap.maxEV||0)+' mph'):'—')+'</div></button>'; }).join('')
+        +'<div class="ev">'+(cnt?(cnt+' log'+(cnt>1?'s':'')):'—')+'</div></button>'; }).join('')
     +'</div>'
     +'<div class="pad">'
-      +'<button class="btn" onclick="startTest(\''+p.id+'\')">Log Hitting Test</button>'
-      +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
+      +'<button class="btn" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
     +'</div></div>';
 }
@@ -812,32 +839,39 @@ async function saveProfile(){
 }
 
 /* ================= BLOCK DETAIL ================= */
+function entryRow(p,b,e){
+  var isTest=e.type==='test';
+  var title=isTest?'Hitting Test':'Rapsodo Results';
+  var sub=isTest
+    ? ('Color '+((e.scores&&e.scores.colorAcc)||0)+'% · Swing '+((e.scores&&e.scores.decAcc)||0)+'%')
+    : ('Max EV '+((e.rap&&e.rap.maxEV)||0)+' · Avg EV '+((e.rap&&e.rap.avgEV)||0));
+  return '<button class="drill-card" onclick="go(\'results\',{playerId:\''+p.id+'\',blockN:'+b.n+',entryId:\''+e.id+'\'})">'
+    +'<div class="dc-top"><div class="dc-ic">'+(isTest?'T':'R')+'</div>'
+    +'<div class="dc-name"><h4>'+title+'</h4><div class="st">'+fmtDate(e.date)+' · '+sub+'</div></div>'+IC.chev+'</div></button>';
+}
 function viewBlock(){
   var p=curPlayer(); if(!p) return viewLogin();
   var b=p.blocks[DB.ctx.blockN-1]; if(!b) return viewProfile();
-  var hasTest=!!b.test; var a=hasTest?analyzeTest(b.test):null;
+  var entries=blockEntries(b).slice().reverse();
   return '<div class="scroll">'
     +topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'+IC.back+'</button>')
     +'<div class="logger-head"><h2>BLOCK '+b.n+' · <em>'+b.label+'</em></h2>'
-      +'<div class="desc">'+(b.date?('Tested '+fmtDate(b.date)):'No test recorded yet.')+'</div></div>'
-    +(hasTest?'<div class="stat-row">'
-      +'<div class="stat"><div class="k">Max EV</div><div class="v">'+a.maxEV+'<small> mph</small></div></div>'
-      +'<div class="stat"><div class="k">Avg EV</div><div class="v">'+a.avgEV+'<small> mph</small></div></div>'
-      +'<div class="stat"><div class="k">Hard Hit</div><div class="v">'+a.hardHitPct+'<small>%</small></div></div>'
-    +'</div>':'')
+      +'<div class="desc">'+(entries.length?(entries.length+' session'+(entries.length>1?'s':'')+' logged in this block'):'No sessions yet — log your first below.')+'</div></div>'
     +'<div class="pad">'
-      +'<button class="btn" onclick="startBlockTest(\''+p.id+'\','+b.n+')">'+(hasTest?'Re-log Test':'Log Test')+'</button>'
-      +(hasTest?'<button class="btn ghost" style="margin-top:8px" onclick="go(\'results\',{playerId:\''+p.id+'\',blockN:'+b.n+'})">View Results</button>':'')
-    +'</div></div>';
+      +'<button class="btn" onclick="startBlockTest(\''+p.id+'\','+b.n+')">Log Hitting Test</button>'
+      +'<button class="btn ghost" style="margin-top:8px" onclick="startRapsodo(\''+p.id+'\','+b.n+')">Log Rapsodo Results</button>'
+    +'</div>'
+    +(entries.length?('<div class="section-lbl">Session History</div>'+entries.map(function(e){return entryRow(p,b,e);}).join('')):'')
+    +'<div style="height:16px"></div></div>';
 }
 
 /* ================= TEST LOGGER ================= */
 var TEST=null;
 function secMeta(s){ return s==='frontToss'?{name:'Front Toss',nc:10,nn:5}:(s==='bp'?{name:'BP',nc:5,nn:10}:{name:'Machine',nc:5,nn:10}); }
 function mkPitches(nc,nn){ var a=[],i; for(i=0;i<nc;i++)a.push({kind:'color',color:null,pick:null,ev:null,swing:null}); for(i=0;i<nn;i++)a.push({kind:'normal',color:null,pick:null,ev:null,swing:null}); return a; }
-function initTest(){ return { section:'frontToss', frontToss:mkPitches(10,5), bp:mkPitches(5,10), machine:mkPitches(5,10), rap:emptyRap() }; }
-function startTest(pid){ DB.ctx.playerId=pid; var p=playerById(pid); var blk=p.blocks.find(function(b){return !b.test;})||p.blocks[0]; TEST=initTest(); TEST.rap=Object.assign(emptyRap(), blk.rap||{}); DB.ctx.blockN=blk.n; go('test'); }
-function startBlockTest(pid,n){ DB.ctx.playerId=pid; var p=playerById(pid); var b=p.blocks[n-1]; TEST=b.test?JSON.parse(JSON.stringify(b.test)):initTest(); TEST.section='frontToss'; TEST.rap=Object.assign(emptyRap(), b.rap||{}); DB.ctx.blockN=n; go('test'); }
+function initTest(){ return { section:'frontToss', frontToss:mkPitches(10,5), bp:mkPitches(5,10), machine:mkPitches(5,10) }; }
+function startTest(pid){ go('block',{playerId:pid,blockN:1}); }
+function startBlockTest(pid,n){ DB.ctx.playerId=pid; TEST=initTest(); DB.ctx.blockN=n; go('test'); }
 function setSection(s){ TEST.section=s; render(); }
 function setPitchColor(sec,i,field,c){ TEST[sec][i][field]=c; render(); }
 function setSwing(sec,i,s){ TEST[sec][i].swing=s; render(); }
@@ -902,11 +936,6 @@ function viewTest(){
       +'<div class="sc"><div class="k">Avg EV</div><div class="v">'+(a.avgEV||'—')+'</div></div>'
     +'</div>'
     +'<div class="swing-list">'+arr.map(function(pt,i){return pitchCard(sec,i,pt);}).join('')+'</div>'
-    +'<div class="section-lbl">Rapsodo Numbers · This Session</div>'
-    +'<div class="pad" style="padding-top:0;padding-bottom:2px">'
-      +'<div style="display:flex;gap:10px">'+rapIn('Max EV','maxEV','mph')+rapIn('Avg EV','avgEV','mph')+rapIn('Hard Hit','hardHitPct','%')+'</div>'
-      +'<div style="display:flex;gap:10px;margin-top:6px">'+rapIn('Max Dist','maxDist','ft')+rapIn('Avg Dist','avgDist','ft')+rapIn('Avg LA','avgLA','°')+'</div>'
-    +'</div>'
     +'<div class="save-bar"><button class="btn" onclick="saveTest()">Save Test &amp; See Results</button></div>'
   +'</div>';
 }
@@ -943,13 +972,10 @@ function pitchCard(sec,i,pt){
 }
 async function saveTest(){
   var p=curPlayer(); var n=DB.ctx.blockN; var b=p.blocks[n-1]; var a=analyzeTest(TEST);
-  b.test=TEST; b.date=new Date().toISOString().slice(0,10);
-  var R=TEST.rap||{};
-  b.rap={ maxEV:+R.maxEV||0, avgEV:+R.avgEV||0, maxDist:+R.maxDist||0, avgDist:+R.avgDist||0, avgLA:+R.avgLA||0, hardHitPct:+R.hardHitPct||0 };
-  b.scores={ colorAcc:a.colorAcc, decAcc:a.decAcc, redDiscipline:a.redDiscipline,
-    nonRedSwingPct:a.nonRedSwingPct, sections:a.sections };
-  p.rap=Object.assign({}, b.rap);
-  await savePlayer(p); toast('Test saved'); go('results',{blockN:n});
+  var entry={ id:nid(), type:'test', date:new Date().toISOString().slice(0,10), test:TEST,
+    scores:{ colorAcc:a.colorAcc, decAcc:a.decAcc, redDiscipline:a.redDiscipline, nonRedSwingPct:a.nonRedSwingPct, sections:a.sections } };
+  if(!b.entries) b.entries=[]; b.entries.push(entry); b.date=entry.date;
+  await savePlayer(p); toast('Test saved'); go('results',{blockN:n, entryId:entry.id});
 }
 
 /* ================= RESULTS ================= */
@@ -977,13 +1003,27 @@ function sectionTable(secs,bg){
 }
 function viewResults(){
   var p=curPlayer(); if(!p) return viewLogin();
-  var n=DB.ctx.blockN; var b=p.blocks[n-1]; if(!b||!b.test) return viewProfile();
-  var a=analyzeTest(b.test);
+  var n=DB.ctx.blockN; var b=p.blocks[n-1]; if(!b) return viewProfile();
+  var e=DB.ctx.entryId?entryById(b,DB.ctx.entryId):(lastTest(b)||lastRap(b));
+  if(!e) return viewBlock();
+  var backR='<button class="icon-btn" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+n+'})">'+IC.back+'</button>';
+  if(e.type==='rapsodo'){
+    var R=e.rap||{};
+    return '<div class="scroll">'+topbar(backR)
+      +'<div class="logger-head"><h2>RAPSODO <em>RESULTS</em></h2><div class="desc">Block '+n+' · '+b.label+' · '+fmtDate(e.date)+'</div></div>'
+      +'<div class="rap-numbers" style="grid-template-columns:1fr 1fr 1fr">'
+        +rn('Max EV',R.maxEV,'mph')+rn('Avg EV',R.avgEV,'mph')+rn('Hard Hit',R.hardHitPct,'%')
+        +rn('Max Dist',R.maxDist,'ft')+rn('Avg Dist',R.avgDist,'ft')+rn('Avg LA',R.avgLA,'°')
+      +'</div>'
+      +'<div class="pad"><button class="btn ghost" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button></div>'
+    +'</div>';
+  }
+  var a=analyzeTest(e.test);
   var cols=['Green','Black','Blue'].filter(function(c){return a.perColor[c].n;});
   var worst=cols.slice().sort(function(x,y){return a.perColor[x].avg-a.perColor[y].avg;})[0];
   return '<div class="scroll">'
-    +topbar('<button class="icon-btn" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+n+'})">'+IC.back+'</button>')
-    +'<div class="logger-head"><h2>TEST <em>RESULTS</em></h2><div class="desc">Block '+n+' · '+b.label+' · '+fmtDate(b.date)+'</div></div>'
+    +topbar(backR)
+    +'<div class="logger-head"><h2>TEST <em>RESULTS</em></h2><div class="desc">Block '+n+' · '+b.label+' · '+fmtDate(e.date)+'</div></div>'
     +'<div class="stat-row">'
       +'<div class="stat"><div class="k">Max EV</div><div class="v">'+a.maxEV+'<small> mph</small></div></div>'
       +'<div class="stat"><div class="k">Avg EV</div><div class="v">'+a.avgEV+'<small> mph</small></div></div>'
@@ -1023,11 +1063,12 @@ function delta(a,b){ return +((a||0)-(b||0)).toFixed(1); }
 function dtxt(v,u){ if(v>0) return '+'+v+(u||'')+' since start'; if(v<0) return v+(u||'')+' since start'; return 'even since start'; }
 function viewReport(){
   var p=curPlayer(); if(!p) return viewLogin();
-  var done=p.blocks.filter(function(b){return b.date;});
-  if(!done.length){ return '<div class="scroll">'+topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'+IC.back+'</button>')
-    +'<div class="logger-head"><h2>HPL <em>REPORT</em></h2></div><div class="center-note">Log at least one test block to generate a development report.</div>'
-    +'<div class="pad"><button class="btn" onclick="startTest(\''+p.id+'\')">Log a Test</button></div></div>'; }
-  var first=done[0], last=done[done.length-1];
+  var assess=[]; p.blocks.forEach(function(b){ var e=lastRap(b); if(e){ assess.push({label:b.label, date:e.date, rap:e.rap}); } });
+  var lastScores=null; p.blocks.forEach(function(b){ var t=lastTest(b); if(t) lastScores=t.scores; });
+  if(!assess.length){ return '<div class="scroll">'+topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'+IC.back+'</button>')
+    +'<div class="logger-head"><h2>HPL <em>REPORT</em></h2></div><div class="center-note">Log at least one Rapsodo session to generate a development report.</div>'
+    +'<div class="pad"><button class="btn" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:1})">Go to Block 1</button></div></div>'; }
+  var first=assess[0], last=assess[assess.length-1];
   var r=last.rap, f=first.rap;
   var dEV=delta(r.maxEV,f.maxEV), dAvg=delta(r.avgEV,f.avgEV), dHH=delta(r.hardHitPct,f.hardHitPct), dDist=delta(r.maxDist,f.maxDist);
   var span=fmtDate(first.date)+' – '+fmtDate(last.date);
@@ -1036,11 +1077,11 @@ function viewReport(){
     +'<div style="font-family:\'Barlow Semi Condensed\';font-weight:700;text-transform:uppercase;letter-spacing:.6px;font-size:9.5px;color:var(--green)">'+k+'</div>'
     +'<div style="font-family:\'Anton\';font-style:italic;font-size:24px;margin:5px 0 4px">'+v+'</div>'
     +'<div style="font-size:9.5px;color:'+(subcls==='up'?'var(--green)':(subcls==='down'?'#ff7b6b':'var(--grey)'))+';font-weight:600">'+sub+'</div></div>'; }
-  var rows=done.map(function(b){ return '<tr>'
-    +'<td style="padding:8px 6px">'+b.label+'</td><td style="padding:8px 6px">'+fmtDate(b.date)+'</td>'
-    +'<td style="padding:8px 6px;text-align:center">'+(b.rap.maxEV||0)+'</td><td style="padding:8px 6px;text-align:center">'+(b.rap.avgEV||0)+'</td>'
-    +'<td style="padding:8px 6px;text-align:center">'+(b.rap.hardHitPct||0)+'%</td><td style="padding:8px 6px;text-align:center">'+(b.rap.maxDist||0)+'</td>'
-    +'<td style="padding:8px 6px;text-align:center">'+(b.rap.avgLA||0)+'°</td></tr>'; }).join('');
+  var rows=assess.map(function(x){ return '<tr>'
+    +'<td style="padding:8px 6px">'+x.label+'</td><td style="padding:8px 6px">'+fmtDate(x.date)+'</td>'
+    +'<td style="padding:8px 6px;text-align:center">'+(x.rap.maxEV||0)+'</td><td style="padding:8px 6px;text-align:center">'+(x.rap.avgEV||0)+'</td>'
+    +'<td style="padding:8px 6px;text-align:center">'+(x.rap.hardHitPct||0)+'%</td><td style="padding:8px 6px;text-align:center">'+(x.rap.maxDist||0)+'</td>'
+    +'<td style="padding:8px 6px;text-align:center">'+(x.rap.avgLA||0)+'°</td></tr>'; }).join('');
   function para(title,body){ return '<div style="margin:14px 0 0"><div style="display:inline-block;border-left:4px solid var(--green);background:rgba(131,245,44,.08);padding:5px 10px;font-family:\'Barlow Semi Condensed\';font-weight:700;font-size:13px">'+title+'</div><p style="font-size:12.5px;line-height:1.55;color:#cfcfcf;margin:7px 2px 0">'+body+'</p></div>'; }
   var nm=esc(p.first)+' '+esc(p.last);
   return '<div class="scroll" id="reportScroll">'
@@ -1050,7 +1091,7 @@ function viewReport(){
         +logoSVG(56)
         +'<div><div style="font-family:\'Barlow Semi Condensed\';font-weight:700;color:var(--green);letter-spacing:.5px;font-size:12px">PLAYER DEVELOPMENT REPORT</div>'
         +'<div style="font-family:\'Anton\';font-style:italic;font-size:24px;line-height:1">'+nm+'</div>'
-        +'<div style="font-size:10.5px;color:var(--grey);margin-top:3px">'+done.length+' Assessments · '+span+'</div></div></div>'
+        +'<div style="font-size:10.5px;color:var(--grey);margin-top:3px">'+assess.length+' Assessments · '+span+'</div></div></div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">'
         +card('Max Exit Velo',r.maxEV+' mph',dtxt(dEV,' mph'),dEV>0?'up':(dEV<0?'down':''))
         +card('Avg Exit Velo',r.avgEV+' mph',dtxt(dAvg,' mph'),dAvg>0?'up':(dAvg<0?'down':''))
@@ -1065,18 +1106,18 @@ function viewReport(){
         +'<thead><tr style="background:rgba(131,245,44,.1);color:var(--green);font-family:\'Barlow Semi Condensed\';text-transform:uppercase;font-size:10px;letter-spacing:.4px">'
         +'<th style="padding:8px 6px;text-align:left">Block</th><th style="padding:8px 6px;text-align:left">Date</th><th style="padding:8px 6px">Max EV</th><th style="padding:8px 6px">Avg EV</th><th style="padding:8px 6px">Hard Hit</th><th style="padding:8px 6px">Max Dist</th><th style="padding:8px 6px">Avg LA</th></tr></thead>'
         +'<tbody>'+rows+'</tbody></table></div>'
-      +(last.scores?(
+      +(lastScores?(
           '<div class="section-lbl" style="margin:20px 2px 8px">Swing Decisions &amp; Pitch Recognition</div>'
           +'<div style="display:flex;flex-wrap:wrap;gap:8px">'
-            +card('Color Read',(last.scores.colorAcc||0)+'%','correct ball called',last.scores.colorAcc>=80?'up':'')
-            +card('Swing Decisions',(last.scores.decAcc||0)+'%','take red / swing rest',last.scores.decAcc>=80?'up':'')
+            +card('Color Read',(lastScores.colorAcc||0)+'%','correct ball called',lastScores.colorAcc>=80?'up':'')
+            +card('Swing Decisions',(lastScores.decAcc||0)+'%','take red / swing rest',lastScores.decAcc>=80?'up':'')
           +'</div>'
           +'<div class="section-lbl" style="margin:16px 2px 8px">By Test Section — Correct Colors, Swing Decisions &amp; EV</div>'
-          +'<div style="overflow-x:auto">'+sectionTable(last.scores.sections,'#141614')+'</div>'
-          +reportNotes(last.scores)
+          +'<div style="overflow-x:auto">'+sectionTable(lastScores.sections,'#141614')+'</div>'
+          +reportNotes(lastScores)
         ):'')
       +'<div class="section-lbl" style="margin:20px 2px 4px">Development Summary</div>'
-      +'<p style="font-size:12.5px;line-height:1.55;color:#cfcfcf;margin:2px">'+nm+' has completed '+done.length+' assessment'+(done.length>1?'s':'')+' at Hitting Performance Labs from '+span+'.</p>'
+      +'<p style="font-size:12.5px;line-height:1.55;color:#cfcfcf;margin:2px">'+nm+' has completed '+assess.length+' assessment'+(assess.length>1?'s':'')+' at Hitting Performance Labs from '+span+'.</p>'
       +para('Exit Velocity', 'Max exit velocity moved from <b>'+f.maxEV+' mph</b> to <b>'+r.maxEV+' mph</b> ('+dtxt(dEV,' mph').replace(' since start','')+'). Average EV is '+r.avgEV+' mph — closing the gap to max means more quality contact every swing.')
       +para('Hard Hit %', 'Hard-hit rate (80+ mph) is <b>'+r.hardHitPct+'%</b> ('+dtxt(dHH,'%').replace(' since start','')+' overall). More hard contact means more game-quality swings.')
       +para('Distance', 'Max distance is <b>'+r.maxDist+' ft</b>. As exit velo and launch angle develop, distance follows.')
@@ -1128,6 +1169,7 @@ function render(){
     else if(v==='editProfile') h=viewEditProfile();
     else if(v==='block') h=viewBlock();
     else if(v==='test') h=viewTest();
+    else if(v==='rapsodo') h=viewRapsodo();
     else if(v==='results') h=viewResults();
     else if(v==='report') h=viewReport();
     else if(v==='info') h=viewInfo();
