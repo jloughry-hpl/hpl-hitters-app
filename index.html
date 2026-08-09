@@ -1,0 +1,1142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HPL Hitters — Player Development</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Barlow+Semi+Condensed:ital,wght@0,400;0,500;0,600;0,700;1,600&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --black:#0a0b0a; --panel:#141614; --panel-2:#1b1e1b; --line:#2a2e2a;
+    --green:#83f52c; --green-deep:#5bc70e; --white:#fff; --grey:#9aa39a; --grey-d:#5c615c;
+    --red:#e23b3b; --blue:#3d7bff; --amber:#ffb020;
+    --shadow:0 18px 40px rgba(0,0,0,.55);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Barlow',system-ui,sans-serif;background:#050605;color:var(--white);
+    min-height:100vh;display:flex;justify-content:center;padding:22px 12px 60px}
+  .display{font-family:'Anton',sans-serif;font-style:italic;text-transform:uppercase;line-height:.95}
+  .cond{font-family:'Barlow Semi Condensed',sans-serif}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select{font-family:inherit}
+
+  /* device frame */
+  .device{width:392px;max-width:100%;background:var(--black);border-radius:44px;padding:12px;
+    box-shadow:var(--shadow),0 0 0 2px #1c1f1c,0 0 0 10px #0c0d0c;position:relative}
+  .device::before{content:"";position:absolute;top:22px;left:50%;transform:translateX(-50%);
+    width:120px;height:26px;background:#000;border-radius:16px;z-index:30}
+  .viewport{background:
+      radial-gradient(900px 380px at 50% -12%, rgba(131,245,44,.08), transparent 60%),#080908;
+    border-radius:34px;overflow:hidden;height:812px;position:relative;border:1px solid var(--line);
+    display:flex;flex-direction:column}
+  .scroll{flex:1;overflow-y:auto;overflow-x:hidden}
+  .scroll::-webkit-scrollbar{width:0}
+
+  /* shared header */
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:40px 18px 12px;position:relative;z-index:5}
+  .brand{display:flex;align-items:center;gap:9px}
+  .badge{width:34px;height:34px;border-radius:50%;flex:0 0 auto;
+    background:radial-gradient(circle at 50% 40%,#fff 0 42%,#0a0b0a 43% 100%);
+    border:2px solid var(--green);display:flex;align-items:center;justify-content:center;box-shadow:0 0 12px rgba(131,245,44,.4)}
+  .badge span{font-family:'Anton';font-style:italic;color:var(--green-deep);font-size:15px}
+  .brand h1{font-family:'Anton';font-style:italic;font-size:18px;letter-spacing:.4px}
+  .brand h1 em{color:var(--green);font-style:normal}
+  .hpl-logo{flex:0 0 auto;filter:drop-shadow(0 0 5px rgba(131,245,44,.45))}
+  .logo-wrap{display:flex;justify-content:center;margin:0 auto 18px;filter:drop-shadow(0 0 18px rgba(131,245,44,.4))}
+  .icon-btn{width:38px;height:38px;border-radius:11px;background:var(--panel);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;color:#fff}
+  .icon-btn svg{width:18px;height:18px}
+  .back{display:flex;align-items:center;gap:7px;color:#fff;font-family:'Barlow Semi Condensed';font-weight:700;
+    text-transform:uppercase;letter-spacing:1px;font-size:13px}
+  .back svg{width:18px;height:18px;color:var(--green)}
+  .pad{padding:4px 16px 40px}
+
+  /* login */
+  .login{height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 30px;text-align:center}
+  .login .logo{width:96px;height:96px;border-radius:50%;margin:0 auto 20px;
+    background:radial-gradient(circle at 50% 40%,#fff 0 44%,#0a0b0a 45% 100%);border:3px solid var(--green);
+    display:flex;align-items:center;justify-content:center;box-shadow:0 0 26px rgba(131,245,44,.4)}
+  .login .logo span{font-family:'Anton';font-style:italic;font-size:40px;color:var(--green-deep)}
+  .login h2{font-family:'Anton';font-style:italic;font-size:30px;line-height:.95}
+  .login h2 em{color:var(--green);font-style:normal}
+  .login p.sub{color:var(--grey);font-size:13px;margin:8px 0 26px;letter-spacing:.3px}
+  .field{text-align:left;margin-bottom:14px}
+  .field label{display:block;font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;
+    letter-spacing:1px;font-size:11px;color:var(--grey);margin-bottom:6px}
+  .field input,.field select{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:13px 14px;font-size:15px;color:#eef;font-weight:500}
+  .field input:focus,.field select:focus{outline:none;border-color:var(--green)}
+  .btn{background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;border-radius:13px;
+    padding:15px;width:100%;font-family:'Anton';font-style:italic;font-size:17px;letter-spacing:.5px;
+    text-transform:uppercase;box-shadow:0 10px 22px rgba(131,245,44,.3);margin-top:6px}
+  .btn.ghost{background:var(--panel);color:#fff;border:1px solid var(--line);box-shadow:none}
+  .btn.sm{padding:11px;font-size:14px}
+  .role-switch{display:flex;gap:8px;margin-bottom:22px;background:var(--panel);border:1px solid var(--line);
+    border-radius:13px;padding:5px}
+  .role-switch button{flex:1;padding:10px;border-radius:9px;font-family:'Barlow Semi Condensed';font-weight:700;
+    text-transform:uppercase;letter-spacing:.5px;font-size:12px;color:var(--grey)}
+  .role-switch button.on{background:var(--green);color:#0a0b0a}
+  .hint{font-size:11px;color:var(--grey-d);margin-top:16px;line-height:1.5}
+  .hint code{color:var(--green);background:rgba(131,245,44,.08);padding:1px 5px;border-radius:5px}
+
+  /* sport toggle */
+  .sport-toggle{display:flex;gap:8px;margin:2px 16px 4px;background:var(--panel);border:1px solid var(--line);
+    border-radius:13px;padding:5px}
+  .sport-toggle button{flex:1;padding:11px;border-radius:9px;font-family:'Barlow Semi Condensed';font-weight:700;
+    text-transform:uppercase;letter-spacing:.6px;font-size:13px;color:var(--grey);display:flex;align-items:center;
+    justify-content:center;gap:7px}
+  .sport-toggle button.on{background:var(--green);color:#0a0b0a}
+  .sport-toggle button svg{width:16px;height:16px}
+
+  .hello{padding:8px 2px 6px}
+  .hello p{color:var(--grey);font-size:13px;font-weight:500}
+  .hello h2{font-family:'Anton';font-style:italic;font-size:25px;margin-top:2px}
+  .hello h2 em{color:var(--green);font-style:normal}
+
+  .searchbar{display:flex;align-items:center;gap:9px;background:var(--panel);border:1px solid var(--line);
+    border-radius:13px;padding:12px 13px;margin:10px 0 6px;color:var(--grey)}
+  .searchbar svg{width:16px;height:16px;flex:0 0 auto}
+  .searchbar input{flex:1;background:none;border:none;color:#fff;font-size:14px}
+  .searchbar input:focus{outline:none}
+  .searchbar input::placeholder{color:var(--grey-d)}
+
+  .list-head{display:flex;justify-content:space-between;align-items:baseline;margin:16px 2px 10px}
+  .list-head .lbl{font-family:'Barlow Semi Condensed';font-weight:700;letter-spacing:1.5px;text-transform:uppercase;
+    font-size:12px;color:var(--grey)}
+  .list-head .cnt{color:var(--green);font-weight:700;font-size:12px}
+
+  .p-card{display:flex;align-items:center;gap:13px;background:var(--panel);border:1px solid var(--line);
+    border-left:3px solid var(--green);border-radius:16px;padding:12px;margin-bottom:10px;width:100%;text-align:left}
+  .p-photo{width:54px;height:54px;border-radius:13px;flex:0 0 auto;object-fit:cover;border:2px solid #303430;background:#222}
+  .p-info{flex:1;min-width:0}
+  .p-info h3{font-family:'Barlow Semi Condensed';font-weight:700;font-size:17px;line-height:1.1}
+  .p-info .meta{color:var(--grey);font-size:12px;font-weight:500;margin-top:2px}
+  .hand{width:29px;height:29px;border-radius:9px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    font-family:'Anton';font-style:italic;font-size:13px;background:rgba(131,245,44,.12);color:var(--green);
+    border:1px solid rgba(131,245,44,.4)}
+  .hand.sw{background:rgba(226,59,59,.12);color:#ff7b6b;border-color:rgba(226,59,59,.4)}
+  .chev{color:#4a4f4a;flex:0 0 auto}
+
+  .fab{position:absolute;bottom:80px;right:18px;width:56px;height:56px;border-radius:18px;z-index:20;
+    background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;display:flex;align-items:center;
+    justify-content:center;font-family:'Anton';font-size:30px;box-shadow:0 10px 24px rgba(131,245,44,.4)}
+
+  .tabbar{height:66px;background:#0c0e0c;border-top:1px solid var(--line);display:flex;justify-content:space-around;
+    align-items:center;padding:0 6px 8px}
+  .tab{display:flex;flex-direction:column;align-items:center;gap:3px;color:#5a5f5a;font-size:10px;font-weight:600;
+    text-transform:uppercase;letter-spacing:.5px;background:none}
+  .tab svg{width:21px;height:21px}
+  .tab.on{color:var(--green)}
+
+  /* profile */
+  .prof-hero{text-align:center;padding:6px 16px 0}
+  .prof-photo-wrap{position:relative;width:132px;height:132px;margin:2px auto 0}
+  .prof-photo{width:132px;height:132px;border-radius:24px;object-fit:cover;border:3px solid var(--green);
+    box-shadow:0 0 0 5px #0a0b0a,0 0 24px rgba(131,245,44,.3)}
+  .prof-hand{position:absolute;bottom:-8px;right:6px;width:38px;height:38px;border-radius:12px;display:flex;
+    align-items:center;justify-content:center;font-family:'Anton';font-style:italic;font-size:17px;
+    background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;border:3px solid #0a0b0a}
+  .prof-name{font-family:'Anton';font-style:italic;font-size:27px;margin-top:14px;line-height:1}
+  .prof-name em{color:var(--green);font-style:normal}
+  .prof-sub{color:var(--grey);font-family:'Barlow Semi Condensed';font-weight:600;letter-spacing:.8px;
+    text-transform:uppercase;font-size:12px;margin-top:6px}
+  .prof-sub .dot{color:var(--green);margin:0 5px}
+  .stat-row{display:flex;gap:9px;padding:16px 16px 2px}
+  .stat{flex:1;background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--green);border-radius:13px;
+    padding:11px 6px;text-align:center}
+  .stat .k{font-family:'Barlow Semi Condensed';font-weight:600;color:var(--grey);text-transform:uppercase;
+    letter-spacing:.6px;font-size:9.5px}
+  .stat .v{font-family:'Anton';font-style:italic;font-size:19px;margin-top:4px}
+  .stat .v small{font-size:10px;color:var(--grey);font-family:'Barlow';font-style:normal;font-weight:600}
+
+  .detail-card{margin:14px 16px;background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden}
+  .detail-card .row{display:flex;justify-content:space-between;align-items:center;padding:13px 15px;border-bottom:1px solid var(--line)}
+  .detail-card .row:last-child{border-bottom:none}
+  .detail-card .row .k{color:var(--grey);font-size:13px;font-weight:500;display:flex;align-items:center;gap:9px}
+  .detail-card .row .k svg{width:16px;height:16px;color:var(--green)}
+  .detail-card .row .v{font-family:'Barlow Semi Condensed';font-weight:700;font-size:15px}
+  .join{text-align:center;font-style:italic;color:var(--grey);font-size:12.5px;margin:2px 16px 0}
+  .join b{color:#c8ccc8;font-weight:600}
+
+  .section-lbl{font-family:'Barlow Semi Condensed';font-weight:700;letter-spacing:1.4px;text-transform:uppercase;
+    font-size:12px;color:var(--grey);margin:22px 18px 10px;display:flex;justify-content:space-between;align-items:center}
+  .section-lbl .link{color:var(--green);font-size:11px}
+
+  /* assessment timeline */
+  .assess{display:flex;gap:9px;overflow-x:auto;padding:0 16px 4px}
+  .assess::-webkit-scrollbar{height:0}
+  .assess .a{flex:0 0 auto;width:96px;background:var(--panel);border:1px solid var(--line);border-radius:13px;
+    padding:11px 10px;text-align:center}
+  .assess .a.cur{border-color:var(--green);box-shadow:0 0 14px rgba(131,245,44,.2)}
+  .assess .a .wk{font-family:'Anton';font-style:italic;font-size:15px}
+  .assess .a .dt{color:var(--grey);font-size:10px;margin-top:2px}
+  .assess .a .ev{color:var(--green);font-weight:700;font-size:12px;margin-top:6px}
+  /* 4-week block carousel */
+  .block-carousel{display:flex;align-items:stretch;gap:6px;padding:0 12px}
+  .bc-nav{flex:0 0 auto;width:34px;background:var(--panel);border:1px solid var(--line);border-radius:11px;
+    color:var(--green);display:flex;align-items:center;justify-content:center}
+  .bc-nav:disabled{opacity:.3;color:var(--grey-d)}
+  .bc-nav svg{width:16px;height:16px}
+  .assess.blk-strip{flex:1;padding:0;overflow:visible}
+  .assess .a.blk{width:auto;flex:1 1 0;min-width:0;padding:13px 4px}
+  .assess .a.blk .wk{font-family:'Barlow Semi Condensed';font-weight:700;font-size:12px;letter-spacing:.5px;color:var(--grey)}
+  .assess .a.blk .blk-lbl{font-family:'Anton';font-style:italic;font-size:22px;color:#fff;margin-top:2px;white-space:nowrap}
+  .assess .a.blk.empty{opacity:.5}
+  .assess .a.blk.empty .ev{color:var(--grey-d)}
+
+  /* drill list on profile */
+  .drill-card{margin:0 16px 11px;background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px;width:calc(100% - 32px);text-align:left;display:block}
+  .drill-card .dc-top{display:flex;align-items:center;gap:11px}
+  .dc-ic{width:40px;height:40px;border-radius:11px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;
+    background:rgba(131,245,44,.1);border:1px solid rgba(131,245,44,.3);color:var(--green);font-family:'Anton';font-style:italic;font-size:16px}
+  .dc-name{flex:1}
+  .dc-name h4{font-family:'Barlow Semi Condensed';font-weight:700;font-size:16px}
+  .dc-name .st{font-size:11.5px;color:var(--grey);margin-top:1px}
+  .lvl-badge{font-family:'Barlow Semi Condensed';font-weight:700;font-size:11px;text-transform:uppercase;
+    letter-spacing:.5px;padding:4px 9px;border-radius:8px;background:var(--panel-2);color:var(--grey);border:1px solid var(--line)}
+  .lvl-badge.l1{background:rgba(61,123,255,.14);color:#7ea8ff;border-color:rgba(61,123,255,.4)}
+  .lvl-badge.l2{background:rgba(131,245,44,.14);color:var(--green);border-color:rgba(131,245,44,.4)}
+  .lvl-badge.done{background:rgba(255,176,32,.14);color:var(--amber);border-color:rgba(255,176,32,.4)}
+  .lvl-badge.locked{background:#191b19;color:#5c615c;border-color:var(--line);display:inline-flex;align-items:center;gap:3px}
+  .lvl-badge.locked svg{width:11px;height:11px}
+  .lv-tags{display:flex;flex-direction:column;gap:4px;align-items:flex-end;flex:0 0 auto}
+  .wk-note{margin:2px 16px 4px;font-size:11.5px;color:var(--grey);font-style:italic}
+  .wk-note b{color:var(--green);font-style:normal}
+  .assess .a{cursor:pointer;background:var(--panel);border:1px solid var(--line)}
+  .prog{height:6px;border-radius:4px;background:#22261f;margin-top:11px;overflow:hidden}
+  .prog i{display:block;height:100%;background:linear-gradient(90deg,var(--green-deep),var(--green));border-radius:4px}
+  .prog-txt{display:flex;justify-content:space-between;margin-top:6px;font-size:11px;color:var(--grey)}
+  .prog-txt b{color:#fff}
+
+  /* drill logger */
+  .logger-head{padding:2px 16px 6px}
+  .logger-head h2{font-family:'Anton';font-style:italic;font-size:23px;line-height:1}
+  .logger-head h2 em{color:var(--green);font-style:normal}
+  .logger-head .desc{color:var(--grey);font-size:12.5px;margin-top:6px;line-height:1.45}
+  .subtabs{display:flex;gap:7px;margin:12px 16px 6px}
+  .subtabs button{flex:1;padding:9px;border-radius:10px;font-family:'Barlow Semi Condensed';font-weight:700;
+    text-transform:uppercase;letter-spacing:.5px;font-size:11.5px;color:var(--grey);background:var(--panel);border:1px solid var(--line)}
+  .subtabs button.on{background:var(--green);color:#0a0b0a;border-color:var(--green)}
+
+  .score-strip{display:flex;gap:8px;padding:8px 16px 4px}
+  .score-strip .sc{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:9px 6px;text-align:center}
+  .score-strip .sc.pass{border-color:var(--green);box-shadow:0 0 12px rgba(131,245,44,.18)}
+  .score-strip .sc.fail{border-color:rgba(226,59,59,.5)}
+  .score-strip .sc .k{font-size:9px;text-transform:uppercase;letter-spacing:.5px;color:var(--grey);font-weight:600}
+  .score-strip .sc .v{font-family:'Anton';font-style:italic;font-size:20px;margin-top:2px}
+  .score-strip .sc.pass .v{color:var(--green)}
+  .score-strip .sc.fail .v{color:#ff7b6b}
+
+  .swing-list{padding:8px 16px 20px}
+  .swing{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:11px 12px;margin-bottom:9px}
+  .swing.correct{border-left:3px solid var(--green)}
+  .swing.wrong{border-left:3px solid var(--red)}
+  .swing.empty{border-left:3px solid var(--line)}
+  .swing .sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:9px}
+  .swing .sh .n{font-family:'Barlow Semi Condensed';font-weight:700;font-size:13px;color:var(--grey);text-transform:uppercase;letter-spacing:.5px}
+  .swing .sh .tag{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;padding:3px 8px;border-radius:7px}
+  .swing .sh .tag.ok{background:rgba(131,245,44,.16);color:var(--green)}
+  .swing .sh .tag.no{background:rgba(226,59,59,.16);color:#ff7b6b}
+  .swing .sh .tag.round{background:var(--panel-2);color:var(--grey);border:1px solid var(--line)}
+  .swing .lab{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--grey-d);font-weight:700;margin:6px 0 5px}
+  .segrow{display:flex;flex-wrap:wrap;gap:6px}
+  .seg{padding:8px 0;border-radius:9px;background:var(--panel-2);border:1px solid var(--line);color:var(--grey);
+    font-family:'Barlow Semi Condensed';font-weight:700;font-size:13px;text-align:center;flex:1;min-width:38px}
+  .seg.on{background:var(--green);color:#0a0b0a;border-color:var(--green)}
+  .seg.big{font-family:'Anton';font-style:italic;font-size:15px;padding:10px 0}
+  /* color chips */
+  .seg.c-red.on{background:var(--red);border-color:var(--red);color:#fff}
+  .seg.c-green.on{background:#37c837;border-color:#37c837;color:#062}
+  .seg.c-black.on{background:#000;border-color:#666;color:#fff}
+  .seg.c-blue.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .seg.swing-y.on{background:var(--green);border-color:var(--green);color:#0a0b0a}
+  .seg.take-n.on{background:var(--amber);border-color:var(--amber);color:#0a0b0a}
+  .numrow{display:flex;gap:8px;align-items:center;margin-top:4px}
+  .numrow input{flex:1;background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:9px 10px;
+    color:#fff;font-size:15px;font-weight:600;width:100%}
+  .numrow input:focus{outline:none;border-color:var(--green)}
+  .numrow .u{font-size:11px;color:var(--grey);font-weight:600}
+
+  /* analysis */
+  .analysis{margin:6px 16px 16px;background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:14px}
+  .analysis h4{font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:1px;
+    font-size:12px;color:var(--grey);margin-bottom:12px}
+  .amx{display:flex;flex-direction:column;gap:9px}
+  .amx .arow{display:flex;align-items:center;gap:10px}
+  .amx .arow .cl{width:66px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:7px}
+  .amx .arow .dot{width:13px;height:13px;border-radius:4px;flex:0 0 auto;border:1px solid #0004}
+  .amx .arow .bar{flex:1;height:9px;background:#22261f;border-radius:5px;overflow:hidden}
+  .amx .arow .bar i{display:block;height:100%;border-radius:5px}
+  .amx .arow .pc{width:56px;text-align:right;font-size:11px;color:var(--grey);font-weight:600}
+  .amx .arow .pc b{color:#fff}
+  .insight{margin:0 16px 16px;border-radius:13px;padding:12px 14px;font-size:12.5px;line-height:1.5;
+    background:rgba(255,176,32,.08);border:1px solid rgba(255,176,32,.3);color:#f0d9a8}
+  .insight.good{background:rgba(131,245,44,.08);border-color:rgba(131,245,44,.3);color:#cdeeb0}
+  .insight b{color:#fff}
+
+  /* objective banner */
+  .objective{margin:8px 16px 4px;background:rgba(131,245,44,.07);border:1px solid rgba(131,245,44,.28);
+    border-radius:13px;padding:11px 13px;display:flex;gap:11px;align-items:flex-start}
+  .objective .badge-n{flex:0 0 auto;min-width:44px;text-align:center;background:var(--green);color:#0a0b0a;
+    border-radius:9px;padding:6px 4px}
+  .objective .badge-n .num{font-family:'Anton';font-style:italic;font-size:20px;line-height:1}
+  .objective .badge-n .u2{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+  .objective .otxt{font-size:12.5px;line-height:1.45;color:#d6e8c8}
+  .objective .otxt b{color:#fff}
+
+  /* live scoring chart pills */
+  .chart-wrap{margin:8px 16px 2px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:11px 12px}
+  .chart-lbl{font-family:'Barlow Semi Condensed';font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+    font-size:10.5px;color:var(--grey);margin-bottom:9px;display:flex;justify-content:space-between}
+  .chart-lbl b{color:var(--green)}
+  .pills{display:flex;flex-wrap:wrap;gap:6px}
+  .pill{width:30px;height:30px;border-radius:8px;font-family:'Anton';font-style:italic;font-size:13px;
+    display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--panel-2);color:var(--grey)}
+  .pill.p-ok{background:rgba(131,245,44,.9);color:#0a0b0a;border-color:var(--green)}
+  .pill.p-no{background:rgba(226,59,59,.9);color:#fff;border-color:var(--red)}
+  .pill.p-none{background:var(--panel-2);color:#4a4f4a}
+
+  /* quick-entry buttons */
+  .seg.ok-quick{background:rgba(131,245,44,.16);border:1px solid var(--green);color:var(--green);
+    font-family:'Barlow Semi Condensed';font-weight:700;flex:0 0 auto;padding:8px 14px}
+  .swing .sh .tag{cursor:pointer;border:none}
+  .mini-correct{color:var(--green);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.4px;
+    background:rgba(131,245,44,.14);border:1px solid rgba(131,245,44,.4);border-radius:6px;padding:2px 7px}
+  .miss-note{font-size:11px;color:#f0b7b0;margin:2px 0 6px 74px;font-style:italic}
+
+  /* rapsodo cloud integration */
+  .rap-cloud{margin:8px 16px 2px;background:rgba(61,123,255,.08);border:1px solid rgba(61,123,255,.35);
+    border-radius:13px;padding:12px 13px}
+  .rap-cloud .rc-top{display:flex;align-items:center;gap:8px;margin-bottom:9px}
+  .rap-cloud .rc-dot{width:9px;height:9px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green)}
+  .rap-cloud .rc-top .t{font-family:'Barlow Semi Condensed';font-weight:700;font-size:13px}
+  .rap-cloud .rc-top .t b{color:#7ea8ff}
+  .rap-cloud .rc-sub{font-size:11px;color:var(--grey);margin-bottom:10px}
+  .rap-pull{width:100%;background:linear-gradient(180deg,#4d86ff,#2f63e0);color:#fff;border-radius:11px;padding:12px;
+    font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.6px;font-size:13px;
+    display:flex;align-items:center;justify-content:center;gap:8px}
+  .rap-pull svg{width:16px;height:16px}
+  .rap-pull.done{background:var(--panel);border:1px solid var(--green);color:var(--green)}
+
+  /* ===== level-up celebration ===== */
+  .reward{position:absolute;inset:0;z-index:50;overflow:hidden;
+    background:radial-gradient(120% 80% at 50% 15%, rgba(131,245,44,.22), rgba(8,9,8,.98) 60%), #060706;
+    display:flex;align-items:center;justify-content:center}
+  .rw-confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+  .cf{position:absolute;top:-20px;border-radius:2px;opacity:.95;animation:cf-fall linear forwards}
+  @keyframes cf-fall{0%{transform:translateY(-20px) rotate(0)}100%{transform:translateY(860px) rotate(540deg)}}
+  .rw-inner{position:relative;text-align:center;padding:0 26px;width:100%}
+  .rw-burst{width:120px;height:120px;margin:0 auto 6px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle, rgba(131,245,44,.35), transparent 70%);animation:rw-pop .6s cubic-bezier(.2,1.5,.4,1) both, rw-spin 6s linear 1s infinite}
+  @keyframes rw-pop{0%{transform:scale(0)}100%{transform:scale(1)}}
+  @keyframes rw-spin{to{transform:rotate(360deg)}}
+  .rw-great{font-family:'Anton';font-style:italic;font-size:44px;line-height:.95;color:#fff;
+    text-shadow:0 0 18px rgba(131,245,44,.6);animation:rw-drop .5s .15s both}
+  @keyframes rw-drop{0%{transform:translateY(-30px) scale(.6);opacity:0}70%{transform:translateY(6px) scale(1.05)}100%{transform:translateY(0) scale(1);opacity:1}}
+  .rw-sub{color:#cdeeb0;font-size:14px;margin-top:8px;animation:rw-fade .6s .5s both}
+  .rw-sub b{color:var(--green)}
+  @keyframes rw-fade{from{opacity:0}to{opacity:1}}
+  .rw-stars{margin:16px 0 6px;display:flex;justify-content:center;gap:10px}
+  .rw-star{font-size:40px;color:#2c3327;animation:rw-star-pop .4s both}
+  .rw-star.lit{color:var(--amber);text-shadow:0 0 16px rgba(255,176,32,.8)}
+  @keyframes rw-star-pop{0%{transform:scale(0) rotate(-40deg)}70%{transform:scale(1.3)}100%{transform:scale(1) rotate(0)}}
+  .rw-unlock{display:flex;align-items:center;justify-content:center;gap:12px;margin:20px auto 4px;
+    background:rgba(131,245,44,.1);border:1.5px solid var(--green);border-radius:16px;padding:14px 20px;max-width:290px;
+    animation:rw-unlock-in .5s 1s both}
+  @keyframes rw-unlock-in{0%{transform:scale(.7);opacity:0}100%{transform:scale(1);opacity:1}}
+  .rw-lock{color:var(--green);animation:rw-shake .5s 1.4s 2}
+  .rw-lock svg{width:30px;height:30px}
+  @keyframes rw-shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+  .rw-unlock-txt{text-align:left;line-height:1}
+  .rw-unlock-txt span{display:block;font-family:'Barlow Semi Condensed';font-weight:700;color:var(--grey);font-size:13px;letter-spacing:1px}
+  .rw-unlock-txt b{font-family:'Anton';font-style:italic;font-size:26px;color:var(--green);letter-spacing:.5px}
+  .rw-levelbar{display:flex;align-items:center;gap:8px;max-width:290px;margin:18px auto 0;animation:rw-fade .5s 1.3s both}
+  .rw-l{font-family:'Barlow Semi Condensed';font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.5px;
+    padding:5px 8px;border-radius:8px;white-space:nowrap}
+  .rw-l.l-done{background:rgba(255,176,32,.16);color:var(--amber)}
+  .rw-l.l-next{background:rgba(131,245,44,.16);color:var(--green)}
+  .rw-track{flex:1;height:8px;background:#22261f;border-radius:5px;overflow:hidden}
+  .rw-track i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--amber),var(--green));border-radius:5px;
+    animation:rw-fill 1.1s 1.5s forwards}
+  @keyframes rw-fill{to{width:100%}}
+  .rw-btn{margin:26px auto 0;display:block;background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;
+    border-radius:16px;padding:16px 34px;font-family:'Anton';font-style:italic;font-size:19px;letter-spacing:.5px;
+    box-shadow:0 10px 26px rgba(131,245,44,.4);animation:rw-fade .5s 1.7s both, rw-bob 1.6s 2.2s ease-in-out infinite}
+  @keyframes rw-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+  .rw-tag{margin-top:18px;font-family:'Barlow Semi Condensed';font-weight:700;letter-spacing:1.5px;font-size:10px;
+    color:var(--grey-d);text-transform:uppercase;animation:rw-fade .5s 2s both}
+
+  .save-bar{padding:10px 16px 16px}
+
+  /* parent progress cards */
+  .pp-card{margin:0 16px 12px;background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden}
+  .pp-card .ph{display:flex;align-items:center;justify-content:space-between;padding:13px 15px;border-bottom:1px solid var(--line)}
+  .pp-card .ph h4{font-family:'Barlow Semi Condensed';font-weight:700;font-size:15px}
+  .pp-card .pb{padding:13px 15px;display:flex;gap:16px;flex-wrap:wrap}
+  .pp-metric{min-width:70px}
+  .pp-metric .k{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--grey);font-weight:600}
+  .pp-metric .v{font-family:'Anton';font-style:italic;font-size:20px;margin-top:2px}
+  .pp-metric .v.up{color:var(--green)}
+  .delta{font-size:11px;font-weight:700;margin-left:5px}
+  .delta.up{color:var(--green)} .delta.down{color:#ff7b6b}
+
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);z-index:200;pointer-events:none;
+    background:var(--green);color:#0a0b0a;font-family:'Barlow Semi Condensed';font-weight:700;padding:12px 20px;
+    border-radius:12px;font-size:14px;box-shadow:0 10px 30px rgba(0,0,0,.5);transition:transform .3s,opacity .3s;white-space:nowrap;
+    opacity:0;visibility:hidden}
+  .toast.show{transform:translateX(-50%) translateY(0);opacity:1;visibility:visible}
+  .muted{color:var(--grey);font-size:12px}
+  .center-note{text-align:center;color:var(--grey-d);font-size:12px;padding:30px 20px}
+
+  /* rapsodo profile numbers */
+  .rap-numbers{margin:2px 16px 10px;display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .rn{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 13px}
+  .rn .k{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--grey);font-weight:600}
+  .rn .v{font-family:'Anton';font-style:italic;font-size:24px;color:var(--green);margin-top:3px;line-height:1}
+  .rn .v small{font-size:12px;color:var(--grey);font-style:normal;font-family:'Barlow Semi Condensed'}
+  .rn input{width:100%;margin-top:5px;background:#0c0d0c;border:1px solid var(--line);border-radius:8px;color:#fff;padding:8px 9px;font-size:16px}
+  .btn.ghost{background:var(--panel);color:var(--grey);border:1px solid var(--line);box-shadow:none}
+
+  /* consent + waiver */
+  .consent-box{display:flex;gap:10px;align-items:flex-start;margin:6px 0 2px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 13px;text-align:left}
+  .consent-box input{width:20px;height:20px;flex-shrink:0;accent-color:var(--green);margin-top:1px}
+  .consent-box label{font-size:12px;color:var(--grey);line-height:1.45}
+  .consent-box a{color:var(--green);text-decoration:underline;cursor:pointer}
+  .waiver-modal{position:fixed;inset:0;z-index:70;background:rgba(4,5,4,.96);display:flex;flex-direction:column;padding:18px 15px;max-width:430px;margin:0 auto}
+  .waiver-modal .wm-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px 17px;overflow-y:auto;flex:1;text-align:left}
+  .waiver-modal h3{font-family:'Anton';font-style:italic;font-size:22px;margin-bottom:4px;color:#fff}
+  .waiver-modal .wm-meta{font-size:11px;color:var(--grey-d);margin-bottom:10px}
+  .waiver-modal h4{font-family:'Barlow Semi Condensed';font-weight:700;font-size:13.5px;margin:14px 0 4px;color:var(--green);text-transform:uppercase;letter-spacing:.4px}
+  .waiver-modal p{font-size:12.5px;color:#cfcfcf;line-height:1.55;margin-bottom:8px}
+
+  /* ==========================================================
+     DESKTOP / LAPTOP LAYOUT — fill the screen (phone frame only on phones)
+     ========================================================== */
+  @media (min-width:900px){
+    body{padding:0;display:block;background:
+      radial-gradient(1400px 620px at 50% -12%, rgba(131,245,44,.05), transparent 60%), #050605;}
+    .device{width:100%;max-width:100%;height:100vh;border-radius:0;padding:0;box-shadow:none;background:transparent}
+    .device::before{display:none}                 /* hide the phone notch */
+    .viewport{height:100vh;border-radius:0;border:none;
+      background:radial-gradient(1500px 560px at 50% -12%, rgba(131,245,44,.06), transparent 55%), #080908}
+
+    /* center all content in a wide, comfortable column */
+    :root{--maxw:1180px}
+    .topbar{padding:22px max(24px, calc((100% - var(--maxw))/2)) 14px}
+    .scroll{padding-left:max(24px, calc((100% - var(--maxw))/2));
+            padding-right:max(24px, calc((100% - var(--maxw))/2))}
+    .pad{padding-left:0;padding-right:0}
+    /* neutralize the fixed 16px side margins so the centered column governs width */
+    .sport-toggle,.stat-row,.detail-card,.drill-card,.section-lbl,.rap-numbers,.assess,
+    .wk-note,.prof-hero,.hello,.searchbar,.list-head,.join,.pp-card,.rap-cloud,.score-strip,
+    .save-bar,.logger-head,.miss,.numrow{margin-left:0;margin-right:0}
+    .drill-card{width:100%}
+
+    /* roster becomes a responsive multi-column grid */
+    #rosterList{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:14px}
+    #rosterList .p-card{margin-bottom:0}
+
+    /* rapsodo numbers: 4 across on desktop */
+    .rap-numbers{grid-template-columns:repeat(4,1fr)}
+
+    /* profile hero + detail: two-column feel on wide screens */
+    .stat-row{gap:14px}
+    .detail-card{max-width:none}
+
+    /* bottom nav spans the same column, tabs left-aligned like a web app */
+    .tabbar{padding-left:max(24px, calc((100% - var(--maxw))/2));
+            padding-right:max(24px, calc((100% - var(--maxw))/2));
+            justify-content:flex-start;gap:6px}
+    .tab{max-width:130px;flex:0 0 auto;padding:0 18px}
+
+    /* keep login + add-forms readable, not stretched */
+    .login{max-width:460px;margin:0 auto}
+    .logger-head{max-width:760px}
+  }
+
+  /* extra-wide screens: let drill loggers breathe in two columns */
+  @media (min-width:1200px){
+    .swing-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  }
+</style>
+</head>
+<body>
+  <div class="device"><div class="viewport" id="vp"></div></div>
+  <div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ===== SUPABASE CLOUD LAYER ===== */
+const SB_URL="https://evoahwtitcyfbjgiaxkf.supabase.co";
+const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2b2Fod3RpdGN5ZmJqZ2lheGtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNDk5NDIsImV4cCI6MjA5ODgyNTk0Mn0.zby-k9XX-hKkbGnTb8hLaLr9IK7vAELbTyWuIlAdggI";
+const SBc = (window.supabase&&window.supabase.createClient)? window.supabase.createClient(SB_URL,SB_KEY) : null;
+
+/* ===== reused framework helpers (from HPL Youth) ===== */
+function pct(n,d){ return d>0 ? Math.round((n/d)*100) : 0; }
+function isHardHit(ev, maxEV){ return maxEV>0 && ev >= 0.8*maxEV; }
+function rapsodoStats(swings){ // swings: [{ev,dist}]
+  const evs=swings.filter(s=>s.ev>0).map(s=>s.ev);
+  const ds=swings.filter(s=>s.dist>0).map(s=>s.dist);
+  if(!evs.length) return {n:0,avgEV:0,maxEV:0,avgDist:0,maxDist:0,hardHitPct:0};
+  const maxEV=Math.max(...evs);
+  const hh=evs.filter(e=>e>=0.8*maxEV).length;
+  return {
+    n:evs.length,
+    avgEV:+(evs.reduce((a,b)=>a+b,0)/evs.length).toFixed(1),
+    maxEV:maxEV,
+    avgDist: ds.length? Math.round(ds.reduce((a,b)=>a+b,0)/ds.length):0,
+    maxDist: ds.length? Math.max(...ds):0,
+    hardHitPct: pct(hh,evs.length)
+  };
+}
+/* accuracy over swings where a correctness flag is set */
+function accuracy(swings, isCorrect){
+  const done=swings.filter(s=>s._done);
+  const c=done.filter(isCorrect).length;
+  return {done:done.length, correct:c, pct:pct(c,done.length)};
+}
+const $=(s,r=document)=>r.querySelector(s);
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function fmtDate(iso){ const [y,m,d]=iso.split('-'); const mo=['January','February','March','April','May','June','July','August','September','October','November','December'][+m-1]; return `${mo} ${+d}, ${y}`; }
+function shortDate(iso){ const [y,m,d]=iso.split('-'); return `${+m}/${+d}/${y.slice(2)}`; }
+function handWord(h){ return h==='S'?'Switch Hitter': h==='L'?'Left-Handed':'Right-Handed'; }
+function playerById(id){ return DB.players.find(p=>p.id===id); }
+function curPlayer(){ return playerById(DB.ctx.playerId); }
+function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>{ t.classList.remove('show'); }, 1900); }
+function go(view,ctx={}){ DB.view=view; DB.ctx={...DB.ctx,...ctx}; render(); $('#vp').scrollTop=0; }
+const IC={
+  user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
+  search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg>',
+  chev:'<svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg>',
+  ruler:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v18M5 8l7-5 7 5"/></svg>',
+  weight:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>',
+  bat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3v6a6 6 0 0 0 12 0V3M12 15v6M8 21h8"/></svg>',
+  home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10l8-6 8 6v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>',
+  ball:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M6 7c3 2 9 2 12 0M6 17c3-2 9-2 12 0M12 3v18"/></svg>',
+  chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>',
+  edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
+  sync:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-8-5"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 8 5"/><path d="M21 3v5h-5M3 21v-5h5"/></svg>',
+  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+};
+
+/* Exact HPL Youth badge from hpllex.com / hplyouth.com */
+var HPL_LOGO="data:image/webp;base64,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";
+var HPL_LOGO_URL="https://assets.cdn.filesafe.space/tP9hmxgC8gPQA2kCR8kL/media/67083d02c7c300621f44cef2.png";
+function logoSVG(size){
+  return `<img class="hpl-logo" src="${HPL_LOGO_URL}" alt="HPL" style="height:${size}px;width:auto;max-width:${Math.round(size*2.4)}px;object-fit:contain">`;
+}
+
+/* ============================================================
+   HPL HITTERS — 14-19 Player Development (v1)
+   Sibling of HPL Youth. Local-first store; wire shared Supabase next.
+   ============================================================ */
+var AVATAR="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23222'/%3E%3Ccircle cx='50' cy='38' r='17' fill='%23484'/%3E%3Cpath d='M22 86c0-16 12-25 28-25s28 9 28 25' fill='%23484'/%3E%3C/svg%3E";
+var LS='hpl_hitters_v2';
+function nid(){ return 'h'+Math.random().toString(36).slice(2,9); }
+function ageFrom(iso){ if(!iso) return ''; const b=new Date(iso), n=new Date(); if(isNaN(b)) return ''; let a=n.getFullYear()-b.getFullYear(); const m=n.getMonth()-b.getMonth(); if(m<0||(m===0&&n.getDate()<b.getDate()))a--; return a>0?a:''; }
+var POSITIONS=['P','C','1B','2B','3B','SS','LF','CF','RF','OF','DH','UTIL'];
+var BLOCK_LABELS=['Weeks 1–5','Weeks 6–10','Weeks 11–15','Weeks 16–20','Weeks 21–25'];
+function emptyRap(){ return {maxEV:0,avgEV:0,maxDist:0,avgDist:0,avgLA:0,hardHitPct:0}; }
+function emptyBlocks(){ return BLOCK_LABELS.map(function(l,i){ return {n:i+1,label:l,date:null,test:null,rap:emptyRap()}; }); }
+
+/* ---------- store (Supabase cloud) ---------- */
+var DB={ view:'login', ctx:{}, user:null, players:[], search:'' };
+function persist(){ /* cloud writes happen in savePlayer(); local no-op */ }
+async function loadPlayers(){
+  DB.players=[];
+  if(!SBc) return;
+  try{
+    var res=await SBc.from('hitters').select('id,owner,state').order('created_at',{ascending:true});
+    if(res.error){ console.warn(res.error); return; }
+    DB.players=(res.data||[]).map(function(r){ return Object.assign({}, r.state||{}, {id:r.id, owner:r.owner}); });
+  }catch(e){ console.warn(e); }
+}
+async function savePlayer(p){
+  if(!SBc||!p) return;
+  var state=Object.assign({}, p); delete state.id; delete state.owner;
+  var row={ id:p.id, first_name:p.first||null, last_name:p.last||null, position:p.position||null, grad_class:p.gradClass||null, state:state, updated_at:new Date().toISOString() };
+  if(p.owner) row.owner=p.owner;
+  try{ var res=await SBc.from('hitters').upsert(row); if(res.error){ console.warn(res.error); toast('Save failed: '+(res.error.message||'')); } }
+  catch(e){ console.warn(e); toast('Save failed'); }
+}
+async function ensureAccount(user){
+  var acc=null;
+  try{ var r=await SBc.from('hitter_accounts').select('role,name,email,hitter_id').eq('id',user.id).maybeSingle(); acc=r.data; }catch(e){}
+  if(acc) return acc;
+  var meta=user.user_metadata||{};
+  var name=meta.full_name||user.email;
+  var role='player';
+  try{ await SBc.from('hitter_accounts').insert({id:user.id, role:'player', name:name, email:user.email}); }catch(e){ console.warn('acc',e); }
+  if(meta.role==='coach' && meta.coach_code){
+    try{ var rc=await SBc.rpc('claim_coach',{p_code:meta.coach_code}); if(rc && !rc.error && rc.data==='coach'){ role='coach'; } else { toast('Invalid coach code — added as a player'); } }catch(e){ console.warn('claim',e); }
+  }
+  if(role==='player'){
+    var parts=String(name||'').split(' ');
+    var st={ first:parts[0]||name, last:parts.slice(1).join(' '), photo:null, birthdate:'', height:'', weight:'', position:'', gradClass:'', hand:'R', gripRH:'', gripLH:'', rap:emptyRap(), blocks:emptyBlocks() };
+    try{ var hr=await SBc.from('hitters').insert({owner:user.id, first_name:st.first, last_name:st.last, state:st}).select('id').single();
+      if(hr.data){ try{ await SBc.from('hitter_accounts').update({hitter_id:hr.data.id}).eq('id',user.id); }catch(e){} }
+    }catch(e){ console.warn('hitter',e); }
+  }
+  return {role:role,name:name,email:user.email};
+}
+async function cloudBoot(){
+  if(!SBc){ DB.view='login'; render(); return; }
+  try{ var s=await SBc.auth.getSession(); if(s.data&&s.data.session&&s.data.session.user){ await enterApp(s.data.session.user); return; } }
+  catch(e){ console.warn(e); }
+  DB.view='login'; render();
+}
+async function enterApp(user){
+  var acc=await ensureAccount(user);
+  var role=(acc&&acc.role)||'player';
+  DB.user={ id:user.id, email:user.email, role:role, name:(acc&&acc.name)||user.email };
+  await loadPlayers();
+  if(role==='coach'){ DB.view='roster'; DB.ctx={}; }
+  else {
+    var mine=DB.players.filter(function(p){return p.owner===user.id;})[0]||DB.players[0];
+    if(mine){ DB.ctx={playerId:mine.id}; DB.view='profile'; }
+    else { DB.view='login'; }
+  }
+  render();
+}
+/* ---------- auth (Supabase) ---------- */
+var authMode='login', loginRole='player', pendingEmail='';
+function fval(id){ var el=$('#'+id); return el?(el.value||'').trim():''; }
+async function doAuth(){
+  if(!SBc){ toast('Cloud not reachable'); return; }
+  var email=fval('f_email').toLowerCase(), pass=fval('f_pass');
+  if(!email||!pass){ toast('Enter email and password'); return; }
+  if(authMode==='signup'){
+    if(pass.length<6){ toast('Password must be at least 6 characters'); return; }
+    var name=fval('f_name')||email;
+    var opts={ data:{ role:loginRole, full_name:name } };
+    if(loginRole==='coach'){ var code=fval('f_code'); if(!code){ toast('Enter the coach code'); return; } opts.data.coach_code=code; }
+    if(typeof location!=='undefined' && String(location.protocol).indexOf('http')===0) opts.emailRedirectTo=location.origin;
+    var su=await SBc.auth.signUp({ email:email, password:pass, options:opts });
+    if(su.error){ toast(su.error.message); return; }
+    if(su.data && su.data.session && su.data.session.user){ await enterApp(su.data.session.user); return; }
+    pendingEmail=email; DB.view='confirm'; render(); return;
+  }
+  var si=await SBc.auth.signInWithPassword({ email:email, password:pass });
+  if(si.error){ toast(si.error.message); return; }
+  await enterApp(si.data.user);
+}
+async function logout(){ try{ if(SBc) await SBc.auth.signOut(); }catch(e){} DB.user=null; DB.players=[]; DB.ctx={}; DB.view='login'; render(); }
+
+/* ---------- shared bits ---------- */
+function topbar(right){ return '<div class="topbar"><div class="brand">'+logoSVG(34)+'<h1>HPL <em>HITTERS</em></h1></div>'+(right||'')+'</div>'; }
+function bindDynamic(){}
+function rn(k,v,u){ var show=(v||v===0)&&v!==''; return '<div class="rn"><div class="k">'+k+'</div><div class="v">'+(show?v:'—')+'<small> '+u+'</small></div></div>'; }
+function miniStat(k,v,u){ var show=(v||v===0)&&v!==''; return '<div style="flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:8px 5px;text-align:center">'
+  +'<div style="font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--grey);font-weight:600">'+k+'</div>'
+  +'<div style="font-family:\'Anton\';font-style:italic;font-size:16px;margin-top:2px">'+(show?v:'—')+(u?'<small style="font-size:9px;color:var(--grey);font-style:normal;font-weight:600"> '+u+'</small>':'')+'</div></div>'; }
+
+/* ================= LOGIN ================= */
+function viewLogin(){
+  var su=authMode==='signup';
+  return '<div class="login">'
+    +'<div class="logo-wrap">'+logoSVG(96)+'</div>'
+    +'<h2>HPL <em>HITTERS</em></h2>'
+    +'<p class="sub">Player Development · Ages 14–19</p>'
+    +'<div class="role-switch">'
+      +'<button class="'+(loginRole==='player'?'on':'')+'" onclick="loginRole=\'player\';render()">Player</button>'
+      +'<button class="'+(loginRole==='coach'?'on':'')+'" onclick="loginRole=\'coach\';render()">Coach</button>'
+    +'</div>'
+    +(su?'<div class="field"><label>Full Name</label><input id="f_name" placeholder="Your name"></div>':'')
+    +((su&&loginRole==='coach')?'<div class="field"><label>Coach Code</label><input id="f_code" type="password" placeholder="Staff code from HPL"></div>':'')
+    +'<div class="field"><label>Email</label><input id="f_email" type="email" placeholder="you@email.com"></div>'
+    +'<div class="field"><label>Password</label><input id="f_pass" type="password" placeholder="••••••"></div>'
+    +'<button class="btn" onclick="doAuth()">'+(su?'Create Account':'Log In')+'</button>'
+    +'<p class="hint">'+(su?'Already have an account? ':"Don't have an account? ")
+      +'<a onclick="authMode=\''+(su?'login':'signup')+'\';render()">'+(su?'Log in':'Sign up')+'</a></p>'
+    +(authMode==='signup'?'<p class="hint">By creating an account you agree to HPL\'s terms &amp; privacy policy.</p>':'')
+  +'</div>';
+}
+function viewConfirm(){
+  return '<div class="login">'
+    +'<div class="logo-wrap">'+logoSVG(80)+'</div>'
+    +'<h2>CHECK YOUR <em>EMAIL</em></h2>'
+    +'<p class="sub">We sent a confirmation link to<br><b style="color:#fff">'+esc(pendingEmail)+'</b></p>'
+    +'<p class="hint" style="margin-top:14px;line-height:1.6">Open that email and click the link to confirm your account. Then come back here and log in.</p>'
+    +'<button class="btn" style="margin-top:16px" onclick="authMode=\'login\';go(\'login\')">Back to Log In</button>'
+  +'</div>';
+}
+
+/* ================= COACH ROSTER ================= */
+function viewRoster(){
+  var q=(DB.search||'').toLowerCase();
+  var list=DB.players.filter(function(p){ return (p.first+' '+p.last).toLowerCase().indexOf(q)>=0; });
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="logout()" title="Log out">'+IC.user+'</button>')
+    +'<div class="pad">'
+      +'<div class="hello"><p>Coach dashboard</p><h2>YOUR <em>HITTERS</em></h2></div>'
+      +'<div class="searchbar">'+IC.search+'<input placeholder="Search players" value="'+esc(DB.search||'')+'" oninput="DB.search=this.value;render()"></div>'
+      +'<div class="list-head"><span class="lbl">Players</span><span class="cnt">'+list.length+'</span></div>'
+      +'<div id="rosterList">'+(list.map(pCard).join('')||'<div class="center-note">No players yet.</div>')+'</div>'
+      +'<button class="btn ghost" style="margin-top:14px" onclick="coachAddPlayer()">+ Add Player</button>'
+    +'</div></div>';
+}
+function pCard(p){
+  return '<button class="p-card" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'
+    +'<img class="p-photo" src="'+(p.photo||AVATAR)+'">'
+    +'<div class="p-info"><h3>'+esc(p.first)+' '+esc(p.last)+'</h3>'
+      +'<div class="meta">'+(p.position||'—')+' · '+(p.gradClass?("'"+String(p.gradClass).slice(2)):'—')+' · '+(p.rap.maxEV||0)+' mph EV</div></div>'
+    +'<div class="hand '+(p.hand==='S'?'sw':'')+'">'+(p.hand||'R')+'</div>'+IC.chev+'</button>';
+}
+async function coachAddPlayer(){
+  if(!SBc){ toast('Cloud not reachable'); return; }
+  var st={ first:'New', last:'Player', photo:null, birthdate:'', height:'', weight:'', position:'', gradClass:'', hand:'R', gripRH:'', gripLH:'', rap:emptyRap(), blocks:emptyBlocks() };
+  try{
+    var r=await SBc.from('hitters').insert({first_name:'New', last_name:'Player', state:st}).select('id,owner,state').single();
+    if(r.error){ toast('Add failed: '+r.error.message); return; }
+    var p=Object.assign({}, r.data.state, {id:r.data.id, owner:r.data.owner});
+    DB.players.push(p); go('editProfile',{playerId:p.id});
+  }catch(e){ toast('Add failed'); }
+}
+
+/* ================= PLAYER PROFILE ================= */
+function viewProfile(){
+  var p=curPlayer(); if(!p) return viewLogin();
+  var isCoach=DB.user&&DB.user.role==='coach';
+  var r=p.rap;
+  var rightBtn=isCoach
+    ? '<button class="icon-btn" onclick="go(\'roster\')" title="Back">'+IC.back+'</button>'
+    : '<button class="icon-btn" onclick="logout()" title="Log out">'+IC.user+'</button>';
+  return '<div class="scroll">'
+    +'<div class="topbar"><div class="brand">'+logoSVG(34)+'<h1>HPL <em>HITTERS</em></h1></div>'
+       +'<div style="display:flex;gap:8px">'
+       +'<button class="icon-btn" onclick="go(\'editProfile\',{playerId:\''+p.id+'\'})" title="Edit" style="font-size:16px;color:var(--green)">✎</button>'
+       +rightBtn+'</div></div>'
+    +'<div class="prof-hero"><div class="prof-photo-wrap">'
+        +'<img class="prof-photo" src="'+(p.photo||AVATAR)+'"><div class="prof-hand">'+(p.hand||'R')+'</div></div>'
+      +'<div class="prof-name">'+esc(p.first)+' <em>'+esc(p.last)+'</em></div>'
+      +'<div class="prof-sub">'+(p.position||'—')+'<span class="dot">•</span>'+(p.gradClass?('Class of '+p.gradClass):'—')+'<span class="dot">•</span>'+(p.age||ageFrom(p.birthdate)||'—')+' yrs</div>'
+    +'</div>'
+    +'<div class="section-lbl" style="margin-top:14px">Measurables</div>'
+    +'<div style="display:flex;gap:8px;padding:0 16px 2px">'
+      +miniStat('Height',p.height,'')+miniStat('Weight',p.weight,'lb')
+      +miniStat('Grip R',p.gripRH,'lb')+miniStat('Grip L',p.gripLH,'lb')
+    +'</div>'
+    +'<div class="section-lbl">Rapsodo Numbers <span class="link" onclick="go(\'editProfile\',{playerId:\''+p.id+'\'})">Edit</span></div>'
+    +'<div class="rap-numbers" style="grid-template-columns:1fr 1fr 1fr">'
+      +rn('Max EV',r.maxEV,'mph')+rn('Avg EV',r.avgEV,'mph')+rn('Hard Hit',r.hardHitPct,'%')
+      +rn('Max Dist',r.maxDist,'ft')+rn('Avg Dist',r.avgDist,'ft')+rn('Avg LA',r.avgLA,'°')
+    +'</div>'
+    +'<div class="section-lbl">Test Blocks · 25-Week Program</div>'
+    +'<div class="assess" style="flex-wrap:wrap;gap:8px">'
+      +p.blocks.map(function(b){ return '<button class="a '+(b.date?'cur':'')+'" style="cursor:pointer;width:auto;flex:1 1 30%;min-width:88px" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+b.n+'})">'
+        +'<div class="wk">Block '+b.n+'</div><div class="dt">'+b.label.replace('Weeks ','Wk ')+'</div>'
+        +'<div class="ev">'+(b.date?((b.rap.maxEV||0)+' mph'):'—')+'</div></button>'; }).join('')
+    +'</div>'
+    +'<div class="pad">'
+      +'<button class="btn" onclick="startTest(\''+p.id+'\')">Log Hitting Test</button>'
+      +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
+      +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
+    +'</div></div>';
+}
+
+/* ================= EDIT PROFILE ================= */
+var EP=null;
+function viewEditProfile(){
+  var p=curPlayer(); if(!p) return viewLogin();
+  EP=p; var r=p.rap;
+  var isCoach=DB.user&&DB.user.role==='coach';
+  var back=isCoach?'go(\'roster\')':'go(\'profile\',{playerId:\''+p.id+'\'})';
+  function fld(lbl,key,ph,type){ return '<div class="field" style="flex:1"><label>'+lbl+'</label><input '+(type?('type="'+type+'"'):'')+' value="'+esc(p[key]!=null?p[key]:'')+'" oninput="EP.'+key+'=this.value" placeholder="'+(ph||'')+'"></div>'; }
+  function rfld(lbl,key,ph){ return '<div class="field" style="flex:1"><label>'+lbl+'</label><input type="number" step="0.1" value="'+(r[key]!=null&&r[key]!==0?r[key]:'')+'" oninput="EP.rap.'+key+'=(this.value===\'\'?0:+this.value)" placeholder="'+(ph||'')+'"></div>'; }
+  var posOpts=POSITIONS.map(function(x){return '<option '+(p.position===x?'selected':'')+'>'+x+'</option>';}).join('');
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="'+back+'">'+IC.back+'</button>')
+    +'<div class="logger-head"><h2>EDIT <em>PROFILE</em></h2><div class="desc">Verifiable stats only. Scores &amp; test history are untouched.</div></div>'
+    +'<div class="pad">'
+      +'<label style="width:120px;height:120px;margin:2px auto 18px;border-radius:22px;border:2px dashed rgba(131,245,44,.5);background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;color:var(--green);cursor:pointer;overflow:hidden">'
+        +'<input type="file" accept="image/*" style="display:none" onchange="epPhoto(this)">'
+        +(p.photo?'<img src="'+p.photo+'" style="width:100%;height:100%;object-fit:cover">':IC.ball+'<span style="font-family:\'Barlow Semi Condensed\';font-weight:700;font-size:11px;text-transform:uppercase">Photo</span>')
+      +'</label>'
+      +'<div style="display:flex;gap:12px">'+fld('First Name','first','First')+fld('Last Name','last','Last')+'</div>'
+      +'<div style="display:flex;gap:12px">'+fld('Birthdate','birthdate','','date')
+        +'<div class="field" style="flex:1"><label>Grad Class</label><input value="'+esc(p.gradClass||'')+'" oninput="EP.gradClass=this.value" placeholder="2027"></div></div>'
+      +'<div style="display:flex;gap:12px">'+fld('Height','height',"5' 11\"")+fld('Weight (lb)','weight','175','number')+'</div>'
+      +'<div style="display:flex;gap:12px">'
+        +'<div class="field" style="flex:1"><label>Position</label><select oninput="EP.position=this.value" onchange="EP.position=this.value"><option value="">—</option>'+posOpts+'</select></div>'
+        +'<div class="field" style="flex:1"><label>Bats</label><div class="segrow" style="margin-top:2px">'
+          +['R','L','S'].map(function(k){return '<button class="seg big '+(p.hand===k?'on':'')+'" onclick="EP.hand=\''+k+'\';render()">'+k+'</button>';}).join('')
+        +'</div></div></div>'
+      +'<div class="section-lbl" style="margin:16px 0 8px">Grip Strength (lb)</div>'
+      +'<div style="display:flex;gap:12px">'+fld('Right Hand','gripRH','110','number')+fld('Left Hand','gripLH','98','number')+'</div>'
+      +'<div class="section-lbl" style="margin:16px 0 8px">Rapsodo Numbers</div>'
+      +'<div style="display:flex;gap:12px">'+rfld('Max Exit Velo','maxEV','mph')+rfld('Avg Exit Velo','avgEV','mph')+'</div>'
+      +'<div style="display:flex;gap:12px">'+rfld('Max Distance','maxDist','ft')+rfld('Avg Distance','avgDist','ft')+'</div>'
+      +'<div style="display:flex;gap:12px">'+rfld('Avg Launch Angle','avgLA','°')+rfld('Hard Hit %','hardHitPct','%')+'</div>'
+      +'<button class="btn" style="margin-top:14px" onclick="saveProfile()">Save Profile</button>'
+      +'<button class="btn ghost" style="margin-top:8px" onclick="'+back+'">Cancel</button>'
+      +'<div style="height:20px"></div>'
+    +'</div></div>';
+}
+function epPhoto(input){
+  var f=input.files&&input.files[0]; if(!f||!EP) return;
+  var rd=new FileReader();
+  rd.onload=function(e){ var img=new Image(); img.onload=function(){
+    var c=document.createElement('canvas'); var max=420,w=img.width,h=img.height;
+    if(w>h){ if(w>max){ h=Math.round(h*max/w); w=max; } } else { if(h>max){ w=Math.round(w*max/h); h=max; } }
+    c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
+    EP.photo=c.toDataURL('image/jpeg',0.72); render();
+  }; img.src=e.target.result; };
+  rd.readAsDataURL(f);
+}
+async function saveProfile(){
+  var p=EP||curPlayer(); if(!p){ toast('No player'); return; }
+  if(!p.first||!p.last){ toast('Enter first and last name'); return; }
+  p.weight=+p.weight||p.weight; p.age=ageFrom(p.birthdate);
+  await savePlayer(p); toast('Profile saved');
+  if(DB.user&&DB.user.role==='coach') go('roster'); else go('profile',{playerId:p.id});
+}
+
+/* ================= BLOCK DETAIL ================= */
+function viewBlock(){
+  var p=curPlayer(); if(!p) return viewLogin();
+  var b=p.blocks[DB.ctx.blockN-1]; if(!b) return viewProfile();
+  var hasTest=!!b.test; var a=hasTest?analyzeTest(b.test):null;
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'+IC.back+'</button>')
+    +'<div class="logger-head"><h2>BLOCK '+b.n+' · <em>'+b.label+'</em></h2>'
+      +'<div class="desc">'+(b.date?('Tested '+fmtDate(b.date)):'No test recorded yet.')+'</div></div>'
+    +(hasTest?'<div class="stat-row">'
+      +'<div class="stat"><div class="k">Max EV</div><div class="v">'+a.maxEV+'<small> mph</small></div></div>'
+      +'<div class="stat"><div class="k">Avg EV</div><div class="v">'+a.avgEV+'<small> mph</small></div></div>'
+      +'<div class="stat"><div class="k">Hard Hit</div><div class="v">'+a.hardHitPct+'<small>%</small></div></div>'
+    +'</div>':'')
+    +'<div class="pad">'
+      +'<button class="btn" onclick="startBlockTest(\''+p.id+'\','+b.n+')">'+(hasTest?'Re-log Test':'Log Test')+'</button>'
+      +(hasTest?'<button class="btn ghost" style="margin-top:8px" onclick="go(\'results\',{playerId:\''+p.id+'\',blockN:'+b.n+'})">View Results</button>':'')
+    +'</div></div>';
+}
+
+/* ================= TEST LOGGER ================= */
+var TEST=null;
+function secMeta(s){ return s==='frontToss'?{name:'Front Toss',nc:10,nn:5}:(s==='bp'?{name:'BP',nc:5,nn:10}:{name:'Machine',nc:5,nn:10}); }
+function mkPitches(nc,nn){ var a=[],i; for(i=0;i<nc;i++)a.push({kind:'color',color:null,pick:null,ev:null,swing:null}); for(i=0;i<nn;i++)a.push({kind:'normal',color:null,pick:null,ev:null,swing:null}); return a; }
+function initTest(){ return { section:'frontToss', frontToss:mkPitches(10,5), bp:mkPitches(5,10), machine:mkPitches(5,10) }; }
+function startTest(pid){ DB.ctx.playerId=pid; var p=playerById(pid); var blk=p.blocks.find(function(b){return !b.test;})||p.blocks[0]; TEST=initTest(); DB.ctx.blockN=blk.n; go('test'); }
+function startBlockTest(pid,n){ DB.ctx.playerId=pid; var p=playerById(pid); var b=p.blocks[n-1]; TEST=b.test?JSON.parse(JSON.stringify(b.test)):initTest(); TEST.section='frontToss'; DB.ctx.blockN=n; go('test'); }
+function setSection(s){ TEST.section=s; render(); }
+function setPitchColor(sec,i,field,c){ TEST[sec][i][field]=c; render(); }
+function setSwing(sec,i,s){ TEST[sec][i].swing=s; render(); }
+function setEV(sec,i,v){ TEST[sec][i].ev=(v===''?null:+v); }
+
+function testPitches(t){ return [].concat(t.frontToss,t.bp,t.machine); }
+function avgOf(arr){ return arr.length?+(arr.reduce(function(a,b){return a+b;},0)/arr.length).toFixed(1):0; }
+function swingRight(p){ return (p.color==='Red')? p.swing==='take' : p.swing==='swing'; }
+function sectionStats(arr){
+  var color=arr.filter(function(p){return p.kind==='color';});
+  var picks=color.filter(function(p){return p.color&&p.pick;});
+  var pickC=picks.filter(function(p){return p.pick===p.color;}).length;
+  var dec=color.filter(function(p){return p.color&&p.swing;});
+  var decC=dec.filter(swingRight).length;
+  var evs=arr.filter(function(p){return p.ev>0&&p.color!=='Red';}).map(function(p){return p.ev;});
+  return { colorN:picks.length, colorCorrect:pickC, colorAcc: picks.length?Math.round(pickC/picks.length*100):0,
+    decN:dec.length, decCorrect:decC, decAcc: dec.length?Math.round(decC/dec.length*100):0,
+    avgEV:avgOf(evs), evN:evs.length };
+}
+function analyzeTest(t){
+  var all=testPitches(t);
+  var sections={ frontToss:sectionStats(t.frontToss), bp:sectionStats(t.bp), machine:sectionStats(t.machine) };
+  var color=all.filter(function(p){return p.kind==='color';});
+  var picks=color.filter(function(p){return p.color&&p.pick;});
+  var pickC=picks.filter(function(p){return p.pick===p.color;}).length;
+  var dec=color.filter(function(p){return p.color&&p.swing;});
+  var decC=dec.filter(swingRight).length;
+  var reds=all.filter(function(p){return p.color==='Red';});
+  var redTakes=reds.filter(function(p){return p.swing==='take';}).length;
+  var nonRed=color.filter(function(p){return p.color&&p.color!=='Red';});
+  var nonRedSwings=nonRed.filter(function(p){return p.swing==='swing';}).length;
+  var colorHits=all.filter(function(p){return p.kind==='color'&&p.color&&p.color!=='Red'&&p.ev>0;});
+  var normalHits=all.filter(function(p){return p.kind==='normal'&&p.ev>0;});
+  var perColor={}; ['Green','Black','Blue'].forEach(function(c){ var evs=all.filter(function(p){return p.color===c&&p.ev>0;}).map(function(p){return p.ev;}); perColor[c]={n:evs.length,avg:avgOf(evs),max:evs.length?Math.max.apply(null,evs):0}; });
+  var colorEVs=colorHits.map(function(p){return p.ev;}), normalEVs=normalHits.map(function(p){return p.ev;});
+  var allEVs=colorEVs.concat(normalEVs);
+  var swings=all.filter(function(p){ return (p.ev>0) || (p.color==='Red'&&p.swing==='swing'); }).length;
+  return {
+    sections:sections,
+    colorN:picks.length, colorCorrect:pickC, colorAcc: picks.length?Math.round(pickC/picks.length*100):0,
+    decN:dec.length, decCorrect:decC, decAcc: dec.length?Math.round(decC/dec.length*100):0,
+    reds:reds.length, redTakes:redTakes, redDiscipline: reds.length?Math.round(redTakes/reds.length*100):0,
+    nonRed:nonRed.length, nonRedSwings:nonRedSwings, nonRedSwingPct: nonRed.length?Math.round(nonRedSwings/nonRed.length*100):0,
+    swings:swings,
+    avgColor:avgOf(colorEVs), avgNormal:avgOf(normalEVs), evDiff:+(avgOf(colorEVs)-avgOf(normalEVs)).toFixed(1),
+    maxEV: allEVs.length?Math.max.apply(null,allEVs):0, avgEV:avgOf(allEVs),
+    hardHitPct: allEVs.length?Math.round(allEVs.filter(function(e){return e>=80;}).length/allEVs.length*100):0,
+    perColor:perColor
+  };
+}
+function viewTest(){
+  var p=curPlayer(); var t=TEST; if(!t){ return viewProfile(); }
+  var sec=t.section; var arr=t[sec]; var m=secMeta(sec); var a=analyzeTest(t);
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+DB.ctx.blockN+'})">'+IC.back+'</button>')
+    +'<div class="logger-head"><h2>HITTING <em>TEST</em></h2><div class="desc">Block '+DB.ctx.blockN+' · '+esc(p.first)+' '+esc(p.last)+' · 45 pitches (15 + 15 + 15)</div></div>'
+    +'<div class="subtabs">'+['frontToss','bp','machine'].map(function(s){ return '<button class="'+(s===sec?'on':'')+'" onclick="setSection(\''+s+'\')">'+secMeta(s).name+'</button>'; }).join('')+'</div>'
+    +'<div class="wk-note">'+m.name+': <b>'+m.nc+' color</b> then <b>'+m.nn+' normal</b>. Lay off <b>Red</b> (take).</div>'
+    +'<div class="score-strip">'
+      +'<div class="sc '+(a.colorN&&a.colorAcc>=80?'pass':'')+'"><div class="k">Color Read</div><div class="v">'+a.colorCorrect+'/'+a.colorN+'</div></div>'
+      +'<div class="sc '+(a.decN&&a.decAcc>=80?'pass':'')+'"><div class="k">Swing Dec</div><div class="v">'+a.decCorrect+'/'+a.decN+'</div></div>'
+      +'<div class="sc"><div class="k">Avg EV</div><div class="v">'+(a.avgEV||'—')+'</div></div>'
+    +'</div>'
+    +'<div class="swing-list">'+arr.map(function(pt,i){return pitchCard(sec,i,pt);}).join('')+'</div>'
+    +'<div class="save-bar"><button class="btn" onclick="saveTest()">Save Test &amp; See Results</button></div>'
+  +'</div>';
+}
+function colorRow(sec,i,field,val){
+  return '<div class="segrow">'+['Red','Green','Black','Blue'].map(function(c){
+    return '<button class="seg c-'+c.toLowerCase()+' '+(val===c?'on':'')+'" onclick="setPitchColor(\''+sec+'\','+i+',\''+field+'\',\''+c+'\')">'+c+'</button>';
+  }).join('')+'</div>';
+}
+function pitchCard(sec,i,pt){
+  var isColor=pt.kind==='color'; var isRed=pt.color==='Red'; var num=i+1;
+  var pickDone=pt.color&&pt.pick, pickOK=pickDone&&pt.pick===pt.color;
+  var decDone=pt.color&&pt.swing, decOK=decDone&&swingRight(pt);
+  var showEV = !isColor || (isColor && pt.swing==='swing' && pt.color && !isRed);
+  var cls='empty';
+  if(isColor){ if(pickDone||decDone){ cls=((pickDone&&!pickOK)||(decDone&&!decOK))?'wrong':'correct'; } }
+  else { cls=pt.ev>0?'correct':'empty'; }
+  var okTag='<span class="mini-correct">✓</span>', noTag='<span class="tag no" style="padding:1px 7px">✗</span>';
+  var h='<div class="swing '+cls+'">'
+    +'<div class="sh"><span class="n">'+(isColor?'Color':'Normal')+' · #'+num+'</span>'
+      +(isColor?'<span class="tag round">'+(pt.color||'set color')+'</span>':'<span class="tag round">Exit Velo</span>')+'</div>';
+  if(isColor){
+    h+='<div class="lab">Correct Color (thrown)</div>'+colorRow(sec,i,'color',pt.color);
+    h+='<div class="lab">Player Called '+(pickDone?(pickOK?okTag:noTag):'')+'</div>'+colorRow(sec,i,'pick',pt.pick);
+    h+='<div class="lab">Swing Decision · '+(isRed?'should TAKE':'should SWING')+' '+(decDone?(decOK?okTag:noTag):'')+'</div>'
+      +'<div class="segrow">'
+      +'<button class="seg take-n '+(pt.swing==='take'?'on':'')+'" onclick="setSwing(\''+sec+'\','+i+',\'take\')">Took</button>'
+      +'<button class="seg swing-y '+(pt.swing==='swing'?'on':'')+'" onclick="setSwing(\''+sec+'\','+i+',\'swing\')">Swung</button>'
+      +'</div>';
+  }
+  if(showEV){
+    h+='<div class="lab">Exit Velo</div><div class="numrow"><input type="number" inputmode="decimal" placeholder="mph" value="'+(pt.ev!=null?pt.ev:'')+'" oninput="setEV(\''+sec+'\','+i+',this.value)"><span class="u">mph</span></div>';
+  }
+  return h+'</div>';
+}
+async function saveTest(){
+  var p=curPlayer(); var n=DB.ctx.blockN; var b=p.blocks[n-1]; var a=analyzeTest(TEST);
+  b.test=TEST; b.date=new Date().toISOString().slice(0,10);
+  if(a.maxEV) b.rap.maxEV=a.maxEV; if(a.avgEV) b.rap.avgEV=a.avgEV; b.rap.hardHitPct=a.hardHitPct;
+  b.scores={ colorAcc:a.colorAcc, decAcc:a.decAcc, redDiscipline:a.redDiscipline,
+    nonRedSwingPct:a.nonRedSwingPct, sections:a.sections };
+  if(a.maxEV>(p.rap.maxEV||0)) p.rap.maxEV=a.maxEV;
+  if(a.avgEV) p.rap.avgEV=a.avgEV; p.rap.hardHitPct=a.hardHitPct;
+  await savePlayer(p); toast('Test saved'); go('results',{blockN:n});
+}
+
+/* ================= RESULTS ================= */
+function evBar(label,val,max){ var w=max?Math.min(100,Math.round(val/max*100)):0; return '<div class="arow"><div class="cl">'+label+'</div><div class="bar"><i style="width:'+w+'%;background:linear-gradient(90deg,var(--green-deep),var(--green))"></i></div><div class="pc"><b>'+(val||0)+'</b> mph</div></div>'; }
+function colorBar(c,d,max){ var cmap={Green:'#37c837',Black:'#000',Blue:'#3d7bff'}; var w=(max&&d.avg)?Math.min(100,Math.round(d.avg/max*100)):0; return '<div class="arow"><div class="cl"><span class="dot" style="background:'+cmap[c]+'"></span>'+c+'</div><div class="bar"><i style="width:'+w+'%;background:'+cmap[c]+'"></i></div><div class="pc"><b>'+(d.avg||0)+'</b> mph</div></div>'; }
+function secLabel(k){ return k==='frontToss'?'Front Toss':(k==='bp'?'BP':'Machine'); }
+function reportNotes(sc){
+  var notes=[];
+  if(sc.decAcc<90) notes.push('Swing decisions are a focus area — correct on <b>'+sc.decAcc+'%</b> of color balls (goal 90%+). Reinforce taking red and attacking the rest.');
+  if(sc.colorAcc<90) notes.push('Color recognition is developing — the correct ball was called <b>'+sc.colorAcc+'%</b> of the time. More reps on ball identification will sharpen pitch recognition.');
+  ['frontToss','bp','machine'].forEach(function(k){ var s=sc.sections&&sc.sections[k]; if(s&&s.colorN&&s.colorAcc<80) notes.push(secLabel(k)+' color reads dipped to <b>'+s.colorAcc+'%</b> — a section to target.'); });
+  if(notes.length){ return '<div style="margin-top:12px;background:rgba(255,176,32,.08);border:1px solid rgba(255,176,32,.3);border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.55;color:#f0d9a8">'+notes.map(function(n){return '• '+n;}).join('<br>')+'</div>'; }
+  return '<div style="margin-top:12px;background:rgba(131,245,44,.08);border:1px solid rgba(131,245,44,.3);border-radius:12px;padding:12px 14px;font-size:12px;color:#cdeeb0">Strong swing decisions and color recognition this block — keep attacking the right pitches.</div>';
+}
+function sectionTable(secs,bg){
+  var rows=['frontToss','bp','machine'].map(function(k){ var s=secs[k]||{};
+    return '<tr><td style="padding:8px 8px;text-align:left">'+secLabel(k)+'</td>'
+      +'<td style="padding:8px 6px;text-align:center">'+(s.colorN?s.colorCorrect+'/'+s.colorN+' ('+s.colorAcc+'%)':'—')+'</td>'
+      +'<td style="padding:8px 6px;text-align:center">'+(s.decN?s.decCorrect+'/'+s.decN+' ('+s.decAcc+'%)':'—')+'</td>'
+      +'<td style="padding:8px 6px;text-align:center">'+(s.avgEV||'—')+'</td></tr>'; }).join('');
+  return '<table style="width:100%;border-collapse:collapse;font-size:11.5px;background:'+(bg||'var(--panel)')+';border:1px solid var(--line);border-radius:10px">'
+    +'<thead><tr style="background:rgba(131,245,44,.1);color:var(--green);font-family:\'Barlow Semi Condensed\';text-transform:uppercase;font-size:10px;letter-spacing:.4px">'
+    +'<th style="padding:8px 8px;text-align:left">Section</th><th style="padding:8px 6px">Color Read</th><th style="padding:8px 6px">Swing Dec</th><th style="padding:8px 6px">Avg EV</th></tr></thead>'
+    +'<tbody>'+rows+'</tbody></table>';
+}
+function viewResults(){
+  var p=curPlayer(); if(!p) return viewLogin();
+  var n=DB.ctx.blockN; var b=p.blocks[n-1]; if(!b||!b.test) return viewProfile();
+  var a=analyzeTest(b.test);
+  var cols=['Green','Black','Blue'].filter(function(c){return a.perColor[c].n;});
+  var worst=cols.slice().sort(function(x,y){return a.perColor[x].avg-a.perColor[y].avg;})[0];
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+n+'})">'+IC.back+'</button>')
+    +'<div class="logger-head"><h2>TEST <em>RESULTS</em></h2><div class="desc">Block '+n+' · '+b.label+' · '+fmtDate(b.date)+'</div></div>'
+    +'<div class="stat-row">'
+      +'<div class="stat"><div class="k">Max EV</div><div class="v">'+a.maxEV+'<small> mph</small></div></div>'
+      +'<div class="stat"><div class="k">Avg EV</div><div class="v">'+a.avgEV+'<small> mph</small></div></div>'
+      +'<div class="stat"><div class="k">Hard Hit</div><div class="v">'+a.hardHitPct+'<small>%</small></div></div>'
+    +'</div>'
+    +'<div class="section-lbl">Pitch Recognition &amp; Swing Decisions</div>'
+    +'<div class="analysis"><div class="amx">'
+      +'<div class="arow"><div class="cl">Color Read</div><div class="bar"><i style="width:'+a.colorAcc+'%;background:linear-gradient(90deg,var(--green-deep),var(--green))"></i></div><div class="pc"><b>'+a.colorCorrect+'</b>/'+a.colorN+'</div></div>'
+      +'<div class="arow"><div class="cl">Swing Dec</div><div class="bar"><i style="width:'+a.decAcc+'%;background:linear-gradient(90deg,var(--green-deep),var(--green))"></i></div><div class="pc"><b>'+a.decCorrect+'</b>/'+a.decN+'</div></div>'
+      +'<div class="arow"><div class="cl">Took Red</div><div class="bar"><i style="width:'+a.redDiscipline+'%;background:'+(a.redDiscipline>=80?'var(--green)':'var(--amber)')+'"></i></div><div class="pc"><b>'+a.redTakes+'</b>/'+a.reds+'</div></div>'
+    +'</div></div>'
+    +'<div class="section-lbl">By Test Section</div>'
+    +'<div style="margin:0 16px 4px">'+sectionTable(a.sections)+'</div>'
+    +'<div class="section-lbl">Color vs Normal Ball</div>'
+    +'<div class="analysis"><div class="amx">'+evBar('Color balls',a.avgColor,a.maxEV)+evBar('Normal balls',a.avgNormal,a.maxEV)+'</div></div>'
+    +'<div class="insight '+(Math.abs(a.evDiff)<2?'good':'')+'">'
+      +(a.evDiff===0?'Exit velo is even across color and normal balls.':(a.evDiff>0
+        ?'Exit velo is <b>'+a.evDiff+' mph higher</b> on color balls than normal balls.'
+        :'Exit velo is <b>'+Math.abs(a.evDiff)+' mph lower</b> on color balls — pitch recognition may be costing power.'))
+    +'</div>'
+    +'<div class="section-lbl">Exit Velo by Color</div>'
+    +'<div class="analysis"><div class="amx">'+['Green','Black','Blue'].map(function(c){return colorBar(c,a.perColor[c],a.maxEV);}).join('')+'</div></div>'
+    +'<div class="section-lbl">Red Ball Discipline</div>'
+    +'<div class="analysis"><div class="amx"><div class="arow"><div class="cl">Took Red</div>'
+      +'<div class="bar"><i style="width:'+a.redDiscipline+'%;background:'+(a.redDiscipline>=80?'var(--green)':'var(--amber)')+'"></i></div>'
+      +'<div class="pc"><b>'+a.redTakes+'</b>/'+a.reds+'</div></div></div></div>'
+    +'<div class="insight '+(a.redDiscipline>=80?'good':'')+'">'
+      +(a.redDiscipline>=80?'Great discipline — took <b>'+a.redDiscipline+'%</b> of red balls.':'Swung at <b>'+(a.reds-a.redTakes)+'</b> red ball(s). Lay off red to sharpen pitch selection.')
+    +'</div>'
+    +(worst?'<div class="insight">Weakest color contact: <b>'+worst+'</b> at '+a.perColor[worst].avg+' mph avg. Add reps on '+worst+' recognition.</div>':'')
+    +'<div class="pad"><button class="btn ghost" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button></div>'
+  +'</div>';
+}
+
+/* ================= HPL REPORT ================= */
+function delta(a,b){ return +((a||0)-(b||0)).toFixed(1); }
+function dtxt(v,u){ if(v>0) return '+'+v+(u||'')+' since start'; if(v<0) return v+(u||'')+' since start'; return 'even since start'; }
+function viewReport(){
+  var p=curPlayer(); if(!p) return viewLogin();
+  var done=p.blocks.filter(function(b){return b.date;});
+  if(!done.length){ return '<div class="scroll">'+topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'+IC.back+'</button>')
+    +'<div class="logger-head"><h2>HPL <em>REPORT</em></h2></div><div class="center-note">Log at least one test block to generate a development report.</div>'
+    +'<div class="pad"><button class="btn" onclick="startTest(\''+p.id+'\')">Log a Test</button></div></div>'; }
+  var first=done[0], last=done[done.length-1];
+  var r=last.rap, f=first.rap;
+  var dEV=delta(r.maxEV,f.maxEV), dAvg=delta(r.avgEV,f.avgEV), dHH=delta(r.hardHitPct,f.hardHitPct), dDist=delta(r.maxDist,f.maxDist);
+  var span=fmtDate(first.date)+' – '+fmtDate(last.date);
+  var laOK=(r.avgLA>=10&&r.avgLA<=25);
+  function card(k,v,sub,subcls){ return '<div style="flex:1;min-width:120px;background:#141614;border-top:3px solid var(--green);border-radius:12px;padding:12px 10px;text-align:center">'
+    +'<div style="font-family:\'Barlow Semi Condensed\';font-weight:700;text-transform:uppercase;letter-spacing:.6px;font-size:9.5px;color:var(--green)">'+k+'</div>'
+    +'<div style="font-family:\'Anton\';font-style:italic;font-size:24px;margin:5px 0 4px">'+v+'</div>'
+    +'<div style="font-size:9.5px;color:'+(subcls==='up'?'var(--green)':(subcls==='down'?'#ff7b6b':'var(--grey)'))+';font-weight:600">'+sub+'</div></div>'; }
+  var rows=done.map(function(b){ return '<tr>'
+    +'<td style="padding:8px 6px">'+b.label+'</td><td style="padding:8px 6px">'+fmtDate(b.date)+'</td>'
+    +'<td style="padding:8px 6px;text-align:center">'+(b.rap.maxEV||0)+'</td><td style="padding:8px 6px;text-align:center">'+(b.rap.avgEV||0)+'</td>'
+    +'<td style="padding:8px 6px;text-align:center">'+(b.rap.hardHitPct||0)+'%</td><td style="padding:8px 6px;text-align:center">'+(b.rap.maxDist||0)+'</td>'
+    +'<td style="padding:8px 6px;text-align:center">'+(b.rap.avgLA||0)+'°</td></tr>'; }).join('');
+  function para(title,body){ return '<div style="margin:14px 0 0"><div style="display:inline-block;border-left:4px solid var(--green);background:rgba(131,245,44,.08);padding:5px 10px;font-family:\'Barlow Semi Condensed\';font-weight:700;font-size:13px">'+title+'</div><p style="font-size:12.5px;line-height:1.55;color:#cfcfcf;margin:7px 2px 0">'+body+'</p></div>'; }
+  var nm=esc(p.first)+' '+esc(p.last);
+  return '<div class="scroll" id="reportScroll">'
+    +topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'+IC.back+'</button>')
+    +'<div class="pad" id="reportSheet">'
+      +'<div style="background:#0d0f0d;border:1px solid #2a2e2a;border-bottom:3px solid var(--green);border-radius:14px;padding:16px 15px;display:flex;align-items:center;gap:14px">'
+        +logoSVG(56)
+        +'<div><div style="font-family:\'Barlow Semi Condensed\';font-weight:700;color:var(--green);letter-spacing:.5px;font-size:12px">PLAYER DEVELOPMENT REPORT</div>'
+        +'<div style="font-family:\'Anton\';font-style:italic;font-size:24px;line-height:1">'+nm+'</div>'
+        +'<div style="font-size:10.5px;color:var(--grey);margin-top:3px">'+done.length+' Assessments · '+span+'</div></div></div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">'
+        +card('Max Exit Velo',r.maxEV+' mph',dtxt(dEV,' mph'),dEV>0?'up':(dEV<0?'down':''))
+        +card('Avg Exit Velo',r.avgEV+' mph',dtxt(dAvg,' mph'),dAvg>0?'up':(dAvg<0?'down':''))
+        +card('Hard Hit %',r.hardHitPct+'%',dtxt(dHH,'%'),dHH>0?'up':(dHH<0?'down':''))
+      +'</div>'
+      +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">'
+        +card('Max Distance',r.maxDist+' ft',dtxt(dDist,' ft'),dDist>0?'up':(dDist<0?'down':''))
+        +card('Avg Launch Ang',r.avgLA+'°',laOK?'In optimal 10–25°':'Target 10–25°',laOK?'up':'')
+      +'</div>'
+      +'<div class="section-lbl" style="margin:20px 2px 8px">Assessment History</div>'
+      +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11.5px;background:#141614;border:1px solid #2a2e2a;border-radius:10px">'
+        +'<thead><tr style="background:rgba(131,245,44,.1);color:var(--green);font-family:\'Barlow Semi Condensed\';text-transform:uppercase;font-size:10px;letter-spacing:.4px">'
+        +'<th style="padding:8px 6px;text-align:left">Block</th><th style="padding:8px 6px;text-align:left">Date</th><th style="padding:8px 6px">Max EV</th><th style="padding:8px 6px">Avg EV</th><th style="padding:8px 6px">Hard Hit</th><th style="padding:8px 6px">Max Dist</th><th style="padding:8px 6px">Avg LA</th></tr></thead>'
+        +'<tbody>'+rows+'</tbody></table></div>'
+      +(last.scores?(
+          '<div class="section-lbl" style="margin:20px 2px 8px">Swing Decisions &amp; Pitch Recognition</div>'
+          +'<div style="display:flex;flex-wrap:wrap;gap:8px">'
+            +card('Color Read',(last.scores.colorAcc||0)+'%','correct ball called',last.scores.colorAcc>=80?'up':'')
+            +card('Swing Decisions',(last.scores.decAcc||0)+'%','take red / swing rest',last.scores.decAcc>=80?'up':'')
+          +'</div>'
+          +'<div class="section-lbl" style="margin:16px 2px 8px">By Test Section — Correct Colors, Swing Decisions &amp; EV</div>'
+          +'<div style="overflow-x:auto">'+sectionTable(last.scores.sections,'#141614')+'</div>'
+          +reportNotes(last.scores)
+        ):'')
+      +'<div class="section-lbl" style="margin:20px 2px 4px">Development Summary</div>'
+      +'<p style="font-size:12.5px;line-height:1.55;color:#cfcfcf;margin:2px">'+nm+' has completed '+done.length+' assessment'+(done.length>1?'s':'')+' at Hitting Performance Labs from '+span+'.</p>'
+      +para('Exit Velocity', 'Max exit velocity moved from <b>'+f.maxEV+' mph</b> to <b>'+r.maxEV+' mph</b> ('+dtxt(dEV,' mph').replace(' since start','')+'). Average EV is '+r.avgEV+' mph — closing the gap to max means more quality contact every swing.')
+      +para('Hard Hit %', 'Hard-hit rate (80+ mph) is <b>'+r.hardHitPct+'%</b> ('+dtxt(dHH,'%').replace(' since start','')+' overall). More hard contact means more game-quality swings.')
+      +para('Distance', 'Max distance is <b>'+r.maxDist+' ft</b>. As exit velo and launch angle develop, distance follows.')
+      +para('Launch Angle', 'Average launch angle sits at <b>'+r.avgLA+'°</b>'+(laOK?' — right in the optimal 10–25° window.':' — target the 10–25° line-drive window to turn exit velo into carry.'))
+      +'<div style="margin-top:16px;background:rgba(131,245,44,.08);border:1px solid rgba(131,245,44,.3);border-radius:12px;padding:13px 14px">'
+        +'<div style="font-family:\'Barlow Semi Condensed\';font-weight:700;font-size:13px;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Areas to Continue Working On</div>'
+        +'<div style="font-size:12px;line-height:1.5;color:#cdeeb0">• <b>Exit velo floor</b> — close the gap between max ('+r.maxEV+') and avg ('+r.avgEV+') EV.<br>• <b>Hard-hit consistency</b> — push hard-hit rate higher by staying in the zone.<br>• <b>Launch angle</b> — keep avg LA locked in the 10–25° zone.</div></div>'
+      +'<div style="text-align:center;color:var(--grey-d);font-size:10px;margin-top:16px;line-height:1.5">949 National Ave, Suite 115 · Lexington, KY 40502<br>hpllex.com · info@hpllex.com</div>'
+      +'<button class="btn" style="margin-top:16px" onclick="window.print()">Save / Print PDF</button>'
+      +'<div style="height:20px"></div>'
+    +'</div></div>';
+}
+
+/* ================= METRIC GUIDE ================= */
+function guideCard(t,measures,matters){ return '<div style="background:#141614;border:1px solid #2a2e2a;border-left:3px solid var(--green);border-radius:13px;padding:13px 14px;margin-bottom:10px">'
+  +'<div style="font-family:\'Barlow Semi Condensed\';font-weight:700;font-size:15px;color:var(--green);margin-bottom:5px">'+t+'</div>'
+  +'<div style="font-size:12px;line-height:1.5;color:#cfcfcf"><b style="color:#fff">What it measures:</b> '+measures+'</div>'
+  +'<div style="font-size:12px;line-height:1.5;color:#cfcfcf;margin-top:5px"><b style="color:#fff">Why it matters:</b> '+matters+'</div></div>'; }
+function viewInfo(){
+  var p=curPlayer();
+  var back=p?'go(\'profile\',{playerId:\''+p.id+'\'})':'go(\'login\')';
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="'+back+'">'+IC.back+'</button>')
+    +'<div class="logger-head"><h2>PARENT &amp; PLAYER <em>GUIDE</em></h2><div class="desc">We use Rapsodo technology — the same data used by college and pro programs. Here is what each number means.</div></div>'
+    +'<div class="pad">'
+      +guideCard('Max Exit Velocity','The fastest speed (mph) the ball left the bat during a session. Even one great swing counts.','The harder a player hits the ball, the harder it is for fielders to make plays. Scouts use exit velocity at every level.')
+      +guideCard('Avg Exit Velocity','The average speed across ALL swings — not just the best ones.','Max EV shows ceiling; Avg EV shows consistency. Closing the gap means more quality contact every session.')
+      +guideCard('Hard Hit %','The percentage of swings hit at 80 mph or faster — our hard-contact threshold for high-school hitters.','Hard contact gives the best chance of success on every swing. A higher hard-hit % means more game-quality contact.')
+      +guideCard('Max Distance','The farthest the ball traveled (ft) on any single swing.','Distance shows how exit velo and launch angle combine into real carry. As both improve, distance follows.')
+      +guideCard('Avg Launch Angle','The average angle the ball leaves the bat. Under 7° is a groundball; 10–21° is the line-drive sweet spot; 25–35° is home-run angle.','Two hitters with the same exit velo get very different results based on angle. Living in the 10–21° zone is a key to becoming a dangerous hitter.')
+      +'<div style="background:rgba(131,245,44,.08);border:1px solid rgba(131,245,44,.3);border-radius:12px;padding:12px 14px;font-size:12px;line-height:1.5;color:#cdeeb0"><b style="color:#fff">Personal Best</b> — Your best session for max exit velocity is your benchmark to beat every future block.</div>'
+      +'<div style="height:20px"></div>'
+    +'</div></div>';
+}
+
+/* ================= ROUTER + SAFETY NET ================= */
+var _lastView=null;
+function render(){
+  var vp=$('#vp'); var v=DB.view;
+  var prevScroll=vp.querySelector?vp.querySelector('.scroll'):null;
+  var sy=prevScroll?prevScroll.scrollTop:0;
+  var sameView=(v===_lastView);
+  try{
+    var h='';
+    if(v==='login') h=viewLogin();
+    else if(v==='confirm') h=viewConfirm();
+    else if(v==='roster') h=viewRoster();
+    else if(v==='profile') h=viewProfile();
+    else if(v==='editProfile') h=viewEditProfile();
+    else if(v==='block') h=viewBlock();
+    else if(v==='test') h=viewTest();
+    else if(v==='results') h=viewResults();
+    else if(v==='report') h=viewReport();
+    else if(v==='info') h=viewInfo();
+    else h=viewLogin();
+    vp.innerHTML=h; bindDynamic();
+    var nowScroll=vp.querySelector?vp.querySelector('.scroll'):null;
+    if(nowScroll) nowScroll.scrollTop = sameView ? sy : 0;
+    _lastView=v;
+  }catch(err){ logAppError(err,'render:'+v,true); }
+}
+var APP_ERRORS=[];
+function logAppError(err,where,fatal){
+  var rec={when:new Date().toISOString(),where:where||'',msg:(err&&err.message)||String(err),stack:(err&&err.stack)||''};
+  APP_ERRORS.push(rec); try{ console.error('[HPL-HITTERS]',where,err); }catch(e){}
+  if(fatal){ var vp=$('#vp'); if(vp){ vp.innerHTML='<div class="scroll"><div class="pad" style="text-align:center;padding-top:70px">'
+    +'<div style="font-size:42px;margin-bottom:10px">⚾</div>'
+    +'<h2 style="font-family:\'Barlow Semi Condensed\';text-transform:uppercase;letter-spacing:1px;margin:0 0 8px">Something went sideways</h2>'
+    +'<div class="desc" style="max-width:290px;margin:0 auto 22px;color:var(--grey)">This screen hit a snag. Your data is safe. Try again below.</div>'
+    +'<button class="btn" onclick="safeHome()">Back to Home</button>'
+    +'<button class="btn ghost" style="margin-top:8px" onclick="location.reload()">Reload App</button></div></div>'; } }
+}
+function safeHome(){ try{ if(DB.user&&DB.user.role==='coach'){DB.view='roster';} else if(DB.user){DB.ctx.playerId=DB.user.playerId;DB.view='profile';} else {DB.view='login';} render(); }catch(e){ location.reload(); } }
+if(typeof window!=='undefined'){
+  window.addEventListener('error',function(e){ if(e&&e.target&&e.target!==window&&e.target.tagName){return;} logAppError((e&&e.error)||(e&&e.message)||'error','window',false); });
+  window.addEventListener('unhandledrejection',function(e){ logAppError((e&&e.reason)||'rejection','promise',false); });
+}
+
+/* ================= BOOT ================= */
+render();      /* paint login immediately */
+cloudBoot();   /* then restore session / route by role */
+</script>
+</body>
+</html>
