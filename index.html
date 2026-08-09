@@ -633,6 +633,22 @@ function rn(k,v,u){ var show=(v||v===0)&&v!==''; return '<div class="rn"><div cl
 function miniStat(k,v,u){ var show=(v||v===0)&&v!==''; return '<div style="flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:8px 5px;text-align:center">'
   +'<div style="font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--grey);font-weight:600">'+k+'</div>'
   +'<div style="font-family:\'Anton\';font-style:italic;font-size:16px;margin-top:2px">'+(show?v:'—')+(u?'<small style="font-size:9px;color:var(--grey);font-style:normal;font-weight:600"> '+u+'</small>':'')+'</div></div>'; }
+/* personal best across sessions (Avg LA just shows the latest number as-is) */
+function bestMetric(p,key){
+  var best=null,bestDate=null,latest=null,latestDate=null;
+  (p.blocks||[]).forEach(function(b){ if(b.date&&b.rap&&b.rap[key]>0){
+    if(latestDate===null||b.date>=latestDate){ latest=b.rap[key]; latestDate=b.date; }
+    if(best===null||b.rap[key]>best){ best=b.rap[key]; bestDate=b.date; }
+  }});
+  if(key==='avgLA'){ if(latest!==null) return {value:latest,date:latestDate,latest:true}; }
+  else if(best!==null){ return {value:best,date:bestDate}; }
+  if(p.rap && p.rap[key]) return {value:p.rap[key],date:null,latest:(key==='avgLA')};
+  return {value:null,date:null};
+}
+function rnBest(k,bm,u){ var show=(bm&&bm.value!=null&&bm.value!==0); var v=show?bm.value:'—'; var lab=(bm&&bm.latest)?'latest':'best'; var d=(show&&bm.date)?shortDate(bm.date):''; return '<div class="rn"><div class="k">'+k+'</div><div class="v">'+v+'<small> '+u+'</small></div>'+(d?'<div style="font-size:9px;color:var(--grey);letter-spacing:.3px;margin-top:3px">'+lab+' · '+d+'</div>':'')+'</div>'; }
+/* test-page Rapsodo input (bound to TEST.rap for this session) */
+function rapIn(lbl,key,u){ var v=(TEST&&TEST.rap&&TEST.rap[key])?TEST.rap[key]:''; return '<div class="field" style="flex:1"><label>'+lbl+' ('+u+')</label><input type="number" step="0.1" value="'+v+'" oninput="setRapField(\''+key+'\',this.value)"></div>'; }
+function setRapField(key,v){ if(TEST&&TEST.rap) TEST.rap[key]=(v===''?0:+v); }
 
 /* ================= LOGIN ================= */
 function viewLogin(){
@@ -720,10 +736,10 @@ function viewProfile(){
       +miniStat('Height',p.height,'')+miniStat('Weight',p.weight,'lb')
       +miniStat('Grip R',p.gripRH,'lb')+miniStat('Grip L',p.gripLH,'lb')
     +'</div>'
-    +'<div class="section-lbl">Rapsodo Numbers <span class="link" onclick="go(\'editProfile\',{playerId:\''+p.id+'\'})">Edit</span></div>'
+    +'<div class="section-lbl">Rapsodo Numbers · Personal Bests <span class="link" onclick="go(\'editProfile\',{playerId:\''+p.id+'\'})">Edit</span></div>'
     +'<div class="rap-numbers" style="grid-template-columns:1fr 1fr 1fr">'
-      +rn('Max EV',r.maxEV,'mph')+rn('Avg EV',r.avgEV,'mph')+rn('Hard Hit',r.hardHitPct,'%')
-      +rn('Max Dist',r.maxDist,'ft')+rn('Avg Dist',r.avgDist,'ft')+rn('Avg LA',r.avgLA,'°')
+      +rnBest('Max EV',bestMetric(p,'maxEV'),'mph')+rnBest('Avg EV',bestMetric(p,'avgEV'),'mph')+rnBest('Hard Hit',bestMetric(p,'hardHitPct'),'%')
+      +rnBest('Max Dist',bestMetric(p,'maxDist'),'ft')+rnBest('Avg Dist',bestMetric(p,'avgDist'),'ft')+rnBest('Avg LA',bestMetric(p,'avgLA'),'°')
     +'</div>'
     +'<div class="section-lbl">Test Blocks · 25-Week Program</div>'
     +'<div class="assess" style="flex-wrap:wrap;gap:8px">'
@@ -819,9 +835,9 @@ function viewBlock(){
 var TEST=null;
 function secMeta(s){ return s==='frontToss'?{name:'Front Toss',nc:10,nn:5}:(s==='bp'?{name:'BP',nc:5,nn:10}:{name:'Machine',nc:5,nn:10}); }
 function mkPitches(nc,nn){ var a=[],i; for(i=0;i<nc;i++)a.push({kind:'color',color:null,pick:null,ev:null,swing:null}); for(i=0;i<nn;i++)a.push({kind:'normal',color:null,pick:null,ev:null,swing:null}); return a; }
-function initTest(){ return { section:'frontToss', frontToss:mkPitches(10,5), bp:mkPitches(5,10), machine:mkPitches(5,10) }; }
-function startTest(pid){ DB.ctx.playerId=pid; var p=playerById(pid); var blk=p.blocks.find(function(b){return !b.test;})||p.blocks[0]; TEST=initTest(); DB.ctx.blockN=blk.n; go('test'); }
-function startBlockTest(pid,n){ DB.ctx.playerId=pid; var p=playerById(pid); var b=p.blocks[n-1]; TEST=b.test?JSON.parse(JSON.stringify(b.test)):initTest(); TEST.section='frontToss'; DB.ctx.blockN=n; go('test'); }
+function initTest(){ return { section:'frontToss', frontToss:mkPitches(10,5), bp:mkPitches(5,10), machine:mkPitches(5,10), rap:emptyRap() }; }
+function startTest(pid){ DB.ctx.playerId=pid; var p=playerById(pid); var blk=p.blocks.find(function(b){return !b.test;})||p.blocks[0]; TEST=initTest(); TEST.rap=Object.assign(emptyRap(), blk.rap||{}); DB.ctx.blockN=blk.n; go('test'); }
+function startBlockTest(pid,n){ DB.ctx.playerId=pid; var p=playerById(pid); var b=p.blocks[n-1]; TEST=b.test?JSON.parse(JSON.stringify(b.test)):initTest(); TEST.section='frontToss'; TEST.rap=Object.assign(emptyRap(), b.rap||{}); DB.ctx.blockN=n; go('test'); }
 function setSection(s){ TEST.section=s; render(); }
 function setPitchColor(sec,i,field,c){ TEST[sec][i][field]=c; render(); }
 function setSwing(sec,i,s){ TEST[sec][i].swing=s; render(); }
@@ -886,6 +902,11 @@ function viewTest(){
       +'<div class="sc"><div class="k">Avg EV</div><div class="v">'+(a.avgEV||'—')+'</div></div>'
     +'</div>'
     +'<div class="swing-list">'+arr.map(function(pt,i){return pitchCard(sec,i,pt);}).join('')+'</div>'
+    +'<div class="section-lbl">Rapsodo Numbers · This Session</div>'
+    +'<div class="pad" style="padding-top:0;padding-bottom:2px">'
+      +'<div style="display:flex;gap:10px">'+rapIn('Max EV','maxEV','mph')+rapIn('Avg EV','avgEV','mph')+rapIn('Hard Hit','hardHitPct','%')+'</div>'
+      +'<div style="display:flex;gap:10px;margin-top:6px">'+rapIn('Max Dist','maxDist','ft')+rapIn('Avg Dist','avgDist','ft')+rapIn('Avg LA','avgLA','°')+'</div>'
+    +'</div>'
     +'<div class="save-bar"><button class="btn" onclick="saveTest()">Save Test &amp; See Results</button></div>'
   +'</div>';
 }
@@ -923,11 +944,11 @@ function pitchCard(sec,i,pt){
 async function saveTest(){
   var p=curPlayer(); var n=DB.ctx.blockN; var b=p.blocks[n-1]; var a=analyzeTest(TEST);
   b.test=TEST; b.date=new Date().toISOString().slice(0,10);
-  if(a.maxEV) b.rap.maxEV=a.maxEV; if(a.avgEV) b.rap.avgEV=a.avgEV; b.rap.hardHitPct=a.hardHitPct;
+  var R=TEST.rap||{};
+  b.rap={ maxEV:+R.maxEV||0, avgEV:+R.avgEV||0, maxDist:+R.maxDist||0, avgDist:+R.avgDist||0, avgLA:+R.avgLA||0, hardHitPct:+R.hardHitPct||0 };
   b.scores={ colorAcc:a.colorAcc, decAcc:a.decAcc, redDiscipline:a.redDiscipline,
     nonRedSwingPct:a.nonRedSwingPct, sections:a.sections };
-  if(a.maxEV>(p.rap.maxEV||0)) p.rap.maxEV=a.maxEV;
-  if(a.avgEV) p.rap.avgEV=a.avgEV; p.rap.hardHitPct=a.hardHitPct;
+  p.rap=Object.assign({}, b.rap);
   await savePlayer(p); toast('Test saved'); go('results',{blockN:n});
 }
 
