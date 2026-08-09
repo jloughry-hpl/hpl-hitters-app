@@ -623,6 +623,10 @@ async function doAuth(){
     var su=await SBc.auth.signUp({ email:email, password:pass, options:opts });
     if(su.error){ toast(su.error.message); return; }
     if(su.data && su.data.session && su.data.session.user){ await enterApp(su.data.session.user); return; }
+    /* no session returned: try an immediate sign-in (this project allows login before email confirm) */
+    var si2=await SBc.auth.signInWithPassword({ email:email, password:pass });
+    if(si2.data && si2.data.user){ await enterApp(si2.data.user); return; }
+    /* only if the project truly requires confirmation do we show the check-email screen */
     pendingEmail=email; DB.view='confirm'; render(); return;
   }
   var si=await SBc.auth.signInWithPassword({ email:email, password:pass });
