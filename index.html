@@ -631,6 +631,12 @@ async function doAuth(){
   }
   var si=await SBc.auth.signInWithPassword({ email:email, password:pass });
   if(si.error){ toast(si.error.message); return; }
+  if(loginRole==='coach'){
+    var code=fval('f_code');
+    if(!code){ toast('Enter the coach code to sign in as a coach'); return; }
+    try{ var rc=await SBc.rpc('claim_coach',{p_code:code}); if(!(rc && !rc.error && rc.data==='coach')){ toast('Invalid coach code'); return; } }
+    catch(e){ console.warn('claim',e); toast('Could not verify coach code'); return; }
+  }
   await enterApp(si.data.user);
 }
 async function logout(){ try{ if(SBc) await SBc.auth.signOut(); }catch(e){} DB.user=null; DB.players=[]; DB.ctx={}; DB.view='login'; render(); }
@@ -733,7 +739,7 @@ function viewLogin(){
       +'<button class="'+(loginRole==='coach'?'on':'')+'" onclick="loginRole=\'coach\';render()">Coach</button>'
     +'</div>'
     +(su?'<div class="field"><label>Full Name</label><input id="f_name" placeholder="Your name"></div>':'')
-    +((su&&loginRole==='coach')?'<div class="field"><label>Coach Code</label><input id="f_code" type="password" placeholder="Staff code from HPL"></div>':'')
+    +((loginRole==='coach')?'<div class="field"><label>Coach Code</label><input id="f_code" type="password" placeholder="Staff code from HPL"></div>'+(su?'':'<div class="hint" style="margin:-6px 2px 10px;text-align:left;line-height:1.5">Enter your staff code to sign in as a coach.</div>'):'')
     +'<div class="field"><label>Email</label><input id="f_email" type="email" placeholder="you@email.com"></div>'
     +'<div class="field"><label>Password</label><input id="f_pass" type="password" placeholder="••••••"></div>'
     +(!su?'<div style="text-align:right;margin:-6px 2px 10px"><a onclick="forgotPassword()" style="color:var(--green);font-size:12px;cursor:pointer">Forgot password?</a></div>':'')
