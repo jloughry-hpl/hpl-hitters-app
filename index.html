@@ -549,7 +549,7 @@ function lastTest(b){ var t=null; blockEntries(b).forEach(function(e){ if(e.type
 function entryById(b,id){ return blockEntries(b).filter(function(e){return e.id===id;})[0]; }
 
 /* ---------- store (Supabase cloud) ---------- */
-var DB={ view:'login', ctx:{}, user:null, players:[], search:'' };
+var DB={ view:'login', ctx:{}, user:null, players:[], coaches:[], search:'' };
 function persist(){ /* cloud writes happen in savePlayer(); local no-op */ }
 async function loadPlayers(){
   DB.players=[];
@@ -771,7 +771,53 @@ function viewRoster(){
       +'<div class="list-head"><span class="lbl">Players</span><span class="cnt">'+list.length+'</span></div>'
       +'<div id="rosterList">'+(list.map(pCard).join('')||'<div class="center-note">No players yet.</div>')+'</div>'
       +'<button class="btn ghost" style="margin-top:14px" onclick="coachAddPlayer()">+ Add Player</button>'
-    +'</div></div>';
+      +'<div style="height:12px"></div>'
+    +'</div></div>'
+    +tabbar('roster');
+}
+/* ---------- bottom tab bar (coach) ---------- */
+function tabbar(active){
+  var act={roster:"go('roster')", coaches:"openCoaches()", me:"logout()"};
+  function t(k,ic,lbl){ return '<button class="tab '+(active===k?'on':'')+'" onclick="'+(act[k]||"toast('Coming soon')")+'">'+ic+'<span>'+lbl+'</span></button>'; }
+  return '<div class="tabbar">'
+    +t('roster',IC.home,'Roster')+t('coaches',IC.user,'Coaches')+t('me',IC.lock,'Log out')
+  +'</div>';
+}
+/* ---------- COACHES screen ---------- */
+async function loadCoaches(){
+  if(!SBc) return [];
+  try{
+    var res=await SBc.from('hitter_accounts').select('name,email,role,created_at').eq('role','coach').order('created_at',{ascending:true});
+    if(res.error){ console.warn('coaches',res.error); return []; }
+    return res.data||[];
+  }catch(e){ console.warn(e); return []; }
+}
+async function openCoaches(){
+  if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
+  toast('Loading coaches…');
+  DB.coaches=await loadCoaches();
+  go('coaches');
+}
+function viewCoaches(){
+  if(!(DB.user&&DB.user.role==='coach')) return viewRoster();
+  var list=DB.coaches||[];
+  var cards=list.map(function(c){
+    var nm=(c.name||'').trim(); var initial=(nm||c.email||'?').charAt(0).toUpperCase();
+    return '<div class="p-card" style="cursor:default">'
+      +'<div class="p-photo" style="display:flex;align-items:center;justify-content:center;background:var(--panel);color:var(--green);font-family:\'Anton\';font-style:italic;font-size:22px">'+esc(initial)+'</div>'
+      +'<div class="p-info"><h3>'+esc(nm||'(no name set)')+'</h3><div class="meta">'+esc(c.email||'')+'</div></div>'
+      +'<div class="hand" style="background:rgba(131,245,44,.14);color:var(--green);font-size:9px;padding:5px 8px;width:auto;border-radius:8px">Coach</div>'
+    +'</div>';
+  }).join('')||'<div class="center-note">No coaches yet.</div>';
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="go(\'roster\')" title="Back">'+IC.back+'</button>')
+    +'<div class="pad">'
+      +'<div class="hello"><p>Coach directory · staff only</p><h2>OUR <em>COACHES</em></h2></div>'
+      +'<div class="list-head"><span class="lbl">Coaches</span><span class="cnt">'+list.length+'</span></div>'
+      +cards
+      +'<div style="height:20px"></div>'
+    +'</div></div>'
+    +tabbar('coaches');
 }
 function pCard(p){
   return '<button class="p-card" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'
@@ -1218,6 +1264,7 @@ function render(){
     else if(v==='resetSent') h=viewResetSent();
     else if(v==='newPassword') h=viewNewPassword();
     else if(v==='roster') h=viewRoster();
+    else if(v==='coaches') h=viewCoaches();
     else if(v==='profile') h=viewProfile();
     else if(v==='editProfile') h=viewEditProfile();
     else if(v==='block') h=viewBlock();
