@@ -545,7 +545,7 @@ function emptyBlocks(){ return BLOCK_LABELS.map(function(l,i){ return {n:i+1,lab
 /* session accessors (each block holds many dated entries: hitting tests + rapsodo) */
 function blockEntries(b){ return (b&&b.entries)||[]; }
 function lastRap(b){ var r=null; blockEntries(b).forEach(function(e){ if(e.type==='rapsodo') r=e; }); return r; }
-function lastTest(b){ var t=null; blockEntries(b).forEach(function(e){ if(e.type==='test') t=e; }); return t; }
+function lastTest(b){ var t=null; blockEntries(b).forEach(function(e){ if(e.type==='test'&&e.status!=='inprogress') t=e; }); return t; }
 function entryById(b,id){ return blockEntries(b).filter(function(e){return e.id===id;})[0]; }
 
 /* ---------- store (Supabase cloud) ---------- */
@@ -689,7 +689,7 @@ function bestMetric(p,key){
   (p.blocks||[]).forEach(function(b){ (b.entries||[]).forEach(function(e){
     var val=null;
     if(e.type==='rapsodo'&&e.rap&&e.rap[key]>0){ val=e.rap[key]; }
-    else if(e.type==='test'&&TEST_METRICS[key]&&e.test){ try{ var ta=analyzeTest(e.test); if(ta&&ta[key]>0) val=ta[key]; }catch(_){} }
+    else if(e.type==='test'&&e.status!=='inprogress'&&TEST_METRICS[key]&&e.test){ try{ var ta=analyzeTest(e.test); if(ta&&ta[key]>0) val=ta[key]; }catch(_){} }
     if(val==null) return;
     if(latestDate===null||e.date>=latestDate){ latest=val; latestDate=e.date; }
     if(best===null||val>best){ best=val; bestDate=e.date; }
@@ -906,10 +906,10 @@ function viewEditProfile(){
         +(p.photo?'<img src="'+p.photo+'" style="width:100%;height:100%;object-fit:cover">':IC.ball+'<span style="font-family:\'Barlow Semi Condensed\';font-weight:700;font-size:11px;text-transform:uppercase">Photo</span>')
       +'</label>'
       +'<div style="display:flex;gap:12px">'+fld('First Name','first','First')+fld('Last Name','last','Last')+'</div>'
-      +'<div style="display:flex;gap:12px">'+fld('Birthdate','birthdate','','date')
-        +'<div class="field" style="flex:1"><label>Grad Class</label><input value="'+esc(p.gradClass||'')+'" oninput="EP.gradClass=this.value" placeholder="2027"></div></div>'
+      +(isCoach?('<div style="display:flex;gap:12px">'+fld('Birthdate','birthdate','','date')
+        +'<div class="field" style="flex:1"><label>Grad Class</label><input value="'+esc(p.gradClass||'')+'" oninput="EP.gradClass=this.value" placeholder="2027"></div></div>'):'')
       +'<div style="display:flex;gap:12px">'+fld('Height','height',"5' 11\"")+fld('Weight (lb)','weight','175','number')+'</div>'
-      +'<div style="display:flex;gap:12px">'
+      +(isCoach?('<div style="display:flex;gap:12px">'
         +'<div class="field" style="flex:1"><label>Position</label><select oninput="EP.position=this.value" onchange="EP.position=this.value"><option value="">—</option>'+posOpts+'</select></div>'
         +'<div class="field" style="flex:1"><label>Bats</label><div class="segrow" style="margin-top:2px">'
           +['R','L','S'].map(function(k){return '<button class="seg big '+(p.hand===k?'on':'')+'" onclick="EP.hand=\''+k+'\';render()">'+k+'</button>';}).join('')
@@ -919,7 +919,8 @@ function viewEditProfile(){
       +'<div class="section-lbl" style="margin:16px 0 8px">Rapsodo Numbers</div>'
       +'<div style="display:flex;gap:12px">'+rfld('Max Exit Velo','maxEV','mph')+rfld('Avg Exit Velo','avgEV','mph')+'</div>'
       +'<div style="display:flex;gap:12px">'+rfld('Max Distance','maxDist','ft')+rfld('Avg Distance','avgDist','ft')+'</div>'
-      +'<div style="display:flex;gap:12px">'+rfld('Avg Launch Angle','avgLA','°')+rfld('Hard Hit %','hardHitPct','%')+'</div>'
+      +'<div style="display:flex;gap:12px">'+rfld('Avg Launch Angle','avgLA','°')+rfld('Hard Hit %','hardHitPct','%')+'</div>'):'')
+      +(isCoach?'':'<div class="hint" style="margin:14px 2px 4px;text-align:left;line-height:1.5">Test scores and Rapsodo numbers are managed by your coach.</div>')
       +'<button class="btn" style="margin-top:14px" onclick="saveProfile()">Save Profile</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="'+back+'">Cancel</button>'
       +'<div style="height:20px"></div>'
@@ -946,14 +947,29 @@ async function saveProfile(){
 
 /* ================= BLOCK DETAIL ================= */
 function entryRow(p,b,e){
+  var isCoach=DB.user&&DB.user.role==='coach';
   var isTest=e.type==='test';
-  var title=isTest?'Hitting Test':'Rapsodo Results';
-  var sub=isTest
-    ? ('Color '+((e.scores&&e.scores.colorAcc)||0)+'% · Swing '+((e.scores&&e.scores.decAcc)||0)+'%')
-    : ('Max EV '+((e.rap&&e.rap.maxEV)||0)+' · Avg EV '+((e.rap&&e.rap.avgEV)||0));
-  return '<button class="drill-card" onclick="go(\'results\',{playerId:\''+p.id+'\',blockN:'+b.n+',entryId:\''+e.id+'\'})">'
-    +'<div class="dc-top"><div class="dc-ic">'+(isTest?'T':'R')+'</div>'
-    +'<div class="dc-name"><h4>'+title+'</h4><div class="st">'+fmtDate(e.date)+' · '+sub+'</div></div>'+IC.chev+'</div></button>';
+  var inProg=isTest&&e.status==='inprogress';
+  var title=isTest?('Hitting Test'+(inProg?' · In progress':'')):'Rapsodo Results';
+  var sub;
+  if(isTest){ if(inProg){ var pr=e.test?testProgress(e.test):{done:0,total:45}; sub='Recorded '+pr.done+'/'+pr.total+' — tap to continue'; }
+    else sub='Color '+((e.scores&&e.scores.colorAcc)||0)+'% · Swing '+((e.scores&&e.scores.decAcc)||0)+'%'; }
+  else sub='Max EV '+((e.rap&&e.rap.maxEV)||0)+' · Avg EV '+((e.rap&&e.rap.avgEV)||0);
+  var open=inProg?('continueTest(\''+p.id+'\','+b.n+',\''+e.id+'\')'):('go(\'results\',{playerId:\''+p.id+'\',blockN:'+b.n+',entryId:\''+e.id+'\'})');
+  return '<div class="drill-card"><div class="dc-top">'
+    +'<div class="dc-ic" onclick="'+open+'" style="cursor:pointer'+(inProg?';background:#ffb020;color:#0a0b0a':'')+'">'+(isTest?(inProg?'…':'T'):'R')+'</div>'
+    +'<div class="dc-name" onclick="'+open+'" style="cursor:pointer"><h4>'+title+'</h4><div class="st">'+fmtDate(e.date)+' · '+sub+'</div></div>'
+    +(isCoach?('<button title="Delete session" onclick="deleteEntry(\''+p.id+'\','+b.n+',\''+e.id+'\')" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:rgba(255,80,80,.14);border:1px solid rgba(255,80,80,.4);color:#ff6b6b;font-size:14px;cursor:pointer">🗑</button>'):('<span onclick="'+open+'" style="cursor:pointer">'+IC.chev+'</span>'))
+  +'</div></div>';
+}
+async function deleteEntry(pid,n,eid){
+  if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
+  var ok=(typeof window!=='undefined'&&window.confirm)?window.confirm('Delete this session? This cannot be undone.'):true;
+  if(!ok) return;
+  var p=curPlayer(); var b=p&&p.blocks[n-1]; if(!b) return;
+  b.entries=(b.entries||[]).filter(function(x){return x.id!==eid;});
+  if(TEST_EID===eid){ TEST_EID=null; }
+  await savePlayer(p); toast('Session deleted'); go('block',{playerId:pid,blockN:n});
 }
 function viewBlock(){
   var p=curPlayer(); if(!p) return viewLogin();
@@ -973,15 +989,27 @@ function viewBlock(){
 
 /* ================= TEST LOGGER ================= */
 var TEST=null;
+var TEST_EID=null;
 function secMeta(s){ return s==='frontToss'?{name:'Front Toss',nc:10,nn:5}:(s==='bp'?{name:'BP',nc:5,nn:10}:{name:'Machine',nc:5,nn:10}); }
-function mkPitches(nc,nn){ var a=[],i; for(i=0;i<nc;i++)a.push({kind:'color',color:null,pick:null,ev:null,swing:null}); for(i=0;i<nn;i++)a.push({kind:'normal',color:null,pick:null,ev:null,swing:null}); return a; }
+function mkPitches(nc,nn){ var a=[],i; for(i=0;i<nc;i++)a.push({kind:'color',color:null,pick:null,ev:null,swing:null,na:false}); for(i=0;i<nn;i++)a.push({kind:'normal',color:null,pick:null,ev:null,swing:null,na:false}); return a; }
 function initTest(){ return { section:'frontToss', frontToss:mkPitches(10,5), bp:mkPitches(5,10), machine:mkPitches(5,10) }; }
 function startTest(pid){ go('block',{playerId:pid,blockN:1}); }
-function startBlockTest(pid,n){ DB.ctx.playerId=pid; TEST=initTest(); DB.ctx.blockN=n; go('test'); }
+function startBlockTest(pid,n){ DB.ctx.playerId=pid; TEST=initTest(); TEST_EID=null; DB.ctx.blockN=n; go('test'); }
+function continueTest(pid,n,eid){ DB.ctx.playerId=pid; DB.ctx.blockN=n; var p=curPlayer(); var b=p&&p.blocks[n-1]; var e=b&&entryById(b,eid);
+  if(!e||!e.test){ toast('Could not open test'); return; }
+  TEST=e.test; if(!TEST.section) TEST.section='frontToss'; TEST_EID=eid; go('test');
+}
 function setSection(s){ TEST.section=s; render(); }
 function setPitchColor(sec,i,field,c){ TEST[sec][i][field]=c; render(); }
 function setSwing(sec,i,s){ TEST[sec][i].swing=s; render(); }
-function setEV(sec,i,v){ TEST[sec][i].ev=(v===''?null:+v); }
+function setEV(sec,i,v){ var pt=TEST[sec][i]; pt.ev=(v===''?null:+v); if(v!=='') pt.na=false; }
+function setNA(sec,i){ var pt=TEST[sec][i]; pt.na=!pt.na; if(pt.na) pt.ev=null; render(); }
+function pitchDone(pt){
+  if(pt.kind==='color'){ if(!(pt.color&&pt.pick&&pt.swing)) return false;
+    if(pt.swing==='swing'&&pt.color!=='Red') return (pt.ev>0||pt.na); return true; }
+  return (pt.ev>0||pt.na);
+}
+function testProgress(t){ var all=testPitches(t); var done=all.filter(pitchDone).length; return {done:done,total:all.length}; }
 
 function testPitches(t){ return [].concat(t.frontToss,t.bp,t.machine); }
 function avgOf(arr){ return arr.length?+(arr.reduce(function(a,b){return a+b;},0)/arr.length).toFixed(1):0; }
@@ -1030,19 +1058,20 @@ function analyzeTest(t){
 }
 function viewTest(){
   var p=curPlayer(); var t=TEST; if(!t){ return viewProfile(); }
-  var sec=t.section; var arr=t[sec]; var m=secMeta(sec); var a=analyzeTest(t);
+  var sec=t.section; var arr=t[sec]; var m=secMeta(sec); var a=analyzeTest(t); var prog=testProgress(t);
   return '<div class="scroll">'
     +topbar('<button class="icon-btn" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+DB.ctx.blockN+'})">'+IC.back+'</button>')
-    +'<div class="logger-head"><h2>HITTING <em>TEST</em></h2><div class="desc">Block '+DB.ctx.blockN+' · '+esc(p.first)+' '+esc(p.last)+' · 45 pitches (15 + 15 + 15)</div></div>'
+    +'<div class="logger-head"><h2>HITTING <em>TEST</em></h2><div class="desc">Block '+DB.ctx.blockN+' · '+esc(p.first)+' '+esc(p.last)+' · 45 pitches (15 + 15 + 15)'+(TEST_EID?' · resuming':'')+'</div></div>'
+    +'<div class="wk-note" style="display:flex;align-items:center;justify-content:space-between"><span>Recorded <b>'+prog.done+' / '+prog.total+'</b> — you can Save &amp; Finish Later and come back anytime.</span></div>'
     +'<div class="subtabs">'+['frontToss','bp','machine'].map(function(s){ return '<button class="'+(s===sec?'on':'')+'" onclick="setSection(\''+s+'\')">'+secMeta(s).name+'</button>'; }).join('')+'</div>'
-    +'<div class="wk-note">'+m.name+': <b>'+m.nc+' color</b> then <b>'+m.nn+' normal</b>. Lay off <b>Red</b> (take).</div>'
+    +'<div class="wk-note">'+m.name+': <b>'+m.nc+' color</b> then <b>'+m.nn+' normal</b>. Lay off <b>Red</b> (take). No Rapsodo read? Tap <b>NA</b>.</div>'
     +'<div class="score-strip">'
       +'<div class="sc '+(a.colorN&&a.colorAcc>=80?'pass':'')+'"><div class="k">Color Read</div><div class="v">'+a.colorCorrect+'/'+a.colorN+'</div></div>'
       +'<div class="sc '+(a.decN&&a.decAcc>=80?'pass':'')+'"><div class="k">Swing Dec</div><div class="v">'+a.decCorrect+'/'+a.decN+'</div></div>'
       +'<div class="sc"><div class="k">Avg EV</div><div class="v">'+(a.avgEV||'—')+'</div></div>'
     +'</div>'
     +'<div class="swing-list">'+arr.map(function(pt,i){return pitchCard(sec,i,pt);}).join('')+'</div>'
-    +'<div class="save-bar"><button class="btn" onclick="saveTest()">Save Test &amp; See Results</button></div>'
+    +'<div class="save-bar" style="display:flex;gap:8px"><button class="btn ghost" style="flex:1" onclick="saveTest(false)">Save &amp; Finish Later</button><button class="btn" style="flex:1" onclick="saveTest(true)">Finish &amp; See Results</button></div>'
   +'</div>';
 }
 function colorRow(sec,i,field,val){
@@ -1057,7 +1086,7 @@ function pitchCard(sec,i,pt){
   var showEV = !isColor || (isColor && pt.swing==='swing' && pt.color && !isRed);
   var cls='empty';
   if(isColor){ if(pickDone||decDone){ cls=((pickDone&&!pickOK)||(decDone&&!decOK))?'wrong':'correct'; } }
-  else { cls=pt.ev>0?'correct':'empty'; }
+  else { cls=(pt.ev>0||pt.na)?'correct':'empty'; }
   var okTag='<span class="mini-correct">✓</span>', noTag='<span class="tag no" style="padding:1px 7px">✗</span>';
   var h='<div class="swing '+cls+'">'
     +'<div class="sh"><span class="n">'+(isColor?'Color':'Normal')+' · #'+num+'</span>'
@@ -1072,16 +1101,27 @@ function pitchCard(sec,i,pt){
       +'</div>';
   }
   if(showEV){
-    h+='<div class="lab">Exit Velo</div><div class="numrow"><input type="number" inputmode="decimal" placeholder="mph" value="'+(pt.ev!=null?pt.ev:'')+'" oninput="setEV(\''+sec+'\','+i+',this.value)"><span class="u">mph</span></div>';
+    h+='<div class="lab">Exit Velo</div><div class="numrow" style="align-items:center">'
+      +'<input type="number" inputmode="decimal" placeholder="'+(pt.na?'no read':'mph')+'" value="'+(pt.na?'':(pt.ev!=null?pt.ev:''))+'"'+(pt.na?' disabled style="opacity:.5"':'')+' oninput="setEV(\''+sec+'\','+i+',this.value)"><span class="u">mph</span>'
+      +'<button class="seg '+(pt.na?'on':'')+'" style="margin-left:8px;flex:0 0 auto;padding:8px 12px" onclick="setNA(\''+sec+'\','+i+')" title="No read from Rapsodo — excluded from averages">NA</button>'
+    +'</div>';
   }
   return h+'</div>';
 }
-async function saveTest(){
+async function saveTest(finalize){
   var p=curPlayer(); var n=DB.ctx.blockN; var b=p.blocks[n-1]; var a=analyzeTest(TEST);
-  var entry={ id:nid(), type:'test', date:new Date().toISOString().slice(0,10), test:TEST,
-    scores:{ colorAcc:a.colorAcc, decAcc:a.decAcc, redDiscipline:a.redDiscipline, nonRedSwingPct:a.nonRedSwingPct, sections:a.sections } };
-  if(!b.entries) b.entries=[]; b.entries.push(entry); b.date=entry.date;
-  await savePlayer(p); toast('Test saved'); go('results',{blockN:n, entryId:entry.id});
+  var scores={ colorAcc:a.colorAcc, decAcc:a.decAcc, redDiscipline:a.redDiscipline, nonRedSwingPct:a.nonRedSwingPct, sections:a.sections };
+  var status=finalize?'complete':'inprogress';
+  if(!b.entries) b.entries=[];
+  var existing=TEST_EID?entryById(b,TEST_EID):null;
+  if(existing){ existing.test=TEST; existing.scores=scores; existing.status=status; b.date=existing.date; }
+  else{
+    var entry={ id:nid(), type:'test', date:new Date().toISOString().slice(0,10), test:TEST, scores:scores, status:status };
+    b.entries.push(entry); b.date=entry.date; TEST_EID=entry.id;
+  }
+  await savePlayer(p);
+  if(finalize){ var eid=TEST_EID; TEST_EID=null; toast('Test saved'); go('results',{blockN:n, entryId:eid}); }
+  else{ toast('Saved — you can finish this test later'); go('block',{playerId:p.id, blockN:n}); }
 }
 
 /* ================= RESULTS ================= */
@@ -1160,7 +1200,9 @@ function viewResults(){
       +(a.redDiscipline>=80?'Great discipline — took <b>'+a.redDiscipline+'%</b> of red balls.':'Swung at <b>'+(a.reds-a.redTakes)+'</b> red ball(s). Lay off red to sharpen pitch selection.')
     +'</div>'
     +(worst?'<div class="insight">Weakest color contact: <b>'+worst+'</b> at '+a.perColor[worst].avg+' mph avg. Add reps on '+worst+' recognition.</div>':'')
-    +'<div class="pad"><button class="btn ghost" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button></div>'
+    +'<div class="pad"><button class="btn ghost" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
+      +((DB.user&&DB.user.role==='coach')?'<button class="btn ghost" style="margin-top:8px;color:#ff6b6b;border-color:rgba(255,80,80,.4)" onclick="deleteEntry(\''+p.id+'\','+n+',\''+e.id+'\')">Delete This Test</button>':'')
+    +'</div>'
   +'</div>';
 }
 
