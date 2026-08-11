@@ -683,12 +683,17 @@ function miniStat(k,v,u){ var show=(v||v===0)&&v!==''; return '<div style="flex:
   +'<div style="font-size:8.5px;text-transform:uppercase;letter-spacing:.4px;color:var(--grey);font-weight:600">'+k+'</div>'
   +'<div style="font-family:\'Anton\';font-style:italic;font-size:16px;margin-top:2px">'+(show?v:'—')+(u?'<small style="font-size:9px;color:var(--grey);font-style:normal;font-weight:600"> '+u+'</small>':'')+'</div></div>'; }
 /* personal best across sessions (Avg LA just shows the latest number as-is) */
+var TEST_METRICS={maxEV:1,avgEV:1,hardHitPct:1};
 function bestMetric(p,key){
   var best=null,bestDate=null,latest=null,latestDate=null;
-  (p.blocks||[]).forEach(function(b){ (b.entries||[]).forEach(function(e){ if(e.type==='rapsodo'&&e.rap&&e.rap[key]>0){
-    if(latestDate===null||e.date>=latestDate){ latest=e.rap[key]; latestDate=e.date; }
-    if(best===null||e.rap[key]>best){ best=e.rap[key]; bestDate=e.date; }
-  }});});
+  (p.blocks||[]).forEach(function(b){ (b.entries||[]).forEach(function(e){
+    var val=null;
+    if(e.type==='rapsodo'&&e.rap&&e.rap[key]>0){ val=e.rap[key]; }
+    else if(e.type==='test'&&TEST_METRICS[key]&&e.test){ try{ var ta=analyzeTest(e.test); if(ta&&ta[key]>0) val=ta[key]; }catch(_){} }
+    if(val==null) return;
+    if(latestDate===null||e.date>=latestDate){ latest=val; latestDate=e.date; }
+    if(best===null||val>best){ best=val; bestDate=e.date; }
+  });});
   if(key==='avgLA'){ if(latest!==null) return {value:latest,date:latestDate,latest:true}; }
   else if(best!==null){ return {value:best,date:bestDate}; }
   if(p.rap && p.rap[key]) return {value:p.rap[key],date:null,latest:(key==='avgLA')};
@@ -699,13 +704,18 @@ function rnBest(k,bm,u){ var show=(bm&&bm.value!=null&&bm.value!==0); var v=show
 var RAP=null;
 function rapField(lbl,key,u){ var v=(RAP&&RAP[key])?RAP[key]:''; return '<div class="field" style="flex:1"><label>'+lbl+' ('+u+')</label><input type="number" step="0.1" value="'+v+'" oninput="setRap(\''+key+'\',this.value)"></div>'; }
 function setRap(key,v){ if(RAP) RAP[key]=(v===''?0:+v); }
-function startRapsodo(pid,n){ DB.ctx.playerId=pid; DB.ctx.blockN=n; RAP=emptyRap(); go('rapsodo'); }
+function startRapsodo(pid,n){ DB.ctx.playerId=pid; DB.ctx.blockN=n; RAP=emptyRap(); RAP._fromTest=false;
+  var p=curPlayer(); var b=p&&p.blocks&&p.blocks[n-1]; var t=b&&lastTest(b);
+  if(t&&t.test){ try{ var a=analyzeTest(t.test); if(a){ RAP.maxEV=a.maxEV||0; RAP.avgEV=a.avgEV||0; RAP.hardHitPct=a.hardHitPct||0; RAP._fromTest=(a.maxEV>0||a.avgEV>0); RAP._testDate=t.date; } }catch(_){} }
+  go('rapsodo');
+}
 function viewRapsodo(){
   var p=curPlayer(); if(!p) return viewLogin(); var n=DB.ctx.blockN; var b=p.blocks[n-1];
   return '<div class="scroll">'
     +topbar('<button class="icon-btn" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+n+'})">'+IC.back+'</button>')
     +'<div class="logger-head"><h2>RAPSODO <em>RESULTS</em></h2><div class="desc">Block '+n+' · '+b.label+' · enter this session\'s numbers</div></div>'
     +'<div class="pad">'
+      +((RAP&&RAP._fromTest)?'<div style="background:rgba(131,245,44,.1);border:1px solid rgba(131,245,44,.35);border-radius:11px;padding:10px 12px;font-size:12px;line-height:1.5;color:#cdeeb0;margin-bottom:12px"><b style="color:#fff">Auto-filled from the hitting test</b>'+(RAP._testDate?' ('+shortDate(RAP._testDate)+')':'')+' — Max EV, Avg EV and Hard Hit% came from this block\'s test swings. Edit any of them if your Rapsodo unit shows different. Distance and Launch Angle aren\'t in the test, so enter those from Rapsodo.</div>':'')
       +'<div style="display:flex;gap:10px">'+rapField('Max EV','maxEV','mph')+rapField('Avg EV','avgEV','mph')+rapField('Hard Hit','hardHitPct','%')+'</div>'
       +'<div style="display:flex;gap:10px;margin-top:6px">'+rapField('Max Dist','maxDist','ft')+rapField('Avg Dist','avgDist','ft')+rapField('Avg LA','avgLA','°')+'</div>'
       +'<button class="btn" style="margin-top:14px" onclick="saveRapsodo()">Save Rapsodo Results</button>'
