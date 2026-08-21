@@ -129,6 +129,27 @@
     text-transform:uppercase;letter-spacing:.5px;background:none}
   .tab svg{width:21px;height:21px}
   .tab.on{color:var(--green)}
+  .lb-chips{display:flex;gap:7px;overflow-x:auto;padding:10px 16px 4px}
+  .lb-chips::-webkit-scrollbar{height:0}
+  .lb-chip{flex:0 0 auto;padding:8px 13px;border-radius:11px;font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:11.5px;color:var(--grey);background:var(--panel);border:1px solid var(--line);white-space:nowrap;cursor:pointer}
+  .lb-chip.on{background:var(--green);color:#0a0b0a;border-color:var(--green)}
+  .lb-cat{padding:6px 16px 2px}
+  .lb-cat .t{font-family:'Anton';font-style:italic;font-size:21px}
+  .lb-cat .d{color:var(--grey);font-size:12px;margin-top:2px;line-height:1.4}
+  .lb-list{padding:8px 16px 4px}
+  .lb-row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-bottom:8px}
+  .lb-row.me{border-color:var(--green);box-shadow:0 0 12px rgba(131,245,44,.18)}
+  .lb-row .rk{font-family:'Anton';font-style:italic;font-size:20px;color:var(--grey-d);width:34px;text-align:center;flex:0 0 auto}
+  .lb-row.top1 .rk{color:var(--amber)}
+  .lb-row.top2 .rk,.lb-row.top3 .rk{color:#cdeeb0}
+  .lb-row .nm{flex:1;font-family:'Barlow Semi Condensed';font-weight:700;font-size:15px}
+  .lb-row .nm small{color:var(--green);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-left:6px}
+  .lb-row .vl{font-family:'Anton';font-style:italic;font-size:20px;flex:0 0 auto}
+  .lb-row .vl small{font-size:10px;color:var(--grey);font-family:'Barlow';font-style:normal;font-weight:600}
+  .lb-empty{color:var(--grey);text-align:center;font-style:italic;padding:26px 16px;font-size:13px}
+  .lb-you{margin:4px 16px;background:rgba(131,245,44,.08);border:1px solid rgba(131,245,44,.3);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
+  .lb-you .l{font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.6px;font-size:12px;color:var(--grey)}
+  .lb-you .r{font-family:'Anton';font-style:italic;font-size:18px;color:var(--green)}
 
   /* profile */
   .prof-hero{text-align:center;padding:6px 16px 0}
@@ -824,10 +845,10 @@ function viewRoster(){
 }
 /* ---------- bottom tab bar (coach) ---------- */
 function tabbar(active){
-  var act={roster:"go('roster')", coaches:"openCoaches()", me:"logout()"};
+  var act={roster:"go('roster')", coaches:"openCoaches()", lead:"openLeaderboard()", me:"logout()"};
   function t(k,ic,lbl){ return '<button class="tab '+(active===k?'on':'')+'" onclick="'+(act[k]||"toast('Coming soon')")+'">'+ic+'<span>'+lbl+'</span></button>'; }
   return '<div class="tabbar">'
-    +t('roster',IC.home,'Roster')+t('coaches',IC.user,'Coaches')+t('me',IC.lock,'Log out')
+    +t('roster',IC.home,'Roster')+t('coaches',IC.user,'Coaches')+t('lead',IC.chart,'Leaders')+t('me',IC.lock,'Log out')
   +'</div>';
 }
 /* ---------- COACHES screen ---------- */
@@ -925,6 +946,7 @@ function viewProfile(){
     +'<div class="pad">'
       +'<button class="btn" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
+      +'<button class="btn ghost" style="margin-top:8px" onclick="openLeaderboard(\''+p.id+'\')">View Leaderboard</button>'
       +(isCoach?('<button class="btn" style="margin-top:14px;background:rgba(226,59,59,.12);border:1px solid var(--red);color:#ff7b6b" onclick="deletePlayer(\''+p.id+'\')">Delete Player</button>'):'')
     +'</div></div>';
 }
@@ -1332,6 +1354,73 @@ function careerStats(p){
     nonRedSwingPct:0, sections:{frontToss:secOut(sec.frontToss),bp:secOut(sec.bp),machine:secOut(sec.machine)},
     swingCount:evs.length, testCount:testCount, rapCount:rapCount, hasTests:testCount>0, hasAny:(testCount>0||rapCount>0) };
 }
+var LB_METRICS=[
+  {k:'maxEV',     lbl:'Max EV',        unit:'mph', dec:1, desc:'Best single-swing exit velocity across all tests.'},
+  {k:'avgEV',     lbl:'Avg EV',        unit:'mph', dec:1, desc:'Average exit velocity across every recorded swing.'},
+  {k:'hardHitPct',lbl:'Hard Hit %',    unit:'%',   dec:0, desc:'Share of swings struck at 80%+ of the hitter max EV.'},
+  {k:'maxDist',   lbl:'Max Distance',  unit:'ft',  dec:0, desc:'Longest batted-ball distance recorded.'},
+  {k:'avgDist',   lbl:'Avg Distance',  unit:'ft',  dec:0, desc:'Average batted-ball distance across tests.'},
+  {k:'colorAcc',  lbl:'Vision',        unit:'%',   dec:0, desc:'Pitch recognition — colored ball read correctly.'},
+  {k:'decAcc',    lbl:'Swing Decision',unit:'%',   dec:0, desc:'Correct swing / take decisions on colored balls.'}
+];
+function lbFmt(v,dec){ if(dec){ return (Math.round(v*10)/10).toFixed(1).replace(/\.0$/,''); } return Math.round(v); }
+async function loadLeaderboard(){
+  if(!SBc) return null;
+  try{ var r=await SBc.rpc('hpl_leaderboard'); if(r.error){ console.warn(r.error); return null; } return r.data||[]; }
+  catch(e){ console.warn(e); return null; }
+}
+async function openLeaderboard(pid){
+  toast('Loading leaderboard…');
+  var raw=await loadLeaderboard();
+  if(raw===null){ toast('Leaderboard unavailable'); return; }
+  DB.lbStats=(raw||[]).map(function(r){
+    var p={ id:r.id, first:r.first, last:r.last, blocks:r.blocks||[] };
+    var cs=careerStats(p);
+    return { id:r.id, name:((r.first||'')+' '+(r.last||'')).trim()||'Unnamed', cs:cs };
+  });
+  go('leaderboard', pid?{playerId:pid}:{});
+}
+function setLbMetric(k){ DB.lbMetric=k; render(); }
+function viewLeaderboard(){
+  var isCoach=DB.user&&DB.user.role==='coach';
+  var meId=DB.ctx&&DB.ctx.playerId;
+  var mk=DB.lbMetric||'maxEV';
+  var def=LB_METRICS.filter(function(m){return m.k===mk;})[0]||LB_METRICS[0];
+  var stats=DB.lbStats||[];
+  var elig=stats.filter(function(r){
+    var v=r.cs[def.k]||0;
+    if(v<=0) return false;
+    if(def.k==='colorAcc' && !(r.cs.colorN>0)) return false;
+    if(def.k==='decAcc' && !(r.cs.decN>0)) return false;
+    return true;
+  }).sort(function(a,b){ return (b.cs[def.k]||0)-(a.cs[def.k]||0); });
+  var top=elig.slice(0,10);
+  var myRank=0, myVal=0;
+  if(meId){ for(var i=0;i<elig.length;i++){ if(elig[i].id===meId){ myRank=i+1; myVal=elig[i].cs[def.k]||0; break; } } }
+  var chips=LB_METRICS.map(function(m){ return '<button class="lb-chip '+(m.k===mk?'on':'')+'" onclick="setLbMetric(\''+m.k+'\')">'+m.lbl+'</button>'; }).join('');
+  var list = top.length ? top.map(function(r,idx){
+      var rk=idx+1; var cls='lb-row'+(r.id===meId?' me':'')+(rk===1?' top1':rk===2?' top2':rk===3?' top3':'');
+      return '<div class="'+cls+'"><div class="rk">'+rk+'</div>'
+        +'<div class="nm">'+esc(r.name)+(r.id===meId?' <small>You</small>':'')+'</div>'
+        +'<div class="vl">'+lbFmt(r.cs[def.k]||0,def.dec)+'<small> '+def.unit+'</small></div></div>';
+    }).join('') : '<div class="lb-empty">No results in this category yet. Rankings fill in as tests are logged.</div>';
+  var youLine='';
+  if(meId && myRank>10){ youLine='<div class="lb-you"><div class="l">Your Rank</div><div class="r">#'+myRank+' · '+lbFmt(myVal,def.dec)+' '+def.unit+'</div></div>'; }
+  else if(meId && myRank===0){ youLine='<div class="lb-you"><div class="l">Your Rank</div><div class="r">No result yet</div></div>'; }
+  var right = isCoach
+    ? '<button class="icon-btn" onclick="go(\'roster\')" title="Roster">'+IC.back+'</button>'
+    : '<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+(meId||'')+'\'})" title="Back">'+IC.back+'</button>';
+  return '<div class="scroll">'
+    +topbar(right)
+    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>Top 10 · updates as tests happen</p><h2>HPL <em>LEADERBOARD</em></h2></div></div>'
+    +'<div class="lb-chips">'+chips+'</div>'
+    +'<div class="lb-cat"><div class="t">'+esc(def.lbl)+'</div><div class="d">'+esc(def.desc)+'</div></div>'
+    +'<div class="lb-list">'+list+'</div>'
+    +youLine
+    +'<div style="height:16px"></div>'
+    +'</div>'
+    +(isCoach?tabbar('lead'):'');
+}
 function viewReport(){
   var p=curPlayer(); if(!p) return viewLogin();
   var cs=careerStats(p);
@@ -1490,6 +1579,7 @@ function render(){
     else if(v==='results') h=viewResults();
     else if(v==='report') h=viewReport();
     else if(v==='info') h=viewInfo();
+    else if(v==='leaderboard') h=viewLeaderboard();
     else h=viewLogin();
     vp.innerHTML=h; bindDynamic();
     var nowScroll=vp.querySelector?vp.querySelector('.scroll'):null;
