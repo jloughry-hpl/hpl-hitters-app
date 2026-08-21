@@ -506,11 +506,6 @@ function playerById(id){ return DB.players.find(p=>p.id===id); }
 function curPlayer(){ return playerById(DB.ctx.playerId); }
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>{ t.classList.remove('show'); }, 1900); }
 function go(view,ctx={}){ DB.view=view; DB.ctx={...DB.ctx,...ctx}; render(); $('#vp').scrollTop=0; }
-function goHome(){
-  if(DB.user&&DB.user.role==='coach'){ go('roster'); }
-  else if(DB.user){ var mine=(DB.players||[]).filter(function(p){return p.owner===DB.user.id;})[0]||(DB.players||[])[0]; if(mine){ go('profile',{playerId:mine.id}); } else { go('roster'); } }
-  else { go('login'); }
-}
 const IC={
   user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
   search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>',
@@ -533,6 +528,11 @@ var HPL_LOGO="data:image/webp;base64,UklGRtobAABXRUJQVlA4WAoAAAAQAAAAfwAAfwAAQUx
 var HPL_LOGO_URL="https://assets.cdn.filesafe.space/tP9hmxgC8gPQA2kCR8kL/media/67083d02c7c300621f44cef2.png";
 function logoSVG(size){
   return `<img class="hpl-logo" src="${HPL_LOGO_URL}" alt="HPL" onclick="goHome()" style="cursor:pointer;height:${size}px;width:auto;max-width:${Math.round(size*2.4)}px;object-fit:contain">`;
+}
+function goHome(){
+  if(DB.user&&DB.user.role==='coach'){ go('roster'); }
+  else if(DB.user){ var mine=(DB.players||[]).filter(function(p){return p.owner===DB.user.id;})[0]||(DB.players||[])[0]; if(mine){ go('profile',{playerId:mine.id}); } else { go('roster'); } }
+  else { go('login'); }
 }
 
 /* ============================================================
@@ -706,6 +706,8 @@ function bestMetric(p,key){
   return {value:null,date:null};
 }
 function rnBest(k,bm,u){ var show=(bm&&bm.value!=null&&bm.value!==0); var v=show?bm.value:'—'; var lab=(bm&&bm.latest)?'latest':'best'; var d=(show&&bm.date)?shortDate(bm.date):''; return '<div class="rn"><div class="k">'+k+'</div><div class="v">'+v+'<small> '+u+'</small></div>'+(d?'<div style="font-size:9px;color:var(--grey);letter-spacing:.3px;margin-top:3px">'+lab+' · '+d+'</div>':'')+'</div>'; }
+/* aggregate stat cell: Max shows "best", others show "avg", all across every test */
+function rnAgg(k,val,u,kind){ var show=(val>0); return '<div class="rn"><div class="k">'+k+'</div><div class="v">'+(show?val:'—')+'<small> '+u+'</small></div>'+(show&&kind?'<div style="font-size:9px;color:var(--grey);letter-spacing:.3px;margin-top:3px">'+kind+'</div>':'')+'</div>'; }
 /* test-page Rapsodo input (bound to TEST.rap for this session) */
 var RAP=null;
 function rapField(lbl,key,u){ var v=(RAP&&RAP[key])?RAP[key]:''; return '<div class="field" style="flex:1"><label>'+lbl+' ('+u+')</label><input type="number" step="0.1" value="'+v+'" oninput="setRap(\''+key+'\',this.value)"></div>'; }
@@ -887,6 +889,9 @@ function viewProfile(){
   var p=curPlayer(); if(!p) return viewLogin();
   var isCoach=DB.user&&DB.user.role==='coach';
   var r=p.rap;
+  var cs=careerStats(p); var pr=p.rap||{};
+  var gMaxEV=cs.maxEV||pr.maxEV||0, gAvgEV=cs.avgEV||pr.avgEV||0, gHH=cs.hardHitPct||pr.hardHitPct||0,
+      gMaxDist=cs.maxDist||pr.maxDist||0, gAvgDist=cs.avgDist||pr.avgDist||0, gAvgLA=cs.avgLA||pr.avgLA||0;
   var rightBtn=isCoach
     ? '<button class="icon-btn" onclick="go(\'roster\')" title="Back">'+IC.back+'</button>'
     : '<button class="icon-btn" onclick="logout()" title="Log out">'+IC.user+'</button>';
@@ -905,10 +910,10 @@ function viewProfile(){
       +miniStat('Height',p.height,'')+miniStat('Weight',p.weight,'lb')
       +miniStat('Grip R',p.gripRH,'lb')+miniStat('Grip L',p.gripLH,'lb')
     +'</div>'
-    +'<div class="section-lbl">Rapsodo Numbers · Personal Bests <span class="link" onclick="go(\'editProfile\',{playerId:\''+p.id+'\'})">Edit</span></div>'
+    +'<div class="section-lbl">Rapsodo Numbers · All Tests'+(isCoach?' <span class="link" onclick="go(\'editProfile\',{playerId:\''+p.id+'\'})">Edit</span>':'')+'</div>'
     +'<div class="rap-numbers" style="grid-template-columns:1fr 1fr 1fr">'
-      +rnBest('Max EV',bestMetric(p,'maxEV'),'mph')+rnBest('Avg EV',bestMetric(p,'avgEV'),'mph')+rnBest('Hard Hit',bestMetric(p,'hardHitPct'),'%')
-      +rnBest('Max Dist',bestMetric(p,'maxDist'),'ft')+rnBest('Avg Dist',bestMetric(p,'avgDist'),'ft')+rnBest('Avg LA',bestMetric(p,'avgLA'),'°')
+      +rnAgg('Max EV',gMaxEV,'mph','best')+rnAgg('Avg EV',gAvgEV,'mph','avg')+rnAgg('Hard Hit',gHH,'%','all swings')
+      +rnAgg('Max Dist',gMaxDist,'ft','best')+rnAgg('Avg Dist',gAvgDist,'ft','avg')+rnAgg('Avg LA',gAvgLA,'°','avg')
     +'</div>'
     +'<div class="section-lbl">Test Blocks · 25-Week Program</div>'
     +'<div class="wk-note" style="margin-bottom:6px">Tap a block to log a hitting test or Rapsodo results.</div>'
@@ -1272,18 +1277,63 @@ function viewResults(){
 /* ================= HPL REPORT ================= */
 function delta(a,b){ return +((a||0)-(b||0)).toFixed(1); }
 function dtxt(v,u){ if(v>0) return '+'+v+(u||'')+' since start'; if(v<0) return v+(u||'')+' since start'; return 'even since start'; }
+/* ===== career aggregation across ALL completed tests + Rapsodo sessions =====
+   Max EV / Max Dist = best of all; Avg EV / Avg Dist / Avg LA + Hard Hit% =
+   aggregate across every swing/session. Section stats pooled over all tests. */
+function careerStats(p){
+  function mean(a){ return a.length? +(a.reduce(function(x,y){return x+y;},0)/a.length).toFixed(1):0; }
+  function mx(a){ return a.length? Math.max.apply(null,a):0; }
+  var evs=[]; var reds=0,redTakes=0,colorN=0,colorCorrect=0,decN=0,decCorrect=0;
+  var sec={frontToss:{cN:0,cC:0,dN:0,dC:0,ev:[]},bp:{cN:0,cC:0,dN:0,dC:0,ev:[]},machine:{cN:0,cC:0,dN:0,dC:0,ev:[]}};
+  var rMaxEV=[],rMaxDist=[],rAvgDist=[],rAvgLA=[],testCount=0,rapCount=0;
+  (p.blocks||[]).forEach(function(b){ blockEntries(b).forEach(function(e){
+    if(e.type==='test'&&e.status!=='inprogress'&&e.test){
+      testCount++;
+      ['frontToss','bp','machine'].forEach(function(k){ (e.test[k]||[]).forEach(function(pt){
+        if(pt.kind==='color'){
+          if(pt.color&&pt.pick){ sec[k].cN++; colorN++; if(pt.pick===pt.color){ sec[k].cC++; colorCorrect++; } }
+          if(pt.color&&pt.swing){ sec[k].dN++; decN++; if(swingRight(pt)){ sec[k].dC++; decCorrect++; } }
+          if(pt.color==='Red'){ reds++; if(pt.swing==='take') redTakes++; }
+        }
+        if(pt.ev>0&&pt.color!=='Red'){ evs.push(pt.ev); sec[k].ev.push(pt.ev); }
+      }); });
+    } else if(e.type==='rapsodo'&&e.rap){
+      rapCount++;
+      if(e.rap.maxEV>0) rMaxEV.push(e.rap.maxEV);
+      if(e.rap.maxDist>0) rMaxDist.push(e.rap.maxDist);
+      if(e.rap.avgDist>0) rAvgDist.push(e.rap.avgDist);
+      if(e.rap.avgLA>0) rAvgLA.push(e.rap.avgLA);
+    }
+  }); });
+  var maxEV=Math.max(mx(evs),mx(rMaxEV));
+  var hardHitPct=(evs.length&&maxEV>0)?Math.round(evs.filter(function(v){return v>=0.8*maxEV;}).length/evs.length*100):0;
+  function secOut(s){ return {colorN:s.cN,colorCorrect:s.cC,colorAcc:s.cN?Math.round(s.cC/s.cN*100):0,
+    decN:s.dN,decCorrect:s.dC,decAcc:s.dN?Math.round(s.dC/s.dN*100):0,avgEV:mean(s.ev),evN:s.ev.length}; }
+  return { maxEV:maxEV, avgEV:mean(evs), hardHitPct:hardHitPct, maxDist:mx(rMaxDist), avgDist:mean(rAvgDist), avgLA:mean(rAvgLA),
+    colorN:colorN,colorCorrect:colorCorrect,colorAcc:colorN?Math.round(colorCorrect/colorN*100):0,
+    decN:decN,decCorrect:decCorrect,decAcc:decN?Math.round(decCorrect/decN*100):0,
+    reds:reds,redTakes:redTakes,redDiscipline:reds?Math.round(redTakes/reds*100):0,
+    nonRedSwingPct:0, sections:{frontToss:secOut(sec.frontToss),bp:secOut(sec.bp),machine:secOut(sec.machine)},
+    swingCount:evs.length, testCount:testCount, rapCount:rapCount, hasTests:testCount>0, hasAny:(testCount>0||rapCount>0) };
+}
 function viewReport(){
   var p=curPlayer(); if(!p) return viewLogin();
+  var cs=careerStats(p);
   var assess=[]; p.blocks.forEach(function(b){ var e=lastRap(b); if(e){ assess.push({label:b.label, date:e.date, rap:e.rap}); } });
   var lastScores=null; p.blocks.forEach(function(b){ var t=lastTest(b); if(t) lastScores=t.scores; });
-  if(!assess.length){ return '<div class="scroll">'+topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'+IC.back+'</button>')
-    +'<div class="logger-head"><h2>HPL <em>REPORT</em></h2></div><div class="center-note">Log at least one Rapsodo session to generate a development report.</div>'
+  var hasRap=assess.length>0;
+  if(!hasRap && !cs.hasTests){ return '<div class="scroll">'+topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'+IC.back+'</button>')
+    +'<div class="logger-head"><h2>HPL <em>REPORT</em></h2></div><div class="center-note">Log at least one hitting test or Rapsodo session to generate a development report.</div>'
     +'<div class="pad"><button class="btn" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:1})">Go to Block 1</button></div></div>'; }
-  var first=assess[0], last=assess[assess.length-1];
-  var r=last.rap, f=first.rap;
+  var first=hasRap?assess[0]:null, last=hasRap?assess[assess.length-1]:null;
+  var r=hasRap?last.rap:{maxEV:0,avgEV:0,hardHitPct:0,maxDist:0,avgDist:0,avgLA:0}, f=hasRap?first.rap:r;
+  /* aggregate (career) values — Max = best of all, others = average across all swings/sessions */
+  var vMaxEV=cs.maxEV||r.maxEV||0, vAvgEV=cs.avgEV||r.avgEV||0, vHH=cs.hardHitPct||r.hardHitPct||0,
+      vMaxDist=cs.maxDist||r.maxDist||0, vAvgDist=cs.avgDist||r.avgDist||0, vAvgLA=cs.avgLA||r.avgLA||0;
   var dEV=delta(r.maxEV,f.maxEV), dAvg=delta(r.avgEV,f.avgEV), dHH=delta(r.hardHitPct,f.hardHitPct), dDist=delta(r.maxDist,f.maxDist);
-  var span=fmtDate(first.date)+' – '+fmtDate(last.date);
-  var laOK=(r.avgLA>=10&&r.avgLA<=25);
+  var span=hasRap?(fmtDate(first.date)+' – '+fmtDate(last.date)):(cs.testCount+' test'+(cs.testCount!==1?'s':''));
+  var laOK=(vAvgLA>=10&&vAvgLA<=25);
+  var nSess=assess.length||cs.testCount;
   function card(k,v,sub,subcls){ return '<div style="flex:1;min-width:120px;background:#141614;border-top:3px solid var(--green);border-radius:12px;padding:12px 10px;text-align:center">'
     +'<div style="font-family:\'Barlow Semi Condensed\';font-weight:700;text-transform:uppercase;letter-spacing:.6px;font-size:9.5px;color:var(--green)">'+k+'</div>'
     +'<div style="font-family:\'Anton\';font-style:italic;font-size:24px;margin:5px 0 4px">'+v+'</div>'
@@ -1338,41 +1388,41 @@ function viewReport(){
         +logoSVG(56)
         +'<div><div style="font-family:\'Barlow Semi Condensed\';font-weight:700;color:var(--green);letter-spacing:.5px;font-size:12px">PLAYER DEVELOPMENT REPORT</div>'
         +'<div style="font-family:\'Anton\';font-style:italic;font-size:24px;line-height:1">'+nm+'</div>'
-        +'<div style="font-size:10.5px;color:var(--grey);margin-top:3px">'+assess.length+' Assessments · '+span+'</div></div></div>'
+        +'<div style="font-size:10.5px;color:var(--grey);margin-top:3px">'+nSess+' session'+(nSess!==1?'s':'')+' · '+span+'</div></div></div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">'
-        +card('Max Exit Velo',r.maxEV+' mph',dtxt(dEV,' mph'),dEV>0?'up':(dEV<0?'down':''))
-        +card('Avg Exit Velo',r.avgEV+' mph',dtxt(dAvg,' mph'),dAvg>0?'up':(dAvg<0?'down':''))
-        +card('Hard Hit %',r.hardHitPct+'%',dtxt(dHH,'%'),dHH>0?'up':(dHH<0?'down':''))
+        +card('Max Exit Velo',vMaxEV+' mph','best · all tests','up')
+        +card('Avg Exit Velo',vAvgEV+' mph','avg · all swings','')
+        +card('Hard Hit %',vHH+'%','all swings','')
       +'</div>'
       +'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:8px">'
-        +card('Max Distance',r.maxDist+' ft',dtxt(dDist,' ft'),dDist>0?'up':(dDist<0?'down':''))
-        +card('Avg Launch Ang',r.avgLA+'°',laOK?'In optimal 10–25°':'Target 10–25°',laOK?'up':'')
+        +card('Max Distance',vMaxDist+' ft','best · all sessions','up')
+        +card('Avg Launch Ang',vAvgLA+'°',laOK?'In optimal 10–25°':'Target 10–25°',laOK?'up':'')
       +'</div>'
       +'<div class="section-lbl" style="margin:20px 2px 8px">Assessment History</div>'
       +'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11.5px;background:#141614;border:1px solid #2a2e2a;border-radius:10px">'
         +'<thead><tr style="background:rgba(131,245,44,.1);color:var(--green);font-family:\'Barlow Semi Condensed\';text-transform:uppercase;font-size:10px;letter-spacing:.4px">'
         +'<th style="padding:8px 6px;text-align:left">Block</th><th style="padding:8px 6px;text-align:left">Date</th><th style="padding:8px 6px">Max EV</th><th style="padding:8px 6px">Avg EV</th><th style="padding:8px 6px">Hard Hit</th><th style="padding:8px 6px">Max Dist</th><th style="padding:8px 6px">Avg LA</th></tr></thead>'
         +'<tbody>'+rows+'</tbody></table></div>'
-      +(lastScores?(
-          '<div class="section-lbl" style="margin:20px 2px 8px">Swing Decisions &amp; Pitch Recognition</div>'
+      +(cs.hasTests?(
+          '<div class="section-lbl" style="margin:20px 2px 8px">Swing Decisions &amp; Pitch Recognition <span style="font-weight:400;color:var(--grey);font-size:11px">· across all '+cs.testCount+' test'+(cs.testCount!==1?'s':'')+'</span></div>'
           +'<div style="display:flex;flex-wrap:wrap;gap:8px">'
-            +card('Color Read',(lastScores.colorAcc||0)+'%','correct ball called',lastScores.colorAcc>=80?'up':'')
-            +card('Swing Decisions',(lastScores.decAcc||0)+'%','take red / swing rest',lastScores.decAcc>=80?'up':'')
+            +card('Color Read',(cs.colorAcc||0)+'%',cs.colorCorrect+'/'+cs.colorN+' correct',cs.colorAcc>=80?'up':'')
+            +card('Swing Decisions',(cs.decAcc||0)+'%',cs.decCorrect+'/'+cs.decN+' correct',cs.decAcc>=80?'up':'')
           +'</div>'
           +'<div class="section-lbl" style="margin:16px 2px 8px">By Test Section — Correct Colors, Swing Decisions &amp; EV</div>'
-          +'<div style="overflow-x:auto">'+sectionTable(lastScores.sections,'#141614')+'</div>'
-          +reportNotes(lastScores)
+          +'<div style="overflow-x:auto">'+sectionTable(cs.sections,'#141614')+'</div>'
+          +reportNotes(cs)
         ):'')
       +evSection
       +'<div class="section-lbl" style="margin:20px 2px 4px">Development Summary</div>'
-      +'<p style="font-size:12.5px;line-height:1.55;color:#cfcfcf;margin:2px">'+nm+' has completed '+assess.length+' assessment'+(assess.length>1?'s':'')+' at Hitting Performance Labs from '+span+'.</p>'
-      +para('Exit Velocity', 'Max exit velocity moved from <b>'+f.maxEV+' mph</b> to <b>'+r.maxEV+' mph</b> ('+dtxt(dEV,' mph').replace(' since start','')+'). Average EV is '+r.avgEV+' mph — closing the gap to max means more quality contact every swing.')
-      +para('Hard Hit %', 'Hard-hit rate — swings at <b>80%+ of the hitter\'s own max exit velo</b> — is <b>'+r.hardHitPct+'%</b> ('+dtxt(dHH,'%').replace(' since start','')+' overall). More hard contact means more game-quality swings.')
-      +para('Distance', 'Max distance is <b>'+r.maxDist+' ft</b>. As exit velo and launch angle develop, distance follows.')
-      +para('Launch Angle', 'Average launch angle sits at <b>'+r.avgLA+'°</b>'+(laOK?' — right in the optimal 10–25° window.':' — target the 10–25° line-drive window to turn exit velo into carry.'))
+      +'<p style="font-size:12.5px;line-height:1.55;color:#cfcfcf;margin:2px">'+nm+' has logged '+nSess+' session'+(nSess!==1?'s':'')+' at Hitting Performance Lab'+(span?' ('+span+')':'')+'. Numbers below aggregate every completed test.</p>'
+      +para('Exit Velocity', 'Best exit velocity across all tests is <b>'+vMaxEV+' mph</b>, with an average of <b>'+vAvgEV+' mph</b> across every swing'+((hasRap&&dEV!==0)?' ('+dtxt(dEV,' mph').replace(' since start','')+' on logged Rapsodo sessions)':'')+'. Closing the gap between max and average means more quality contact every swing.')
+      +para('Hard Hit %', 'Hard-hit rate — swings at <b>80%+ of the hitter\'s own max exit velo</b> — is <b>'+vHH+'%</b> across all tracked swings. More hard contact means more game-quality swings.')
+      +para('Distance', 'Best distance is <b>'+vMaxDist+' ft</b>. As exit velo and launch angle develop, distance follows.')
+      +para('Launch Angle', 'Average launch angle sits at <b>'+vAvgLA+'°</b>'+(laOK?' — right in the optimal 10–25° window.':' — target the 10–25° line-drive window to turn exit velo into carry.'))
       +'<div style="margin-top:16px;background:rgba(131,245,44,.08);border:1px solid rgba(131,245,44,.3);border-radius:12px;padding:13px 14px">'
         +'<div style="font-family:\'Barlow Semi Condensed\';font-weight:700;font-size:13px;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Areas to Continue Working On</div>'
-        +'<div style="font-size:12px;line-height:1.5;color:#cdeeb0">• <b>Exit velo floor</b> — close the gap between max ('+r.maxEV+') and avg ('+r.avgEV+') EV.<br>• <b>Hard-hit consistency</b> — push hard-hit rate higher by staying in the zone.<br>• <b>Launch angle</b> — keep avg LA locked in the 10–25° zone.</div></div>'
+        +'<div style="font-size:12px;line-height:1.5;color:#cdeeb0">• <b>Exit velo floor</b> — close the gap between max ('+vMaxEV+') and avg ('+vAvgEV+') EV.<br>• <b>Hard-hit consistency</b> — push hard-hit rate higher by staying in the zone.<br>• <b>Launch angle</b> — keep avg LA locked in the 10–25° zone.</div></div>'
       +'<div style="text-align:center;color:var(--grey-d);font-size:10px;margin-top:16px;line-height:1.5">949 National Ave, Suite 115 · Lexington, KY 40502<br>hpllex.com · info@hpllex.com</div>'
       +'<button class="btn" style="margin-top:16px" onclick="window.print()">Save / Print PDF</button>'
       +'<div style="height:20px"></div>'
