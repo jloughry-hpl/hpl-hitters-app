@@ -150,6 +150,9 @@
   .lb-you{margin:4px 16px;background:rgba(131,245,44,.08);border:1px solid rgba(131,245,44,.3);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
   .lb-you .l{font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.6px;font-size:12px;color:var(--grey)}
   .lb-you .r{font-family:'Anton';font-style:italic;font-size:18px;color:var(--green)}
+  .lb-row .nm small.ft{display:block;color:var(--grey);font-weight:600;font-size:11px;margin-top:2px;letter-spacing:0;text-transform:none}
+  .lb-row .vl.up{color:var(--green)}
+  .lb-row .vl.down{color:#ff7b6b}
 
   /* profile */
   .prof-hero{text-align:center;padding:6px 16px 0}
@@ -470,7 +473,8 @@
     .tabbar{padding-left:max(24px, calc((100% - var(--maxw))/2));
             padding-right:max(24px, calc((100% - var(--maxw))/2));
             justify-content:flex-start;gap:6px}
-    .tab{max-width:130px;flex:0 0 auto;padding:0 18px}
+    .tab{max-width:none;flex:1 1 0;min-width:0;padding:0 5px}
+    .tab span{white-space:normal;line-height:1.05;text-align:center;word-break:break-word}
 
     /* keep login + add-forms readable, not stretched */
     .login{max-width:460px;margin:0 auto}
@@ -539,6 +543,7 @@ const IC={
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10l8-6 8 6v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>',
   ball:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M6 7c3 2 9 2 12 0M6 17c3-2 9-2 12 0M12 3v18"/></svg>',
   chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>',
+  trend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>',
   edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
   sync:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-8-5"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 8 5"/><path d="M21 3v5h-5M3 21v-5h5"/></svg>',
   lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
@@ -845,10 +850,10 @@ function viewRoster(){
 }
 /* ---------- bottom tab bar (coach) ---------- */
 function tabbar(active){
-  var act={roster:"go('roster')", coaches:"openCoaches()", lead:"openLeaderboard()", me:"logout()"};
+  var act={roster:"go('roster')", coaches:"openCoaches()", lead:"openLeaderboard()", dev:"openDevelopment()", me:"logout()"};
   function t(k,ic,lbl){ return '<button class="tab '+(active===k?'on':'')+'" onclick="'+(act[k]||"toast('Coming soon')")+'">'+ic+'<span>'+lbl+'</span></button>'; }
   return '<div class="tabbar">'
-    +t('roster',IC.home,'Roster')+t('coaches',IC.user,'Coaches')+t('lead',IC.chart,'Leaders')+t('me',IC.lock,'Log out')
+    +t('roster',IC.home,'Roster')+t('coaches',IC.user,'Coaches')+t('lead',IC.chart,'Leaders')+t('dev',IC.trend,'Development')+t('me',IC.lock,'Log out')
   +'</div>';
 }
 /* ---------- COACHES screen ---------- */
@@ -947,6 +952,7 @@ function viewProfile(){
       +'<button class="btn" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="openLeaderboard(\''+p.id+'\')">View Leaderboard</button>'
+      +'<button class="btn ghost" style="margin-top:8px" onclick="openDevelopment(\''+p.id+'\')">Development Leaders</button>'
       +(isCoach?('<button class="btn" style="margin-top:14px;background:rgba(226,59,59,.12);border:1px solid var(--red);color:#ff7b6b" onclick="deletePlayer(\''+p.id+'\')">Delete Player</button>'):'')
     +'</div></div>';
 }
@@ -1364,21 +1370,68 @@ var LB_METRICS=[
   {k:'decAcc',    lbl:'Swing Decision',unit:'%',   dec:0, desc:'Correct swing / take decisions on colored balls.'}
 ];
 function lbFmt(v,dec){ if(dec){ return (Math.round(v*10)/10).toFixed(1).replace(/\.0$/,''); } return Math.round(v); }
+function devStats(p){
+  var H=careerStats(p).maxEV||0;
+  var METS=['maxEV','avgEV','hardHitPct','maxDist','avgDist','colorAcc','decAcc'];
+  var series={}; METS.forEach(function(k){ series[k]=[]; });
+  (p.blocks||[]).forEach(function(b){
+    var evs=[], colorN=0,colorC=0, decN=0,decC=0, rMaxEV=0, rMaxDist=0, rAvgDist=0;
+    blockEntries(b).forEach(function(e){
+      if(e.type==='test'&&e.status!=='inprogress'&&e.test){
+        ['frontToss','bp','machine'].forEach(function(kk){ (e.test[kk]||[]).forEach(function(pt){
+          if(pt.kind==='color'){
+            if(pt.color&&pt.pick){ colorN++; if(pt.pick===pt.color) colorC++; }
+            if(pt.color&&pt.swing){ decN++; if(swingRight(pt)) decC++; }
+          }
+          if(pt.ev>0&&pt.color!=='Red'){ evs.push(pt.ev); }
+        }); });
+      } else if(e.type==='rapsodo'&&e.rap){
+        if(e.rap.maxEV>rMaxEV) rMaxEV=e.rap.maxEV;
+        if(e.rap.maxDist>rMaxDist) rMaxDist=e.rap.maxDist;
+        if(e.rap.avgDist>0) rAvgDist=e.rap.avgDist;
+      }
+    });
+    var n=b.n||0;
+    var sMax=Math.max(evs.length?Math.max.apply(null,evs):0, rMaxEV);
+    if(sMax>0) series.maxEV.push({n:n,v:sMax});
+    if(evs.length) series.avgEV.push({n:n,v:+(evs.reduce(function(a,c){return a+c;},0)/evs.length).toFixed(1)});
+    if(evs.length&&H>0) series.hardHitPct.push({n:n,v:Math.round(evs.filter(function(x){return x>=0.8*H;}).length/evs.length*100)});
+    if(rMaxDist>0) series.maxDist.push({n:n,v:rMaxDist});
+    if(rAvgDist>0) series.avgDist.push({n:n,v:rAvgDist});
+    if(colorN>0) series.colorAcc.push({n:n,v:Math.round(colorC/colorN*100)});
+    if(decN>0) series.decAcc.push({n:n,v:Math.round(decC/decN*100)});
+  });
+  var out={};
+  METS.forEach(function(k){
+    var s=series[k].sort(function(a,b){return a.n-b.n;});
+    out[k]=(s.length>=2)?{ first:s[0].v, last:s[s.length-1].v, delta:+(s[s.length-1].v-s[0].v).toFixed(1), fromN:s[0].n, toN:s[s.length-1].n, count:s.length }:null;
+  });
+  return out;
+}
 async function loadLeaderboard(){
   if(!SBc) return null;
   try{ var r=await SBc.rpc('hpl_leaderboard'); if(r.error){ console.warn(r.error); return null; } return r.data||[]; }
   catch(e){ console.warn(e); return null; }
 }
+function lbLoad(raw){
+  return (raw||[]).map(function(r){
+    var p={ id:r.id, first:r.first, last:r.last, blocks:r.blocks||[] };
+    return { id:r.id, name:((r.first||'')+' '+(r.last||'')).trim()||'Unnamed', cs:careerStats(p), dev:devStats(p) };
+  });
+}
 async function openLeaderboard(pid){
   toast('Loading leaderboard…');
   var raw=await loadLeaderboard();
   if(raw===null){ toast('Leaderboard unavailable'); return; }
-  DB.lbStats=(raw||[]).map(function(r){
-    var p={ id:r.id, first:r.first, last:r.last, blocks:r.blocks||[] };
-    var cs=careerStats(p);
-    return { id:r.id, name:((r.first||'')+' '+(r.last||'')).trim()||'Unnamed', cs:cs };
-  });
+  DB.lbStats=lbLoad(raw);
   go('leaderboard', pid?{playerId:pid}:{});
+}
+async function openDevelopment(pid){
+  toast('Loading development…');
+  var raw=await loadLeaderboard();
+  if(raw===null){ toast('Development board unavailable'); return; }
+  DB.lbStats=lbLoad(raw);
+  go('development', pid?{playerId:pid}:{});
 }
 function setLbMetric(k){ DB.lbMetric=k; render(); }
 function viewLeaderboard(){
@@ -1420,6 +1473,44 @@ function viewLeaderboard(){
     +'<div style="height:16px"></div>'
     +'</div>'
     +(isCoach?tabbar('lead'):'');
+}
+function setDevMetric(k){ DB.devMetric=k; render(); }
+function viewDevelopment(){
+  var isCoach=DB.user&&DB.user.role==='coach';
+  var meId=DB.ctx&&DB.ctx.playerId;
+  var mk=DB.devMetric||'maxEV';
+  var def=LB_METRICS.filter(function(m){return m.k===mk;})[0]||LB_METRICS[0];
+  var stats=DB.lbStats||[];
+  var elig=stats.filter(function(r){ return r.dev && r.dev[def.k]; })
+                .sort(function(a,b){ return (b.dev[def.k].delta)-(a.dev[def.k].delta); });
+  var top=elig.slice(0,5);
+  var myRank=0, myD=null;
+  if(meId){ for(var i=0;i<elig.length;i++){ if(elig[i].id===meId){ myRank=i+1; myD=elig[i].dev[def.k]; break; } } }
+  function dStr(d){ return (d>=0?'+':'')+lbFmt(d,def.dec); }
+  var chips=LB_METRICS.map(function(m){ return '<button class="lb-chip '+(m.k===mk?'on':'')+'" onclick="setDevMetric(\''+m.k+'\')">'+m.lbl+'</button>'; }).join('');
+  var list = top.length ? top.map(function(r,idx){
+      var rk=idx+1; var d=r.dev[def.k]; var cls='lb-row'+(r.id===meId?' me':'')+(rk===1?' top1':rk===2?' top2':rk===3?' top3':'');
+      return '<div class="'+cls+'"><div class="rk">'+rk+'</div>'
+        +'<div class="nm">'+esc(r.name)+(r.id===meId?' <small>You</small>':'')
+          +'<small class="ft">'+lbFmt(d.first,def.dec)+' → '+lbFmt(d.last,def.dec)+' '+def.unit+'</small></div>'
+        +'<div class="vl '+(d.delta>=0?'up':'down')+'">'+dStr(d.delta)+'<small> '+def.unit+'</small></div></div>';
+    }).join('') : '<div class="lb-empty">Development rankings begin in Weeks 6–10. Once a player logs a test in a second block, their gain vs. their first test appears here.</div>';
+  var youLine='';
+  if(meId && myD && myRank>5){ youLine='<div class="lb-you"><div class="l">Your Gain</div><div class="r">'+dStr(myD.delta)+' '+def.unit+' · #'+myRank+'</div></div>'; }
+  else if(meId && !myD){ youLine='<div class="lb-you"><div class="l">Your Gain</div><div class="r">After your 2nd test</div></div>'; }
+  var right = isCoach
+    ? '<button class="icon-btn" onclick="go(\'roster\')" title="Roster">'+IC.back+'</button>'
+    : '<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+(meId||'')+'\'})" title="Back">'+IC.back+'</button>';
+  return '<div class="scroll">'
+    +topbar(right)
+    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>Top 5 · biggest gain vs. first test</p><h2>DEVELOPMENT <em>LEADERS</em></h2></div></div>'
+    +'<div class="lb-chips">'+chips+'</div>'
+    +'<div class="lb-cat"><div class="t">'+esc(def.lbl)+'</div><div class="d">Improvement from a player\'s first test (Weeks 1–5) to their latest.</div></div>'
+    +'<div class="lb-list">'+list+'</div>'
+    +youLine
+    +'<div style="height:16px"></div>'
+    +'</div>'
+    +(isCoach?tabbar('dev'):'');
 }
 function viewReport(){
   var p=curPlayer(); if(!p) return viewLogin();
@@ -1580,6 +1671,7 @@ function render(){
     else if(v==='report') h=viewReport();
     else if(v==='info') h=viewInfo();
     else if(v==='leaderboard') h=viewLeaderboard();
+    else if(v==='development') h=viewDevelopment();
     else h=viewLogin();
     vp.innerHTML=h; bindDynamic();
     var nowScroll=vp.querySelector?vp.querySelector('.scroll'):null;
