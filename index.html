@@ -925,6 +925,7 @@ function viewProfile(){
     +'<div class="pad">'
       +'<button class="btn" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
+      +(isCoach?('<button class="btn" style="margin-top:14px;background:rgba(226,59,59,.12);border:1px solid var(--red);color:#ff7b6b" onclick="deletePlayer(\''+p.id+'\')">Delete Player</button>'):'')
     +'</div></div>';
 }
 
@@ -1011,6 +1012,21 @@ async function deleteEntry(pid,n,eid){
   b.entries=(b.entries||[]).filter(function(x){return x.id!==eid;});
   if(TEST_EID===eid){ TEST_EID=null; }
   await savePlayer(p); toast('Session deleted'); go('block',{playerId:pid,blockN:n});
+}
+async function deletePlayer(pid){
+  if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
+  var p=playerById(pid); if(!p){ toast('Player not found'); return; }
+  var nm=((p.first||'')+' '+(p.last||'')).trim()||'this player';
+  var ok=(typeof window!=='undefined'&&window.confirm)?window.confirm('Delete '+nm+"'s entire profile? This permanently removes all of their tests and Rapsodo results and cannot be undone."):true;
+  if(!ok) return;
+  if(!SBc){ toast('Not connected'); return; }
+  try{
+    await SBc.from('hitter_accounts').delete().eq('hitter_id',pid);
+    var res=await SBc.from('hitters').delete().eq('id',pid);
+    if(res.error){ console.warn(res.error); toast('Delete failed: '+(res.error.message||'')); return; }
+  }catch(e){ console.warn(e); toast('Delete failed'); return; }
+  DB.players=(DB.players||[]).filter(function(x){return x.id!==pid;});
+  toast('Player deleted'); go('roster');
 }
 function viewBlock(){
   var p=curPlayer(); if(!p) return viewLogin();
