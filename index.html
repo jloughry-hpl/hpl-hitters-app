@@ -153,6 +153,35 @@
   .lb-row .nm small.ft{display:block;color:var(--grey);font-weight:600;font-size:11px;margin-top:2px;letter-spacing:0;text-transform:none}
   .lb-row .vl.up{color:var(--green)}
   .lb-row .vl.down{color:#ff7b6b}
+  /* ===== home hub + drills ===== */
+  .hub-hello{padding:16px 16px 0}
+  .hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:12px 16px 16px}
+  .hub-card{background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--green);border-radius:15px;padding:15px 14px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:7px;min-height:98px}
+  .hub-card svg{width:24px;height:24px;color:var(--green)}
+  .hub-card h3{font-family:'Anton';font-style:italic;font-size:16px;line-height:1;margin:0}
+  .hub-card p{color:var(--grey);font-size:11px;line-height:1.35;margin:0}
+  .dlog{padding:6px 16px 20px}
+  .dlog-q{font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.6px;font-size:12px;color:var(--grey);margin:15px 0 8px}
+  .dbtns{display:flex;gap:8px;flex-wrap:wrap}
+  .dbtn{flex:1;min-width:66px;padding:15px 8px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);color:#fff;font-family:'Barlow Semi Condensed';font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.5px;cursor:pointer}
+  .dbtn.on{background:var(--green);color:#0a0b0a;border-color:var(--green)}
+  .dbtn.fb.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .dbtn.cb.on{background:var(--amber);border-color:var(--amber);color:#0a0b0a}
+  .dbtn.bad.on{background:var(--red);border-color:var(--red);color:#fff}
+  .dgrid7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .dgrid7 .dbtn{min-width:0;padding:14px 0;font-family:'Anton';font-style:italic;font-size:18px}
+  .dev-in{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:13px 12px;color:#fff;font-size:17px;font-weight:700}
+  .dev-in:focus{outline:none;border-color:var(--green)}
+  .dtally{display:flex;gap:8px;padding:8px 0 2px}
+  .dtally .tc{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 6px;text-align:center}
+  .dtally .tc .n{font-family:'Anton';font-style:italic;font-size:20px}
+  .dtally .tc .l{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--grey);font-weight:700;margin-top:2px}
+  .dprog{font-size:12.5px;color:var(--grey);text-align:center;margin:10px 0 2px}
+  .dprog b{color:var(--green)}
+  .plist{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .pchip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line);font-size:11px;font-weight:700;color:var(--grey)}
+  .pchip.good{border-color:rgba(131,245,44,.5);color:var(--green)}
+  .pchip.bad{border-color:rgba(226,59,59,.5);color:#ff7b6b}
 
   /* profile */
   .prof-hero{text-align:center;padding:6px 16px 0}
@@ -949,7 +978,8 @@ function viewProfile(){
         +'<div class="ev">'+(cnt?(cnt+' log'+(cnt>1?'s':'')):'—')+'</div></button>'; }).join('')
     +'</div>'
     +'<div class="pad">'
-      +'<button class="btn" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
+      +(isCoach?'<button class="btn" style="background:rgba(131,245,44,.12);border:1px solid var(--green);color:var(--green)" onclick="go(\'drillMenu\',{playerId:\''+p.id+'\'})">Skill Drills</button>':'')
+      +'<button class="btn'+(isCoach?' ghost':'')+'"'+(isCoach?' style="margin-top:8px"':'')+' onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="openLeaderboard(\''+p.id+'\')">View Leaderboard</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="openDevelopment(\''+p.id+'\')">Development Leaders</button>'
@@ -1512,6 +1542,271 @@ function viewDevelopment(){
     +'</div>'
     +(isCoach?tabbar('dev'):'');
 }
+/* ==================== DRILLS ==================== */
+var DRILL=null;
+var DRILL_META={
+  bpReads:{name:'BP FB / CB Reads', tag:'Pitch Recognition', icon:'ball', blurb:'Swing fastballs, take curveballs. Grades reads + FB attack EV.'},
+  adjustment:{name:'Adjustment', tag:'Machine · 2 Rounds', icon:'bat', blurb:'Contact / whiff / take across alternating FB & CB sets.'},
+  sevenBall:{name:'7 Ball', tag:'Location Read', icon:'chart', blurb:'Call the ball 1–7 across the plate. Recognition accuracy.'},
+  zeroStrike:{name:'0 Strike', tag:'Zone Discipline', icon:'trend', blurb:'Swing in-zone, take out. Great AB = 90% of max EV.'}
+};
+function drillIcon(k){ return IC[(DRILL_META[k]||{}).icon]||IC.ball; }
+function adjOrder(){ var o=[]; [[1,'FB',3],[1,'CB',3],[1,'FB',3],[2,'CB',3],[2,'FB',3],[2,'CB',3]].forEach(function(s){ for(var i=0;i<s[2];i++) o.push({round:s[0],type:s[1]}); }); return o; }
+var ADJ_ORDER=adjOrder();
+function _avg(a){ return a.length?+(a.reduce(function(x,y){return x+y;},0)/a.length).toFixed(1):0; }
+function _mx(a){ return a.length?Math.max.apply(null,a):0; }
+function gradeBpReads(P){
+  var tot=P.length,correct=0,fbTakes=0,cbSwings=0,evs=[];
+  P.forEach(function(p){
+    var good=(p.type==='FB'&&p.action==='swing')||(p.type==='CB'&&p.action==='take');
+    if(good) correct++;
+    if(p.type==='FB'&&p.action==='take') fbTakes++;
+    if(p.type==='CB'&&p.action==='swing') cbSwings++;
+    if(p.type==='FB'&&p.action==='swing'&&!p.na&&p.ev>0) evs.push(p.ev);
+  });
+  return { total:tot, correct:correct, acc:tot?Math.round(correct/tot*100):0, fbTakes:fbTakes, cbSwings:cbSwings, fbEvAvg:_avg(evs), fbEvMax:_mx(evs), fbSwings:evs.length };
+}
+function gradeAdjustment(P){
+  var contact=0,whiff=0,take=0,evs=[],byType={FB:{c:0,n:0},CB:{c:0,n:0}};
+  P.forEach(function(p){
+    if(p.result==='contact'){contact++; if(byType[p.type])byType[p.type].c++;}
+    else if(p.result==='whiff') whiff++; else take++;
+    if(byType[p.type]) byType[p.type].n++;
+    if(p.result==='contact'&&!p.na&&p.ev>0) evs.push(p.ev);
+  });
+  var swings=contact+whiff, tot=P.length;
+  return { total:tot, contact:contact, whiff:whiff, take:take, swings:swings,
+    aggression:tot?Math.round(swings/tot*100):0, contactRate:swings?Math.round(contact/swings*100):0,
+    fbContact:byType.FB.n?Math.round(byType.FB.c/byType.FB.n*100):0, cbContact:byType.CB.n?Math.round(byType.CB.c/byType.CB.n*100):0,
+    evAvg:_avg(evs), evMax:_mx(evs), evN:evs.length };
+}
+function gradeSevenBall(P){
+  var tot=P.length,exact=0,one=0,two=0;
+  P.forEach(function(p){ var d=Math.abs((p.actual||0)-(p.called||0)); if(d===0)exact++; else if(d===1)one++; else two++; });
+  return { total:tot, exact:exact, oneOff:one, off2:two, exactPct:tot?Math.round(exact/tot*100):0, within1Pct:tot?Math.round((exact+one)/tot*100):0, off2Pct:tot?Math.round(two/tot*100):0 };
+}
+function gradeZeroStrike(P,maxEV){
+  var tot=P.length,good=0,chase=0,tookStrike=0,great=0,ok=0,fail=0,evs=[];
+  P.forEach(function(p){
+    var g=(p.zone==='in'&&p.action==='swing')||(p.zone==='out'&&p.action==='take');
+    if(g) good++;
+    if(p.zone==='out'&&p.action==='swing') chase++;
+    if(p.zone==='in'&&p.action==='take') tookStrike++;
+    if(p.action==='swing'&&!p.na&&p.ev>0){ evs.push(p.ev); if(maxEV>0){ if(p.ev>=0.9*maxEV) great++; else if(p.ev>=0.8*maxEV) ok++; else fail++; } }
+  });
+  return { total:tot, good:good, acc:tot?Math.round(good/tot*100):0, chase:chase, tookStrike:tookStrike, great:great, ok:ok, fail:fail, evN:evs.length, evAvg:_avg(evs) };
+}
+function startDrill(drill){
+  if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
+  var p=curPlayer(); if(!p){ toast('No player'); return; }
+  DRILL={ drill:drill, playerId:p.id, pitches:[], cur:{} };
+  go('drill',{playerId:p.id, drill:drill});
+}
+function drillSet(field,val){ if(!DRILL)return; DRILL.cur[field]=(DRILL.cur[field]===val)?null:val; render(); }
+function drillEV(v){ if(!DRILL)return; DRILL.cur.ev=(v===''||v==null)?null:+v; DRILL.cur.na=false; }
+function drillNA(){ if(!DRILL)return; DRILL.cur.na=!DRILL.cur.na; if(DRILL.cur.na) DRILL.cur.ev=null; render(); }
+function drillUndo(){ if(!DRILL||!DRILL.pitches.length)return; DRILL.pitches.pop(); render(); }
+function drillLog(){
+  if(!DRILL)return; var c=DRILL.cur, d=DRILL.drill;
+  if(d==='bpReads'){
+    if(!c.type||!c.action){ toast('Pick pitch + swing/take'); return; }
+    var needEV=(c.type==='FB'&&c.action==='swing');
+    if(needEV&&!c.na&&c.ev==null){ toast('Enter EV or NA'); return; }
+    DRILL.pitches.push({type:c.type,action:c.action,ev:(needEV&&!c.na)?c.ev:null,na:needEV?!!c.na:false});
+  } else if(d==='adjustment'){
+    if(DRILL.pitches.length>=ADJ_ORDER.length){ toast('All 18 logged'); return; }
+    if(!c.result){ toast('Contact / whiff / take?'); return; }
+    var slot=ADJ_ORDER[DRILL.pitches.length], isTake=(c.result==='take');
+    if(!isTake&&!c.na&&c.ev==null){ toast('Enter EV or NA'); return; }
+    DRILL.pitches.push({round:slot.round,type:slot.type,result:c.result,ev:(!isTake&&!c.na)?c.ev:null,na:isTake?true:!!c.na});
+  } else if(d==='zeroStrike'){
+    if(!c.zone||!c.action){ toast('Zone + swing/take'); return; }
+    var nE=(c.action==='swing');
+    if(nE&&!c.na&&c.ev==null){ toast('Enter EV or NA'); return; }
+    DRILL.pitches.push({zone:c.zone,action:c.action,ev:(nE&&!c.na)?c.ev:null,na:nE?!!c.na:false});
+  }
+  DRILL.cur={}; render();
+}
+function sbCall(called){ if(!DRILL)return; var c=DRILL.cur; if(c.actual==null){ toast('Tap the real number first'); return; } DRILL.pitches.push({actual:c.actual,called:called}); DRILL.cur={}; render(); }
+async function saveDrill(){
+  if(!DRILL||!DRILL.pitches.length){ toast('Log at least one rep'); return; }
+  var p=curPlayer(); if(!p)return;
+  if(!p.drills) p.drills=[];
+  var entry={ id:nid(), drill:DRILL.drill, date:new Date().toISOString().slice(0,10), pitches:DRILL.pitches.slice() };
+  p.drills.push(entry); var eid=entry.id, pid=p.id;
+  await savePlayer(p); toast('Drill saved'); DRILL=null;
+  go('drillResult',{playerId:pid, entryId:eid});
+}
+function drillCancel(pid){ DRILL=null; go('drillMenu',{playerId:pid}); }
+async function deleteDrill(pid,eid){
+  if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
+  var ok=(typeof window!=='undefined'&&window.confirm)?window.confirm('Delete this drill result? This cannot be undone.'):true;
+  if(!ok)return;
+  var p=playerById(pid); if(!p)return;
+  p.drills=(p.drills||[]).filter(function(x){return x.id!==eid;});
+  await savePlayer(p); toast('Drill deleted'); go('drillMenu',{playerId:pid});
+}
+function insight(good,txt){ return '<div class="insight'+(good?' good':'')+'">'+txt+'</div>'; }
+function evRow(){
+  var c=DRILL.cur;
+  return '<div class="dlog-q">Exit Velo</div>'
+    +'<div style="display:flex;gap:8px;align-items:center">'
+      +'<input class="dev-in" type="number" inputmode="decimal" placeholder="mph" value="'+(c.ev!=null?c.ev:'')+'" '+(c.na?'disabled':'')+' oninput="drillEV(this.value)">'
+      +'<button class="dbtn '+(c.na?'on':'')+'" style="flex:0 0 auto;min-width:64px" onclick="drillNA()">NA</button>'
+    +'</div>';
+}
+function drillChip(d,pt){
+  if(d==='bpReads'){ var g=(pt.type==='FB'&&pt.action==='swing')||(pt.type==='CB'&&pt.action==='take'); return '<span class="pchip '+(g?'good':'bad')+'">'+pt.type+' '+(pt.action==='swing'?'Sw':'Tk')+(pt.ev?(' '+pt.ev):(pt.na?' NA':''))+'</span>'; }
+  if(d==='adjustment'){ var lab=pt.result==='contact'?'C':pt.result==='whiff'?'Wh':'Tk'; return '<span class="pchip '+(pt.result==='contact'?'good':pt.result==='take'?'bad':'')+'">'+pt.type+' '+lab+(pt.ev?(' '+pt.ev):'')+'</span>'; }
+  if(d==='sevenBall'){ var df=Math.abs(pt.actual-pt.called); return '<span class="pchip '+(df===0?'good':df>=2?'bad':'')+'">'+pt.actual+'→'+pt.called+'</span>'; }
+  if(d==='zeroStrike'){ var gg=(pt.zone==='in'&&pt.action==='swing')||(pt.zone==='out'&&pt.action==='take'); return '<span class="pchip '+(gg?'good':'bad')+'">'+(pt.zone==='in'?'In':'Out')+' '+(pt.action==='swing'?'Sw':'Tk')+(pt.ev?(' '+pt.ev):(pt.na?' NA':''))+'</span>'; }
+  return '';
+}
+function drillFooter(pid){
+  var n=DRILL.pitches.length;
+  var chips=DRILL.pitches.slice(-10).map(function(pt){return drillChip(DRILL.drill,pt);}).join('');
+  return (n?'<div class="plist">'+chips+'</div>':'')
+    +'<div style="display:flex;gap:8px;margin-top:16px">'
+      +(n?'<button class="btn ghost" style="flex:0 0 auto" onclick="drillUndo()">Undo</button>':'')
+      +'<button class="btn" style="flex:1;'+(n?'':'opacity:.5')+'" onclick="saveDrill()">Finish &amp; Grade</button>'
+    +'</div>';
+}
+function renderBpReads(p){
+  var c=DRILL.cur, g=gradeBpReads(DRILL.pitches), needEV=(c.type==='FB'&&c.action==='swing');
+  return '<div class="dprog">'+DRILL.pitches.length+' pitches · <b>'+g.acc+'%</b> reads correct</div>'
+    +'<div class="dlog-q">Pitch</div><div class="dbtns">'
+      +'<button class="dbtn fb '+(c.type==='FB'?'on':'')+'" onclick="drillSet(\'type\',\'FB\')">Fastball</button>'
+      +'<button class="dbtn cb '+(c.type==='CB'?'on':'')+'" onclick="drillSet(\'type\',\'CB\')">Curveball</button></div>'
+    +'<div class="dlog-q">Decision</div><div class="dbtns">'
+      +'<button class="dbtn '+(c.action==='swing'?'on':'')+'" onclick="drillSet(\'action\',\'swing\')">Swing</button>'
+      +'<button class="dbtn '+(c.action==='take'?'on':'')+'" onclick="drillSet(\'action\',\'take\')">Take</button></div>'
+    +(needEV?evRow():'')
+    +'<button class="btn" style="margin-top:16px" onclick="drillLog()">Log Pitch</button>';
+}
+function renderAdjustment(p){
+  var c=DRILL.cur, n=DRILL.pitches.length, done=n>=ADJ_ORDER.length, slot=done?null:ADJ_ORDER[n];
+  var head=done?'<b>All 18 pitches logged.</b> Finish to grade.':'Round <b>'+slot.round+'</b> · Pitch <b>'+(n+1)+'</b> of 18 · <b>'+(slot.type==='FB'?'FASTBALL':'CURVEBALL')+'</b>';
+  var body=done?'':('<div class="dlog-q">Result</div><div class="dbtns">'
+      +'<button class="dbtn '+(c.result==='contact'?'on':'')+'" onclick="drillSet(\'result\',\'contact\')">Contact</button>'
+      +'<button class="dbtn '+(c.result==='whiff'?'on':'')+'" onclick="drillSet(\'result\',\'whiff\')">Whiff</button>'
+      +'<button class="dbtn bad '+(c.result==='take'?'on':'')+'" onclick="drillSet(\'result\',\'take\')">Take</button></div>'
+      +((c.result&&c.result!=='take')?evRow():'')
+      +'<button class="btn" style="margin-top:16px" onclick="drillLog()">Log Pitch</button>');
+  return '<div class="dprog">'+head+'</div>'+body;
+}
+function renderSevenBall(p){
+  var c=DRILL.cur, g=gradeSevenBall(DRILL.pitches);
+  var nums=[1,2,3,4,5,6,7].map(function(i){return '<button class="dbtn '+(c.actual===i?'on':'')+'" onclick="drillSet(\'actual\','+i+')">'+i+'</button>';}).join('');
+  var call=[1,2,3,4,5,6,7].map(function(i){return '<button class="dbtn" onclick="sbCall('+i+')">'+i+'</button>';}).join('');
+  return '<div class="dprog">'+DRILL.pitches.length+' logged · <b>'+g.exactPct+'%</b> exact · '+g.within1Pct+'% within 1</div>'
+    +'<div class="dlog-q">Actual number (coach)</div><div class="dgrid7">'+nums+'</div>'
+    +'<div class="dlog-q">Player called…</div><div class="dgrid7">'+call+'</div>'
+    +'<div style="font-size:11.5px;color:var(--grey);margin-top:8px;font-style:italic">Tap the real number, then the number the player called — it logs automatically.</div>';
+}
+function renderZeroStrike(p){
+  var c=DRILL.cur, needEV=(c.action==='swing'), cs=careerStats(p), mx=cs.maxEV||0, g=gradeZeroStrike(DRILL.pitches,mx);
+  return '<div class="dprog">'+DRILL.pitches.length+' logged · <b>'+g.acc+'%</b> good decisions'+(mx?(' · Great AB ≥ '+Math.round(0.9*mx)+' mph'):'')+'</div>'
+    +'<div class="dlog-q">Pitch location</div><div class="dbtns">'
+      +'<button class="dbtn '+(c.zone==='in'?'on':'')+'" onclick="drillSet(\'zone\',\'in\')">In Zone</button>'
+      +'<button class="dbtn '+(c.zone==='out'?'on':'')+'" onclick="drillSet(\'zone\',\'out\')">Out of Zone</button></div>'
+    +'<div class="dlog-q">Decision</div><div class="dbtns">'
+      +'<button class="dbtn '+(c.action==='swing'?'on':'')+'" onclick="drillSet(\'action\',\'swing\')">Swing</button>'
+      +'<button class="dbtn '+(c.action==='take'?'on':'')+'" onclick="drillSet(\'action\',\'take\')">Take</button></div>'
+    +(needEV?evRow():'')
+    +'<button class="btn" style="margin-top:16px" onclick="drillLog()">Log Pitch</button>';
+}
+function viewDrill(){
+  var p=curPlayer(); if(!p) return viewLogin();
+  if(!DRILL||DRILL.drill!==DB.ctx.drill){ DRILL={drill:DB.ctx.drill, playerId:p.id, pitches:[], cur:{}}; }
+  var m=DRILL_META[DRILL.drill]||{name:'Drill'};
+  var body=DRILL.drill==='bpReads'?renderBpReads(p):DRILL.drill==='adjustment'?renderAdjustment(p):DRILL.drill==='sevenBall'?renderSevenBall(p):DRILL.drill==='zeroStrike'?renderZeroStrike(p):'';
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="drillCancel(\''+p.id+'\')" title="Cancel">'+IC.back+'</button>')
+    +'<div class="pad" style="padding-bottom:0"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+' · Drill</p><h2>'+esc(m.name).toUpperCase()+'</h2></div></div>'
+    +'<div class="dlog">'+body+drillFooter(p.id)+'</div>'
+    +'</div>';
+}
+function viewDrillMenu(){
+  var p=curPlayer(); if(!p) return viewLogin();
+  var drills=(p.drills||[]).slice().reverse();
+  var cards=Object.keys(DRILL_META).map(function(k){ var m=DRILL_META[k];
+    return '<button class="hub-card" onclick="startDrill(\''+k+'\')">'+drillIcon(k)+'<h3>'+esc(m.name)+'</h3><p>'+esc(m.blurb)+'</p></button>';
+  }).join('');
+  var hist=drills.length?drills.map(function(e){ var m=DRILL_META[e.drill]||{name:e.drill};
+      return '<button class="drill-card" onclick="go(\'drillResult\',{playerId:\''+p.id+'\',entryId:\''+e.id+'\'})">'
+        +'<div class="dc-top"><div class="dc-ic">'+drillIcon(e.drill)+'</div>'
+        +'<div class="dc-name"><h4>'+esc(m.name)+'</h4><div class="st">'+e.date+' · '+(e.pitches||[]).length+' reps</div></div></div></button>';
+    }).join(''):'<div class="lb-empty">No drills logged yet. Pick one above to start.</div>';
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>')
+    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>SKILL <em>DRILLS</em></h2></div></div>'
+    +'<div class="hub-grid">'+cards+'</div>'
+    +'<div class="section-lbl">Drill History</div>'
+    +'<div style="padding:0 0 22px">'+hist+'</div>'
+    +'</div>';
+}
+function viewDrillResult(){
+  var p=curPlayer(); if(!p) return viewLogin();
+  var isCoach=DB.user&&DB.user.role==='coach';
+  var e=(p.drills||[]).filter(function(x){return x.id===DB.ctx.entryId;})[0];
+  if(!e) return viewDrillMenu();
+  var m=DRILL_META[e.drill]||{name:e.drill}, cs=careerStats(p);
+  var body=e.drill==='bpReads'?resBpReads(e,cs):e.drill==='adjustment'?resAdjustment(e,cs):e.drill==='sevenBall'?resSevenBall(e,cs):e.drill==='zeroStrike'?resZeroStrike(e,cs):'';
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="go(\'drillMenu\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>')
+    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+e.date+' · '+(e.pitches||[]).length+' reps</p><h2>'+esc(m.name).toUpperCase()+'</h2></div></div>'
+    +body
+    +(isCoach?'<div class="pad"><button class="btn ghost" style="border-color:var(--red);color:#ff7b6b" onclick="deleteDrill(\''+p.id+'\',\''+e.id+'\')">Delete Drill</button></div>':'')
+    +'<div style="height:16px"></div></div>';
+}
+function wellWork(wells,works){
+  return '<div class="section-lbl">What We Did Well</div>'
+    +(wells.length?wells.map(function(t){return insight(true,t);}).join(''):'<div class="insight">Log more reps to surface strengths.</div>')
+    +'<div class="section-lbl">What To Work On</div>'
+    +(works.length?works.map(function(t){return insight(false,t);}).join(''):insight(true,'Clean session — nothing flagged.'));
+}
+function strip3(a){ return '<div class="score-strip">'+a.map(function(s){return '<div class="sc '+(s.cls||'')+'"><div class="k">'+s.k+'</div><div class="v">'+s.v+'</div></div>';}).join('')+'</div>'; }
+function resBpReads(e,cs){
+  var g=gradeBpReads(e.pitches), wells=[], works=[];
+  if(g.acc>=80) wells.push('Sharp reads — <b>'+g.acc+'%</b> correct on FB vs CB.');
+  if(g.cbSwings===0&&g.total) wells.push('No chase — took every curveball.');
+  if(g.fbSwings) wells.push('Attacked fastballs at <b>'+g.fbEvAvg+'</b> mph avg (max '+g.fbEvMax+').');
+  if(g.cbSwings>0) works.push('Chased <b>'+g.cbSwings+'</b> curveball'+(g.cbSwings>1?'s':'')+' — lay off the CB.');
+  if(g.fbTakes>0) works.push('Took <b>'+g.fbTakes+'</b> hittable fastball'+(g.fbTakes>1?'s':'')+' — be on time to attack.');
+  if(g.acc<70) works.push('Reads at '+g.acc+'% — recognize spin out of the hand earlier.');
+  return strip3([{k:'Reads',v:g.acc+'%',cls:g.acc>=70?'pass':'fail'},{k:'FB Attack EV',v:g.fbEvAvg||'—'},{k:'Pitches',v:g.total}])+wellWork(wells,works);
+}
+function resAdjustment(e,cs){
+  var g=gradeAdjustment(e.pitches), base=cs.avgEV||0, wells=[], works=[];
+  if(g.aggression>=80) wells.push('On time &amp; aggressive — swung at <b>'+g.aggression+'%</b> (only '+g.take+' take'+(g.take===1?'':'s')+').');
+  if(g.contactRate>=75) wells.push('Strong barrel control — <b>'+g.contactRate+'%</b> contact on swings.');
+  if(base&&g.evN&&g.evAvg>=base) wells.push('Contact EV <b>'+g.evAvg+'</b> mph — at/above assessment avg ('+base+').');
+  if(g.cbContact>=g.fbContact&&g.cbContact) wells.push('Adjusted to spin — '+g.cbContact+'% contact on curveballs.');
+  if(g.take>0) works.push('<b>'+g.take+'</b> take'+(g.take>1?'s':'')+' — a take counts against you here; commit to swing.');
+  if(g.contactRate<60&&g.swings) works.push('Contact '+g.contactRate+'% on swings — shorten up and track longer.');
+  if(base&&g.evN&&g.evAvg<base) works.push('Contact EV '+g.evAvg+' below your '+base+' avg — drive through the ball.');
+  if(g.cbContact<g.fbContact) works.push('Curveball contact ('+g.cbContact+'%) trails fastball ('+g.fbContact+'%) — stay back on spin.');
+  return strip3([{k:'Aggression',v:g.aggression+'%',cls:g.aggression>=70?'pass':'fail'},{k:'Contact',v:g.contactRate+'%',cls:g.contactRate>=60?'pass':'fail'},{k:'Contact EV',v:g.evAvg||'—'}])+wellWork(wells,works);
+}
+function resSevenBall(e,cs){
+  var g=gradeSevenBall(e.pitches), wells=[], works=[];
+  if(g.exactPct>=60) wells.push('Dialed-in recognition — <b>'+g.exactPct+'%</b> called exactly.');
+  if(g.within1Pct>=85) wells.push('Reliable location read — <b>'+g.within1Pct+'%</b> within one ball.');
+  if(g.off2===0&&g.total) wells.push('Never more than one off — no big misreads.');
+  if(g.off2>0) works.push('<b>'+g.off2+'</b> call'+(g.off2>1?'s':'')+' 2+ balls off — poor recognition on those; track release longer.');
+  if(g.exactPct<40) works.push('Exact reads at '+g.exactPct+'% — work on pinpointing location, not just side.');
+  return strip3([{k:'Exact',v:g.exactPct+'%',cls:g.exactPct>=50?'pass':'fail'},{k:'Within 1',v:g.within1Pct+'%',cls:g.within1Pct>=80?'pass':''},{k:'2+ Off',v:g.off2,cls:g.off2?'fail':'pass'}])+wellWork(wells,works);
+}
+function resZeroStrike(e,cs){
+  var mx=cs.maxEV||0, g=gradeZeroStrike(e.pitches,mx), wells=[], works=[];
+  if(g.acc>=80) wells.push('Elite discipline — <b>'+g.acc+'%</b> correct swing/take decisions.');
+  if(g.chase===0&&g.total) wells.push('Zero chase — never swung outside the zone.');
+  if(g.great>0) wells.push('<b>'+g.great+'</b> great AB'+(g.great>1?'s':'')+' (≥ 90% of max EV).');
+  if(g.chase>0) works.push('Chased <b>'+g.chase+'</b> pitch'+(g.chase>1?'es':'')+' out of the zone — a swing at a ball is a bad decision.');
+  if(g.tookStrike>0) works.push('Took <b>'+g.tookStrike+'</b> hittable strike'+(g.tookStrike>1?'s':'')+' — be ready to fire in the zone.');
+  if(g.fail>0&&mx) works.push('<b>'+g.fail+'</b> swing'+(g.fail>1?'s':'')+' under 80% of max EV — failed to execute; drive through contact.');
+  return strip3([{k:'Discipline',v:g.acc+'%',cls:g.acc>=75?'pass':'fail'},{k:'Great ABs',v:mx?g.great:'—'},{k:'Chases',v:g.chase,cls:g.chase?'fail':'pass'}])+wellWork(wells,works);
+}
 function viewReport(){
   var p=curPlayer(); if(!p) return viewLogin();
   var cs=careerStats(p);
@@ -1672,6 +1967,9 @@ function render(){
     else if(v==='info') h=viewInfo();
     else if(v==='leaderboard') h=viewLeaderboard();
     else if(v==='development') h=viewDevelopment();
+    else if(v==='drillMenu') h=viewDrillMenu();
+    else if(v==='drill') h=viewDrill();
+    else if(v==='drillResult') h=viewDrillResult();
     else h=viewLogin();
     vp.innerHTML=h; bindDynamic();
     var nowScroll=vp.querySelector?vp.querySelector('.scroll'):null;
