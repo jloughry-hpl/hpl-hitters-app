@@ -978,11 +978,11 @@ function viewProfile(){
         +'<div class="ev">'+(cnt?(cnt+' log'+(cnt>1?'s':'')):'—')+'</div></button>'; }).join('')
     +'</div>'
     +'<div class="pad">'
-      +(isCoach?'<button class="btn" style="background:rgba(131,245,44,.12);border:1px solid var(--green);color:var(--green)" onclick="go(\'drillMenu\',{playerId:\''+p.id+'\'})">Skill Drills</button>':'')
-      +'<button class="btn'+(isCoach?' ghost':'')+'"'+(isCoach?' style="margin-top:8px"':'')+' onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
-      +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
+      +'<button class="btn" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
+      +(isCoach?'<button class="btn ghost" style="margin-top:8px" onclick="go(\'drillMenu\',{playerId:\''+p.id+'\'})">Drills</button>':'')
       +'<button class="btn ghost" style="margin-top:8px" onclick="openLeaderboard(\''+p.id+'\')">View Leaderboard</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="openDevelopment(\''+p.id+'\')">Development Leaders</button>'
+      +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
       +(isCoach?('<button class="btn" style="margin-top:14px;background:rgba(226,59,59,.12);border:1px solid var(--red);color:#ff7b6b" onclick="deletePlayer(\''+p.id+'\')">Delete Player</button>'):'')
     +'</div></div>';
 }
@@ -1556,6 +1556,7 @@ var ADJ_ORDER=adjOrder();
 function _avg(a){ return a.length?+(a.reduce(function(x,y){return x+y;},0)/a.length).toFixed(1):0; }
 function _mx(a){ return a.length?Math.max.apply(null,a):0; }
 function gradeBpReads(P){
+  P=P.filter(function(p){return p.type&&p.action;});
   var tot=P.length,correct=0,fbTakes=0,cbSwings=0,evs=[];
   P.forEach(function(p){
     var good=(p.type==='FB'&&p.action==='swing')||(p.type==='CB'&&p.action==='take');
@@ -1567,6 +1568,7 @@ function gradeBpReads(P){
   return { total:tot, correct:correct, acc:tot?Math.round(correct/tot*100):0, fbTakes:fbTakes, cbSwings:cbSwings, fbEvAvg:_avg(evs), fbEvMax:_mx(evs), fbSwings:evs.length };
 }
 function gradeAdjustment(P){
+  P=P.filter(function(p){return !!p.result;});
   var contact=0,whiff=0,take=0,evs=[],byType={FB:{c:0,n:0},CB:{c:0,n:0}};
   P.forEach(function(p){
     if(p.result==='contact'){contact++; if(byType[p.type])byType[p.type].c++;}
@@ -1581,11 +1583,13 @@ function gradeAdjustment(P){
     evAvg:_avg(evs), evMax:_mx(evs), evN:evs.length };
 }
 function gradeSevenBall(P){
+  P=P.filter(function(p){return p.actual!=null&&p.called!=null;});
   var tot=P.length,exact=0,one=0,two=0;
   P.forEach(function(p){ var d=Math.abs((p.actual||0)-(p.called||0)); if(d===0)exact++; else if(d===1)one++; else two++; });
   return { total:tot, exact:exact, oneOff:one, off2:two, exactPct:tot?Math.round(exact/tot*100):0, within1Pct:tot?Math.round((exact+one)/tot*100):0, off2Pct:tot?Math.round(two/tot*100):0 };
 }
 function gradeZeroStrike(P,maxEV){
+  P=P.filter(function(p){return p.zone&&p.action;});
   var tot=P.length,good=0,chase=0,tookStrike=0,great=0,ok=0,fail=0,evs=[];
   P.forEach(function(p){
     var g=(p.zone==='in'&&p.action==='swing')||(p.zone==='out'&&p.action==='take');
@@ -1596,46 +1600,50 @@ function gradeZeroStrike(P,maxEV){
   });
   return { total:tot, good:good, acc:tot?Math.round(good/tot*100):0, chase:chase, tookStrike:tookStrike, great:great, ok:ok, fail:fail, evN:evs.length, evAvg:_avg(evs) };
 }
+function newDrillPitches(drill){
+  var a=[];
+  if(drill==='adjustment'){ ADJ_ORDER.forEach(function(s){ a.push({round:s.round,type:s.type,result:null,ev:null,na:false}); }); }
+  else if(drill==='sevenBall'){ for(var i=0;i<10;i++) a.push({actual:null,called:null}); }
+  else if(drill==='zeroStrike'){ for(var j=0;j<10;j++) a.push({zone:null,action:null,ev:null,na:false}); }
+  else { for(var k=0;k<10;k++) a.push({type:null,action:null,ev:null,na:false}); }
+  return a;
+}
+function drillFilled(drill,pt){
+  if(drill==='adjustment') return !!pt.result;
+  if(drill==='sevenBall') return pt.actual!=null&&pt.called!=null;
+  if(drill==='zeroStrike') return !!(pt.zone&&pt.action);
+  return !!(pt.type&&pt.action);
+}
 function startDrill(drill){
   if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
   var p=curPlayer(); if(!p){ toast('No player'); return; }
-  DRILL={ drill:drill, playerId:p.id, pitches:[], cur:{} };
+  DRILL={ drill:drill, playerId:p.id, pitches:newDrillPitches(drill), eid:null, round:1 };
   go('drill',{playerId:p.id, drill:drill});
 }
-function drillSet(field,val){ if(!DRILL)return; DRILL.cur[field]=(DRILL.cur[field]===val)?null:val; render(); }
-function drillEV(v){ if(!DRILL)return; DRILL.cur.ev=(v===''||v==null)?null:+v; DRILL.cur.na=false; }
-function drillNA(){ if(!DRILL)return; DRILL.cur.na=!DRILL.cur.na; if(DRILL.cur.na) DRILL.cur.ev=null; render(); }
-function drillUndo(){ if(!DRILL||!DRILL.pitches.length)return; DRILL.pitches.pop(); render(); }
-function drillLog(){
-  if(!DRILL)return; var c=DRILL.cur, d=DRILL.drill;
-  if(d==='bpReads'){
-    if(!c.type||!c.action){ toast('Pick pitch + swing/take'); return; }
-    var needEV=(c.type==='FB'&&c.action==='swing');
-    if(needEV&&!c.na&&c.ev==null){ toast('Enter EV or NA'); return; }
-    DRILL.pitches.push({type:c.type,action:c.action,ev:(needEV&&!c.na)?c.ev:null,na:needEV?!!c.na:false});
-  } else if(d==='adjustment'){
-    if(DRILL.pitches.length>=ADJ_ORDER.length){ toast('All 18 logged'); return; }
-    if(!c.result){ toast('Contact / whiff / take?'); return; }
-    var slot=ADJ_ORDER[DRILL.pitches.length], isTake=(c.result==='take');
-    if(!isTake&&!c.na&&c.ev==null){ toast('Enter EV or NA'); return; }
-    DRILL.pitches.push({round:slot.round,type:slot.type,result:c.result,ev:(!isTake&&!c.na)?c.ev:null,na:isTake?true:!!c.na});
-  } else if(d==='zeroStrike'){
-    if(!c.zone||!c.action){ toast('Zone + swing/take'); return; }
-    var nE=(c.action==='swing');
-    if(nE&&!c.na&&c.ev==null){ toast('Enter EV or NA'); return; }
-    DRILL.pitches.push({zone:c.zone,action:c.action,ev:(nE&&!c.na)?c.ev:null,na:nE?!!c.na:false});
-  }
-  DRILL.cur={}; render();
-}
-function sbCall(called){ if(!DRILL)return; var c=DRILL.cur; if(c.actual==null){ toast('Tap the real number first'); return; } DRILL.pitches.push({actual:c.actual,called:called}); DRILL.cur={}; render(); }
-async function saveDrill(){
-  if(!DRILL||!DRILL.pitches.length){ toast('Log at least one rep'); return; }
+function dSet(i,field,val){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt[field]=(pt[field]===val)?null:val; if(field==='result'&&pt.result==='take'){ pt.ev=null; pt.na=false; } render(); }
+function dEV(i,v){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt.ev=(v===''?null:+v); if(v!=='') pt.na=false; }
+function dNA(i){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt.na=!pt.na; if(pt.na) pt.ev=null; render(); }
+async function saveDrill(finalize){
+  if(!DRILL)return;
+  var filled=DRILL.pitches.filter(function(pt){return drillFilled(DRILL.drill,pt);});
+  if(!filled.length){ toast('Log at least one rep first'); return; }
   var p=curPlayer(); if(!p)return;
   if(!p.drills) p.drills=[];
-  var entry={ id:nid(), drill:DRILL.drill, date:new Date().toISOString().slice(0,10), pitches:DRILL.pitches.slice() };
-  p.drills.push(entry); var eid=entry.id, pid=p.id;
-  await savePlayer(p); toast('Drill saved'); DRILL=null;
-  go('drillResult',{playerId:pid, entryId:eid});
+  var status=finalize?'complete':'inprogress';
+  var ex=DRILL.eid?(p.drills.filter(function(x){return x.id===DRILL.eid;})[0]):null;
+  if(ex){ ex.pitches=DRILL.pitches.slice(); ex.status=status; ex.date=new Date().toISOString().slice(0,10); }
+  else{ var entry={ id:nid(), drill:DRILL.drill, date:new Date().toISOString().slice(0,10), pitches:DRILL.pitches.slice(), status:status }; p.drills.push(entry); DRILL.eid=entry.id; }
+  var eid=DRILL.eid, pid=p.id;
+  await savePlayer(p);
+  if(finalize){ DRILL=null; toast('Drill saved'); go('drillResult',{playerId:pid, entryId:eid}); }
+  else{ toast('Saved — finish later anytime'); go('drillMenu',{playerId:pid}); }
+}
+function setDrillRound(r){ if(!DRILL)return; DRILL.round=r; render(); }
+function resumeDrill(pid,eid){
+  var p=playerById(pid); if(!p)return;
+  var e=(p.drills||[]).filter(function(x){return x.id===eid;})[0]; if(!e)return;
+  DRILL={ drill:e.drill, playerId:pid, pitches:(e.pitches&&e.pitches.length?e.pitches.slice():newDrillPitches(e.drill)), eid:e.id, round:1 };
+  go('drill',{playerId:pid, drill:e.drill});
 }
 function drillCancel(pid){ DRILL=null; go('drillMenu',{playerId:pid}); }
 async function deleteDrill(pid,eid){
@@ -1647,84 +1655,95 @@ async function deleteDrill(pid,eid){
   await savePlayer(p); toast('Drill deleted'); go('drillMenu',{playerId:pid});
 }
 function insight(good,txt){ return '<div class="insight'+(good?' good':'')+'">'+txt+'</div>'; }
-function evRow(){
-  var c=DRILL.cur;
-  return '<div class="dlog-q">Exit Velo</div>'
-    +'<div style="display:flex;gap:8px;align-items:center">'
-      +'<input class="dev-in" type="number" inputmode="decimal" placeholder="mph" value="'+(c.ev!=null?c.ev:'')+'" '+(c.na?'disabled':'')+' oninput="drillEV(this.value)">'
-      +'<button class="dbtn '+(c.na?'on':'')+'" style="flex:0 0 auto;min-width:64px" onclick="drillNA()">NA</button>'
-    +'</div>';
+function dEvRow(i,pt){
+  return '<div class="lab">Exit Velo</div><div class="numrow" style="align-items:center">'
+    +'<input type="number" inputmode="decimal" placeholder="'+(pt.na?'no read':'mph')+'" value="'+(pt.na?'':(pt.ev!=null?pt.ev:''))+'"'+(pt.na?' disabled style="opacity:.5"':'')+' oninput="dEV('+i+',this.value)"><span class="u">mph</span>'
+    +'<button class="seg '+(pt.na?'on':'')+'" style="margin-left:8px;flex:0 0 auto;padding:8px 12px" onclick="dNA('+i+')">NA</button>'
+  +'</div>';
 }
-function drillChip(d,pt){
-  if(d==='bpReads'){ var g=(pt.type==='FB'&&pt.action==='swing')||(pt.type==='CB'&&pt.action==='take'); return '<span class="pchip '+(g?'good':'bad')+'">'+pt.type+' '+(pt.action==='swing'?'Sw':'Tk')+(pt.ev?(' '+pt.ev):(pt.na?' NA':''))+'</span>'; }
-  if(d==='adjustment'){ var lab=pt.result==='contact'?'C':pt.result==='whiff'?'Wh':'Tk'; return '<span class="pchip '+(pt.result==='contact'?'good':pt.result==='take'?'bad':'')+'">'+pt.type+' '+lab+(pt.ev?(' '+pt.ev):'')+'</span>'; }
-  if(d==='sevenBall'){ var df=Math.abs(pt.actual-pt.called); return '<span class="pchip '+(df===0?'good':df>=2?'bad':'')+'">'+pt.actual+'→'+pt.called+'</span>'; }
-  if(d==='zeroStrike'){ var gg=(pt.zone==='in'&&pt.action==='swing')||(pt.zone==='out'&&pt.action==='take'); return '<span class="pchip '+(gg?'good':'bad')+'">'+(pt.zone==='in'?'In':'Out')+' '+(pt.action==='swing'?'Sw':'Tk')+(pt.ev?(' '+pt.ev):(pt.na?' NA':''))+'</span>'; }
-  return '';
+function drillStrip(d,p){
+  var P=DRILL.pitches, g;
+  if(d==='bpReads'){ g=gradeBpReads(P); return strip3([{k:'Reads',v:g.total?g.acc+'%':'—'},{k:'FB Attack EV',v:g.fbEvAvg||'—'},{k:'Reps',v:g.total}]); }
+  if(d==='adjustment'){ g=gradeAdjustment(P); return strip3([{k:'Aggression',v:g.total?g.aggression+'%':'—'},{k:'Contact',v:g.swings?g.contactRate+'%':'—'},{k:'Contact EV',v:g.evAvg||'—'}]); }
+  if(d==='sevenBall'){ g=gradeSevenBall(P); return strip3([{k:'Exact',v:g.total?g.exactPct+'%':'—'},{k:'Within 1',v:g.total?g.within1Pct+'%':'—'},{k:'2+ Off',v:g.off2}]); }
+  var cs=careerStats(p); g=gradeZeroStrike(P,cs.maxEV||0); return strip3([{k:'Discipline',v:g.total?g.acc+'%':'—'},{k:'Great ABs',v:g.great},{k:'Chases',v:g.chase}]);
 }
-function drillFooter(pid){
-  var n=DRILL.pitches.length;
-  var chips=DRILL.pitches.slice(-10).map(function(pt){return drillChip(DRILL.drill,pt);}).join('');
-  return (n?'<div class="plist">'+chips+'</div>':'')
-    +'<div style="display:flex;gap:8px;margin-top:16px">'
-      +(n?'<button class="btn ghost" style="flex:0 0 auto" onclick="drillUndo()">Undo</button>':'')
-      +'<button class="btn" style="flex:1;'+(n?'':'opacity:.5')+'" onclick="saveDrill()">Finish &amp; Grade</button>'
-    +'</div>';
+function cardBpReads(i,pt){
+  var needEV=(pt.type==='FB'&&pt.action==='swing'), done=pt.type&&pt.action;
+  var good=done&&((pt.type==='FB'&&pt.action==='swing')||(pt.type==='CB'&&pt.action==='take'));
+  var cls=done?(good?'correct':'wrong'):'empty';
+  return '<div class="swing '+cls+'">'
+    +'<div class="sh"><span class="n">Pitch · #'+(i+1)+'</span><span class="tag round">'+(pt.type==='FB'?'Fastball':pt.type==='CB'?'Curveball':'set pitch')+'</span></div>'
+    +'<div class="lab">Pitch Type</div><div class="segrow">'
+      +'<button class="seg '+(pt.type==='FB'?'on':'')+'" onclick="dSet('+i+',\'type\',\'FB\')">Fastball</button>'
+      +'<button class="seg '+(pt.type==='CB'?'on':'')+'" onclick="dSet('+i+',\'type\',\'CB\')">Curveball</button></div>'
+    +'<div class="lab">Decision'+(pt.type?' · '+(pt.type==='CB'?'should TAKE':'should SWING'):'')+'</div><div class="segrow">'
+      +'<button class="seg take-n '+(pt.action==='take'?'on':'')+'" onclick="dSet('+i+',\'action\',\'take\')">Took</button>'
+      +'<button class="seg swing-y '+(pt.action==='swing'?'on':'')+'" onclick="dSet('+i+',\'action\',\'swing\')">Swung</button></div>'
+    +(needEV?dEvRow(i,pt):'')
+  +'</div>';
 }
-function renderBpReads(p){
-  var c=DRILL.cur, g=gradeBpReads(DRILL.pitches), needEV=(c.type==='FB'&&c.action==='swing');
-  return '<div class="dprog">'+DRILL.pitches.length+' pitches · <b>'+g.acc+'%</b> reads correct</div>'
-    +'<div class="dlog-q">Pitch</div><div class="dbtns">'
-      +'<button class="dbtn fb '+(c.type==='FB'?'on':'')+'" onclick="drillSet(\'type\',\'FB\')">Fastball</button>'
-      +'<button class="dbtn cb '+(c.type==='CB'?'on':'')+'" onclick="drillSet(\'type\',\'CB\')">Curveball</button></div>'
-    +'<div class="dlog-q">Decision</div><div class="dbtns">'
-      +'<button class="dbtn '+(c.action==='swing'?'on':'')+'" onclick="drillSet(\'action\',\'swing\')">Swing</button>'
-      +'<button class="dbtn '+(c.action==='take'?'on':'')+'" onclick="drillSet(\'action\',\'take\')">Take</button></div>'
-    +(needEV?evRow():'')
-    +'<button class="btn" style="margin-top:16px" onclick="drillLog()">Log Pitch</button>';
+function cardAdjustment(i,pt){
+  var done=!!pt.result, needEV=(pt.result&&pt.result!=='take');
+  var cls=!done?'empty':pt.result==='contact'?'correct':pt.result==='take'?'wrong':'';
+  return '<div class="swing '+cls+'">'
+    +'<div class="sh"><span class="n">R'+pt.round+' · #'+(i+1)+'</span><span class="tag round">'+(pt.type==='FB'?'Fastball':'Curveball')+'</span></div>'
+    +'<div class="lab">Result</div><div class="segrow">'
+      +'<button class="seg '+(pt.result==='contact'?'on':'')+'" onclick="dSet('+i+',\'result\',\'contact\')">Contact</button>'
+      +'<button class="seg '+(pt.result==='whiff'?'on':'')+'" onclick="dSet('+i+',\'result\',\'whiff\')">Whiff</button>'
+      +'<button class="seg take-n '+(pt.result==='take'?'on':'')+'" onclick="dSet('+i+',\'result\',\'take\')">Take</button></div>'
+    +(needEV?dEvRow(i,pt):'')
+  +'</div>';
 }
-function renderAdjustment(p){
-  var c=DRILL.cur, n=DRILL.pitches.length, done=n>=ADJ_ORDER.length, slot=done?null:ADJ_ORDER[n];
-  var head=done?'<b>All 18 pitches logged.</b> Finish to grade.':'Round <b>'+slot.round+'</b> · Pitch <b>'+(n+1)+'</b> of 18 · <b>'+(slot.type==='FB'?'FASTBALL':'CURVEBALL')+'</b>';
-  var body=done?'':('<div class="dlog-q">Result</div><div class="dbtns">'
-      +'<button class="dbtn '+(c.result==='contact'?'on':'')+'" onclick="drillSet(\'result\',\'contact\')">Contact</button>'
-      +'<button class="dbtn '+(c.result==='whiff'?'on':'')+'" onclick="drillSet(\'result\',\'whiff\')">Whiff</button>'
-      +'<button class="dbtn bad '+(c.result==='take'?'on':'')+'" onclick="drillSet(\'result\',\'take\')">Take</button></div>'
-      +((c.result&&c.result!=='take')?evRow():'')
-      +'<button class="btn" style="margin-top:16px" onclick="drillLog()">Log Pitch</button>');
-  return '<div class="dprog">'+head+'</div>'+body;
+function cardSevenBall(i,pt){
+  var done=pt.actual!=null&&pt.called!=null, diff=done?Math.abs(pt.actual-pt.called):null;
+  var cls=!done?'empty':diff===0?'correct':diff>=2?'wrong':'';
+  function grid(field){ var out=''; for(var n=1;n<=7;n++){ out+='<button class="seg'+(pt[field]===n?' on':'')+'" style="flex:1;min-width:0;padding:10px 0;font-family:\'Anton\';font-style:italic;font-size:16px" onclick="dSet('+i+',\''+field+'\','+n+')">'+n+'</button>'; } return '<div class="segrow" style="gap:5px">'+out+'</div>'; }
+  return '<div class="swing '+cls+'">'
+    +'<div class="sh"><span class="n">Ball · #'+(i+1)+'</span>'+(done?'<span class="tag round">'+pt.actual+' → '+pt.called+'</span>':'')+'</div>'
+    +'<div class="lab">Actual number (coach)</div>'+grid('actual')
+    +'<div class="lab">Player called</div>'+grid('called')
+  +'</div>';
 }
-function renderSevenBall(p){
-  var c=DRILL.cur, g=gradeSevenBall(DRILL.pitches);
-  var nums=[1,2,3,4,5,6,7].map(function(i){return '<button class="dbtn '+(c.actual===i?'on':'')+'" onclick="drillSet(\'actual\','+i+')">'+i+'</button>';}).join('');
-  var call=[1,2,3,4,5,6,7].map(function(i){return '<button class="dbtn" onclick="sbCall('+i+')">'+i+'</button>';}).join('');
-  return '<div class="dprog">'+DRILL.pitches.length+' logged · <b>'+g.exactPct+'%</b> exact · '+g.within1Pct+'% within 1</div>'
-    +'<div class="dlog-q">Actual number (coach)</div><div class="dgrid7">'+nums+'</div>'
-    +'<div class="dlog-q">Player called…</div><div class="dgrid7">'+call+'</div>'
-    +'<div style="font-size:11.5px;color:var(--grey);margin-top:8px;font-style:italic">Tap the real number, then the number the player called — it logs automatically.</div>';
-}
-function renderZeroStrike(p){
-  var c=DRILL.cur, needEV=(c.action==='swing'), cs=careerStats(p), mx=cs.maxEV||0, g=gradeZeroStrike(DRILL.pitches,mx);
-  return '<div class="dprog">'+DRILL.pitches.length+' logged · <b>'+g.acc+'%</b> good decisions'+(mx?(' · Great AB ≥ '+Math.round(0.9*mx)+' mph'):'')+'</div>'
-    +'<div class="dlog-q">Pitch location</div><div class="dbtns">'
-      +'<button class="dbtn '+(c.zone==='in'?'on':'')+'" onclick="drillSet(\'zone\',\'in\')">In Zone</button>'
-      +'<button class="dbtn '+(c.zone==='out'?'on':'')+'" onclick="drillSet(\'zone\',\'out\')">Out of Zone</button></div>'
-    +'<div class="dlog-q">Decision</div><div class="dbtns">'
-      +'<button class="dbtn '+(c.action==='swing'?'on':'')+'" onclick="drillSet(\'action\',\'swing\')">Swing</button>'
-      +'<button class="dbtn '+(c.action==='take'?'on':'')+'" onclick="drillSet(\'action\',\'take\')">Take</button></div>'
-    +(needEV?evRow():'')
-    +'<button class="btn" style="margin-top:16px" onclick="drillLog()">Log Pitch</button>';
+function cardZeroStrike(i,pt){
+  var done=pt.zone&&pt.action, needEV=(pt.action==='swing');
+  var good=done&&((pt.zone==='in'&&pt.action==='swing')||(pt.zone==='out'&&pt.action==='take'));
+  var cls=done?(good?'correct':'wrong'):'empty';
+  return '<div class="swing '+cls+'">'
+    +'<div class="sh"><span class="n">Pitch · #'+(i+1)+'</span><span class="tag round">'+(pt.zone==='in'?'In Zone':pt.zone==='out'?'Out of Zone':'set zone')+'</span></div>'
+    +'<div class="lab">Location</div><div class="segrow">'
+      +'<button class="seg '+(pt.zone==='in'?'on':'')+'" onclick="dSet('+i+',\'zone\',\'in\')">In Zone</button>'
+      +'<button class="seg '+(pt.zone==='out'?'on':'')+'" onclick="dSet('+i+',\'zone\',\'out\')">Out of Zone</button></div>'
+    +'<div class="lab">Decision</div><div class="segrow">'
+      +'<button class="seg take-n '+(pt.action==='take'?'on':'')+'" onclick="dSet('+i+',\'action\',\'take\')">Took</button>'
+      +'<button class="seg swing-y '+(pt.action==='swing'?'on':'')+'" onclick="dSet('+i+',\'action\',\'swing\')">Swung</button></div>'
+    +(needEV?dEvRow(i,pt):'')
+  +'</div>';
 }
 function viewDrill(){
   var p=curPlayer(); if(!p) return viewLogin();
-  if(!DRILL||DRILL.drill!==DB.ctx.drill){ DRILL={drill:DB.ctx.drill, playerId:p.id, pitches:[], cur:{}}; }
-  var m=DRILL_META[DRILL.drill]||{name:'Drill'};
-  var body=DRILL.drill==='bpReads'?renderBpReads(p):DRILL.drill==='adjustment'?renderAdjustment(p):DRILL.drill==='sevenBall'?renderSevenBall(p):DRILL.drill==='zeroStrike'?renderZeroStrike(p):'';
+  if(!DRILL||DRILL.drill!==DB.ctx.drill){ DRILL={drill:DB.ctx.drill, playerId:p.id, pitches:newDrillPitches(DB.ctx.drill), eid:null, round:1}; }
+  var d=DRILL.drill, m=DRILL_META[d]||{name:'Drill'};
+  var filledN=DRILL.pitches.filter(function(pt){return drillFilled(d,pt);}).length, total=DRILL.pitches.length;
+  function card(i,pt){ return d==='bpReads'?cardBpReads(i,pt):d==='adjustment'?cardAdjustment(i,pt):d==='sevenBall'?cardSevenBall(i,pt):cardZeroStrike(i,pt); }
+  var subtabs='', list='';
+  if(d==='adjustment'){
+    var r=DRILL.round||1;
+    subtabs='<div class="subtabs">'+[1,2].map(function(x){return '<button class="'+(x===r?'on':'')+'" onclick="setDrillRound('+x+')">Round '+x+'</button>';}).join('')+'</div>';
+    list=DRILL.pitches.map(function(pt,i){return {pt:pt,i:i};}).filter(function(o){return o.pt.round===r;}).map(function(o){return card(o.i,o.pt);}).join('');
+  } else {
+    list=DRILL.pitches.map(function(pt,i){return card(i,pt);}).join('');
+  }
+  var desc=d==='adjustment'?'2 rounds × 9 pitches · guided FB/CB order':'10 pitches';
   return '<div class="scroll">'
-    +topbar('<button class="icon-btn" onclick="drillCancel(\''+p.id+'\')" title="Cancel">'+IC.back+'</button>')
-    +'<div class="pad" style="padding-bottom:0"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+' · Drill</p><h2>'+esc(m.name).toUpperCase()+'</h2></div></div>'
-    +'<div class="dlog">'+body+drillFooter(p.id)+'</div>'
-    +'</div>';
+    +topbar('<button class="icon-btn" onclick="drillCancel(\''+p.id+'\')" title="Back">'+IC.back+'</button>')
+    +'<div class="logger-head"><h2>'+esc(m.name).toUpperCase()+'</h2><div class="desc">'+esc(p.first)+' '+esc(p.last)+' · '+desc+(DRILL.eid?' · resuming':'')+'</div></div>'
+    +'<div class="wk-note" style="display:flex;align-items:center;justify-content:space-between"><span>Recorded <b>'+filledN+' / '+total+'</b> — Save &amp; Finish Later and come back anytime.</span></div>'
+    +subtabs
+    +drillStrip(d,p)
+    +'<div class="swing-list">'+list+'</div>'
+    +'<div class="save-bar" style="display:flex;gap:8px"><button class="btn ghost" style="flex:1" onclick="saveDrill(false)">Save &amp; Finish Later</button><button class="btn" style="flex:1" onclick="saveDrill(true)">Finish &amp; See Results</button></div>'
+  +'</div>';
 }
 function viewDrillMenu(){
   var p=curPlayer(); if(!p) return viewLogin();
@@ -1732,14 +1751,21 @@ function viewDrillMenu(){
   var cards=Object.keys(DRILL_META).map(function(k){ var m=DRILL_META[k];
     return '<button class="hub-card" onclick="startDrill(\''+k+'\')">'+drillIcon(k)+'<h3>'+esc(m.name)+'</h3><p>'+esc(m.blurb)+'</p></button>';
   }).join('');
-  var hist=drills.length?drills.map(function(e){ var m=DRILL_META[e.drill]||{name:e.drill};
-      return '<button class="drill-card" onclick="go(\'drillResult\',{playerId:\''+p.id+'\',entryId:\''+e.id+'\'})">'
-        +'<div class="dc-top"><div class="dc-ic">'+drillIcon(e.drill)+'</div>'
-        +'<div class="dc-name"><h4>'+esc(m.name)+'</h4><div class="st">'+e.date+' · '+(e.pitches||[]).length+' reps</div></div></div></button>';
+  var hist=drills.length?drills.map(function(e){ var mm=DRILL_META[e.drill]||{name:e.drill};
+      var inprog=e.status==='inprogress';
+      var reps=(e.pitches||[]).filter(function(pt){return drillFilled(e.drill,pt);}).length;
+      var tap=inprog?('resumeDrill(\''+p.id+'\',\''+e.id+'\')'):('go(\'drillResult\',{playerId:\''+p.id+'\',entryId:\''+e.id+'\'})');
+      return '<div class="drill-card" style="display:flex;align-items:center;gap:8px">'
+        +'<div style="flex:1;cursor:pointer" onclick="'+tap+'">'
+          +'<div class="dc-top"><div class="dc-ic">'+drillIcon(e.drill)+'</div>'
+          +'<div class="dc-name"><h4>'+esc(mm.name)+(inprog?' <span style="color:var(--amber);font-weight:700;font-size:11px">· IN PROGRESS</span>':'')+'</h4>'
+          +'<div class="st">'+e.date+' · '+reps+' reps'+(inprog?' · tap to resume':'')+'</div></div></div></div>'
+        +'<button class="icon-btn" style="flex:0 0 auto;color:#ff7b6b;font-size:15px" title="Delete drill" onclick="deleteDrill(\''+p.id+'\',\''+e.id+'\')">✕</button>'
+      +'</div>';
     }).join(''):'<div class="lb-empty">No drills logged yet. Pick one above to start.</div>';
   return '<div class="scroll">'
     +topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>')
-    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>SKILL <em>DRILLS</em></h2></div></div>'
+    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>HITTING <em>DRILLS</em></h2></div></div>'
     +'<div class="hub-grid">'+cards+'</div>'
     +'<div class="section-lbl">Drill History</div>'
     +'<div style="padding:0 0 22px">'+hist+'</div>'
