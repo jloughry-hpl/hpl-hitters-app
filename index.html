@@ -1568,19 +1568,22 @@ function gradeBpReads(P){
   return { total:tot, correct:correct, acc:tot?Math.round(correct/tot*100):0, fbTakes:fbTakes, cbSwings:cbSwings, fbEvAvg:_avg(evs), fbEvMax:_mx(evs), fbSwings:evs.length };
 }
 function gradeAdjustment(P){
-  P=P.filter(function(p){return !!p.result;});
-  var contact=0,whiff=0,take=0,evs=[],byType={FB:{c:0,n:0},CB:{c:0,n:0}};
-  P.forEach(function(p){
+  var contact=0,whiff=0,take=0,tot=0,evs=[],byType={FB:{c:0,n:0},CB:{c:0,n:0}};
+  var pos={1:[],2:[],3:[]};
+  P.forEach(function(p,idx){
+    if(!p||!p.result) return;
+    tot++;
     if(p.result==='contact'){contact++; if(byType[p.type])byType[p.type].c++;}
     else if(p.result==='whiff') whiff++; else take++;
     if(byType[p.type]) byType[p.type].n++;
-    if(p.result==='contact'&&!p.na&&p.ev>0) evs.push(p.ev);
+    if(p.result==='contact'&&!p.na&&p.ev>0){ evs.push(p.ev); var pp=(idx%3)+1; if(pos[pp]) pos[pp].push(p.ev); }
   });
-  var swings=contact+whiff, tot=P.length;
+  var swings=contact+whiff;
   return { total:tot, contact:contact, whiff:whiff, take:take, swings:swings,
     aggression:tot?Math.round(swings/tot*100):0, contactRate:swings?Math.round(contact/swings*100):0,
     fbContact:byType.FB.n?Math.round(byType.FB.c/byType.FB.n*100):0, cbContact:byType.CB.n?Math.round(byType.CB.c/byType.CB.n*100):0,
-    evAvg:_avg(evs), evMax:_mx(evs), evN:evs.length };
+    evAvg:_avg(evs), evMax:_mx(evs), evN:evs.length,
+    posEV1:_avg(pos[1]), posEV2:_avg(pos[2]), posEV3:_avg(pos[3]), posN1:pos[1].length, posN2:pos[2].length, posN3:pos[3].length };
 }
 function gradeSevenBall(P){
   P=P.filter(function(p){return p.actual!=null&&p.called!=null;});
@@ -1620,7 +1623,7 @@ function startDrill(drill){
   DRILL={ drill:drill, playerId:p.id, pitches:newDrillPitches(drill), eid:null, round:1 };
   go('drill',{playerId:p.id, drill:drill});
 }
-function dSet(i,field,val){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt[field]=(pt[field]===val)?null:val; if(field==='result'&&pt.result==='take'){ pt.ev=null; pt.na=false; } render(); }
+function dSet(i,field,val){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt[field]=(pt[field]===val)?null:val; if(field==='result'&&(pt.result==='take'||pt.result==='whiff')){ pt.ev=null; pt.na=false; } render(); }
 function dEV(i,v){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt.ev=(v===''?null:+v); if(v!=='') pt.na=false; }
 function dNA(i){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt.na=!pt.na; if(pt.na) pt.ev=null; render(); }
 async function saveDrill(finalize){
@@ -1684,7 +1687,7 @@ function cardBpReads(i,pt){
   +'</div>';
 }
 function cardAdjustment(i,pt){
-  var done=!!pt.result, needEV=(pt.result&&pt.result!=='take');
+  var done=!!pt.result, needEV=(pt.result==='contact');
   var cls=!done?'empty':pt.result==='contact'?'correct':pt.result==='take'?'wrong':'';
   return '<div class="swing '+cls+'">'
     +'<div class="sh"><span class="n">R'+pt.round+' · #'+(i+1)+'</span><span class="tag round">'+(pt.type==='FB'?'Fastball':'Curveball')+'</span></div>'
@@ -1806,13 +1809,29 @@ function resAdjustment(e,cs){
   var g=gradeAdjustment(e.pitches), base=cs.avgEV||0, wells=[], works=[];
   if(g.aggression>=80) wells.push('On time &amp; aggressive — swung at <b>'+g.aggression+'%</b> (only '+g.take+' take'+(g.take===1?'':'s')+').');
   if(g.contactRate>=75) wells.push('Strong barrel control — <b>'+g.contactRate+'%</b> contact on swings.');
-  if(base&&g.evN&&g.evAvg>=base) wells.push('Contact EV <b>'+g.evAvg+'</b> mph — at/above assessment avg ('+base+').');
   if(g.cbContact>=g.fbContact&&g.cbContact) wells.push('Adjusted to spin — '+g.cbContact+'% contact on curveballs.');
   if(g.take>0) works.push('<b>'+g.take+'</b> take'+(g.take>1?'s':'')+' — a take counts against you here; commit to swing.');
   if(g.contactRate<60&&g.swings) works.push('Contact '+g.contactRate+'% on swings — shorten up and track longer.');
-  if(base&&g.evN&&g.evAvg<base) works.push('Contact EV '+g.evAvg+' below your '+base+' avg — drive through the ball.');
   if(g.cbContact<g.fbContact) works.push('Curveball contact ('+g.cbContact+'%) trails fastball ('+g.fbContact+'%) — stay back on spin.');
-  return strip3([{k:'Aggression',v:g.aggression+'%',cls:g.aggression>=70?'pass':'fail'},{k:'Contact',v:g.contactRate+'%',cls:g.contactRate>=60?'pass':'fail'},{k:'Contact EV',v:g.evAvg||'—'}])+wellWork(wells,works);
+  // timing-adjustment insights (EV by pitch position in each 3-pitch run)
+  if(base&&g.posN1){
+    if(g.posEV1>=0.97*base) wells.push('Elite adjustment — Pitch 1 of a new type at <b>'+g.posEV1+'</b> mph, matching your '+base+' assessment avg.');
+    else works.push('Pitch-1 EV <b>'+g.posEV1+'</b> vs your '+base+' avg — get on time from the very first pitch of a new type.');
+  }
+  if(g.posN1&&g.posN3){
+    if(g.posEV1>=g.posEV3) wells.push('No ramp-up needed — Pitch 1 EV ('+g.posEV1+') already at/above Pitch 3 ('+g.posEV3+').');
+    else if(g.posEV3-g.posEV1>=3) works.push('Slow to adjust — Pitch 1 '+g.posEV1+' → Pitch 3 '+g.posEV3+' mph. You find it by Pitch 3; goal is to hit that on Pitch 1.');
+  }
+  var posBlock = g.evN ? (
+    '<div class="section-lbl">Timing Adjustment · EV by Pitch in Run</div>'
+    +'<div class="wk-note">Each run is 3 of one pitch type. Pitch 1 = first look at a new type. Goal: match your assessment avg EV'+(base?(' ('+base+' mph)'):'')+' on Pitch 1.</div>'
+    +strip3([
+       {k:'Pitch 1',v:g.posN1?g.posEV1:'—',cls:(base&&g.posN1&&g.posEV1>=0.97*base)?'pass':(g.posN1?'fail':'')},
+       {k:'Pitch 2',v:g.posN2?g.posEV2:'—'},
+       {k:'Pitch 3',v:g.posN3?g.posEV3:'—'}
+    ])
+  ) : '';
+  return strip3([{k:'Aggression',v:g.aggression+'%',cls:g.aggression>=70?'pass':'fail'},{k:'Contact',v:g.contactRate+'%',cls:g.contactRate>=60?'pass':'fail'},{k:'Contact EV',v:g.evAvg||'—'}])+posBlock+wellWork(wells,works);
 }
 function resSevenBall(e,cs){
   var g=gradeSevenBall(e.pitches), wells=[], works=[];
