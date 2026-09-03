@@ -1064,7 +1064,7 @@ function viewProfile(){
     +'</div>'
     +'<div class="pad">'
       +'<button class="btn" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
-      +(isCoach?'<button class="btn ghost" style="margin-top:8px" onclick="go(\'drillMenu\',{playerId:\''+p.id+'\'})">Drills</button>':'')
+      +((isCoach && (p.sport||'baseball')!=='softball')?'<button class="btn ghost" style="margin-top:8px" onclick="go(\'drillMenu\',{playerId:\''+p.id+'\'})">Drills</button>':'')
       +'<button class="btn ghost" style="margin-top:8px" onclick="openLeaderboard(\''+p.id+'\')">View Leaderboard</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="openDevelopment(\''+p.id+'\')">Development Leaders</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
