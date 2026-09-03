@@ -182,6 +182,10 @@
   .pchip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line);font-size:11px;font-weight:700;color:var(--grey)}
   .pchip.good{border-color:rgba(131,245,44,.5);color:var(--green)}
   .pchip.bad{border-color:rgba(226,59,59,.5);color:#ff7b6b}
+  .sport-toggle{display:flex;gap:8px;margin:10px 16px 2px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px}
+  .sport-toggle button{flex:1;padding:11px;border-radius:9px;font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:13px;color:var(--grey);background:none;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+  .sport-toggle button.on{background:var(--green);color:#0a0b0a}
+  .sport-toggle button svg{width:16px;height:16px}
 
   /* profile */
   .prof-hero{text-align:center;padding:6px 16px 0}
@@ -609,7 +613,7 @@ function lastTest(b){ var t=null; blockEntries(b).forEach(function(e){ if(e.type
 function entryById(b,id){ return blockEntries(b).filter(function(e){return e.id===id;})[0]; }
 
 /* ---------- store (Supabase cloud) ---------- */
-var DB={ view:'login', ctx:{}, user:null, players:[], coaches:[], search:'' };
+var DB={ view:'login', ctx:{}, user:null, players:[], coaches:[], search:'', sport:'baseball' };
 function persist(){ /* cloud writes happen in savePlayer(); local no-op */ }
 async function loadPlayers(){
   DB.players=[];
@@ -641,7 +645,7 @@ async function ensureAccount(user){
   }
   if(role==='player'){
     var parts=String(name||'').split(' ');
-    var st={ first:parts[0]||name, last:parts.slice(1).join(' '), photo:null, birthdate:'', height:'', weight:'', position:'', gradClass:'', hand:'R', gripRH:'', gripLH:'', rap:emptyRap(), blocks:emptyBlocks() };
+    var st={ first:parts[0]||name, last:parts.slice(1).join(' '), sport:(meta.sport==='softball'?'softball':'baseball'), photo:null, birthdate:'', height:'', weight:'', position:'', gradClass:'', hand:'R', gripRH:'', gripLH:'', rap:emptyRap(), blocks:emptyBlocks() };
     try{ var hr=await SBc.from('hitters').insert({owner:user.id, first_name:st.first, last_name:st.last, state:st}).select('id').single();
       if(hr.data){ try{ await SBc.from('hitter_accounts').update({hitter_id:hr.data.id}).eq('id',user.id); }catch(e){} }
     }catch(e){ console.warn('hitter',e); }
@@ -668,7 +672,7 @@ async function enterApp(user){
   render();
 }
 /* ---------- auth (Supabase) ---------- */
-var authMode='login', loginRole='player', pendingEmail='';
+var authMode='login', loginRole='player', pendingEmail='', signupSport='baseball';
 function fval(id){ var el=$('#'+id); return el?(el.value||'').trim():''; }
 async function doAuth(){
   if(!SBc){ toast('Cloud not reachable'); return; }
@@ -677,7 +681,7 @@ async function doAuth(){
   if(authMode==='signup'){
     if(pass.length<6){ toast('Password must be at least 6 characters'); return; }
     var name=fval('f_name')||email;
-    var opts={ data:{ role:loginRole, full_name:name } };
+    var opts={ data:{ role:loginRole, full_name:name, sport:(loginRole==='player'?signupSport:'baseball') } };
     if(loginRole==='coach'){ var code=fval('f_code'); if(!code){ toast('Enter the coach code'); return; } opts.data.coach_code=code; }
     if(typeof location!=='undefined' && String(location.protocol).indexOf('http')===0) opts.emailRedirectTo=location.origin;
     var su=await SBc.auth.signUp({ email:email, password:pass, options:opts });
@@ -810,6 +814,10 @@ function viewLogin(){
       +'<button class="'+(!coach?'on':'')+'" onclick="loginRole=\'player\';render()">I\'m a Player</button>'
       +'<button class="'+(coach?'on':'')+'" onclick="loginRole=\'coach\';render()">I\'m a Coach</button>'
     +'</div>':'')
+    +((su&&!coach)?'<div class="sport-toggle" style="margin:8px 0 0">'
+      +'<button class="'+(signupSport==='baseball'?'on':'')+'" onclick="signupSport=\'baseball\';render()">'+IC.ball+' Baseball</button>'
+      +'<button class="'+(signupSport==='softball'?'on':'')+'" onclick="signupSport=\'softball\';render()">'+IC.ball+' Softball</button>'
+    +'</div>':'')
     +(su?'<div class="field"><label>Full Name</label><input id="f_name" placeholder="First Last"></div>':'')
     +'<div class="field"><label>Email</label><input id="f_email" type="email" placeholder="you@email.com"></div>'
     +'<div class="field"><label>Password</label><input id="f_pass" type="password" placeholder="'+(su?'Create a password (6+ characters)':'Your password')+'"></div>'
@@ -832,11 +840,14 @@ function viewConfirm(){
 }
 
 /* ================= COACH ROSTER ================= */
+function setSport(s){ DB.sport=s; DB.search=''; render(); }
 function rosterFiltered(){
+  var sp=DB.sport||'baseball';
+  var base=DB.players.filter(function(p){ return (p.sport||'baseball')===sp; });
   var q=(DB.search||'').trim().toLowerCase();
-  if(q.length===0) return DB.players.slice();
+  if(q.length===0) return base;
   if(q.length<3) return null;
-  return DB.players.filter(function(p){
+  return base.filter(function(p){
     var f=String(p.first||'').toLowerCase(), l=String(p.last||'').toLowerCase();
     return f.indexOf(q)>=0 || l.indexOf(q)>=0 || (f+' '+l).indexOf(q)>=0;
   });
@@ -865,8 +876,12 @@ function clearRosterSearch(){
 function viewRoster(){
   return '<div class="scroll">'
     +topbar('<button class="icon-btn" onclick="logout()" title="Log out">'+IC.user+'</button>')
+    +'<div class="sport-toggle">'
+      +'<button class="'+(DB.sport==='baseball'?'on':'')+'" onclick="setSport(\'baseball\')">'+IC.ball+' Baseball</button>'
+      +'<button class="'+(DB.sport==='softball'?'on':'')+'" onclick="setSport(\'softball\')">'+IC.ball+' Softball</button>'
+    +'</div>'
     +'<div class="pad">'
-      +'<div class="hello"><p>Coach dashboard</p><h2>YOUR <em>HITTERS</em></h2></div>'
+      +'<div class="hello"><p>Coach dashboard · '+(DB.sport==='softball'?'Softball':'Baseball')+'</p><h2>YOUR <em>'+(DB.sport==='softball'?'SOFTBALL':'HITTERS')+'</em></h2></div>'
       +'<div class="searchbar">'+IC.search+'<input id="rosterSearch" placeholder="Search by first or last name" value="'+esc(DB.search||'')+'" oninput="onRosterSearch(this.value)">'
         +'<button id="rosterClear" onclick="clearRosterSearch()" title="Clear search" style="flex:0 0 auto;display:'+((DB.search||'').length?'flex':'none')+';align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--line);border:none;color:#fff;font-size:12px;line-height:1;cursor:pointer">X</button>'
       +'</div>'
@@ -930,7 +945,7 @@ function pCard(p){
 }
 async function coachAddPlayer(){
   if(!SBc){ toast('Cloud not reachable'); return; }
-  var st={ first:'New', last:'Player', photo:null, birthdate:'', height:'', weight:'', position:'', gradClass:'', hand:'R', gripRH:'', gripLH:'', rap:emptyRap(), blocks:emptyBlocks() };
+  var st={ first:'New', last:'Player', sport:(DB.sport||'baseball'), photo:null, birthdate:'', height:'', weight:'', position:'', gradClass:'', hand:'R', gripRH:'', gripLH:'', rap:emptyRap(), blocks:emptyBlocks() };
   try{
     var r=await SBc.from('hitters').insert({first_name:'New', last_name:'Player', state:st}).select('id,owner,state').single();
     if(r.error){ toast('Add failed: '+r.error.message); return; }
@@ -1446,7 +1461,7 @@ async function loadLeaderboard(){
 function lbLoad(raw){
   return (raw||[]).map(function(r){
     var p={ id:r.id, first:r.first, last:r.last, blocks:r.blocks||[] };
-    return { id:r.id, name:((r.first||'')+' '+(r.last||'')).trim()||'Unnamed', cs:careerStats(p), dev:devStats(p) };
+    return { id:r.id, name:((r.first||'')+' '+(r.last||'')).trim()||'Unnamed', sport:(r.sport||'baseball'), cs:careerStats(p), dev:devStats(p) };
   });
 }
 async function openLeaderboard(pid){
@@ -1470,6 +1485,9 @@ function viewLeaderboard(){
   var mk=DB.lbMetric||'maxEV';
   var def=LB_METRICS.filter(function(m){return m.k===mk;})[0]||LB_METRICS[0];
   var stats=DB.lbStats||[];
+  var meRow=meId?stats.filter(function(r){return r.id===meId;})[0]:null;
+  var lbSport=meRow?(meRow.sport||'baseball'):(DB.sport||'baseball');
+  stats=stats.filter(function(r){return (r.sport||'baseball')===lbSport;});
   var elig=stats.filter(function(r){
     var v=r.cs[def.k]||0;
     if(v<=0) return false;
@@ -1495,7 +1513,7 @@ function viewLeaderboard(){
     : '<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+(meId||'')+'\'})" title="Back">'+IC.back+'</button>';
   return '<div class="scroll">'
     +topbar(right)
-    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>Top 10 · updates as tests happen</p><h2>HPL <em>LEADERBOARD</em></h2></div></div>'
+    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+(lbSport==='softball'?'Softball':'Baseball')+' · Top 10 · updates as tests happen</p><h2>HPL <em>LEADERBOARD</em></h2></div></div>'
     +'<div class="lb-chips">'+chips+'</div>'
     +'<div class="lb-cat"><div class="t">'+esc(def.lbl)+'</div><div class="d">'+esc(def.desc)+'</div></div>'
     +'<div class="lb-list">'+list+'</div>'
@@ -1511,6 +1529,9 @@ function viewDevelopment(){
   var mk=DB.devMetric||'maxEV';
   var def=LB_METRICS.filter(function(m){return m.k===mk;})[0]||LB_METRICS[0];
   var stats=DB.lbStats||[];
+  var meRow=meId?stats.filter(function(r){return r.id===meId;})[0]:null;
+  var devSport=meRow?(meRow.sport||'baseball'):(DB.sport||'baseball');
+  stats=stats.filter(function(r){return (r.sport||'baseball')===devSport;});
   var elig=stats.filter(function(r){ return r.dev && r.dev[def.k]; })
                 .sort(function(a,b){ return (b.dev[def.k].delta)-(a.dev[def.k].delta); });
   var top=elig.slice(0,5);
@@ -1533,7 +1554,7 @@ function viewDevelopment(){
     : '<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+(meId||'')+'\'})" title="Back">'+IC.back+'</button>';
   return '<div class="scroll">'
     +topbar(right)
-    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>Top 5 · biggest gain vs. first test</p><h2>DEVELOPMENT <em>LEADERS</em></h2></div></div>'
+    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+(devSport==='softball'?'Softball':'Baseball')+' · Top 5 · biggest gain vs. first test</p><h2>DEVELOPMENT <em>LEADERS</em></h2></div></div>'
     +'<div class="lb-chips">'+chips+'</div>'
     +'<div class="lb-cat"><div class="t">'+esc(def.lbl)+'</div><div class="d">Improvement from a player\'s first test (Weeks 1–5) to their latest.</div></div>'
     +'<div class="lb-list">'+list+'</div>'
