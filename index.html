@@ -145,6 +145,7 @@
   .lb-row .nm{flex:1;font-family:'Barlow Semi Condensed';font-weight:700;font-size:15px}
   .lb-row .nm small{color:var(--green);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-left:6px}
   .lb-row .vl{font-family:'Anton';font-style:italic;font-size:20px;flex:0 0 auto}
+  .lb-row .loc{flex:0 0 auto;width:74px;text-align:center;font-family:'Barlow Semi Condensed';font-weight:600;font-size:10.5px;color:var(--grey);text-transform:uppercase;letter-spacing:.3px;line-height:1.15;padding:0 4px}
   .lb-row .vl small{font-size:10px;color:var(--grey);font-family:'Barlow';font-style:normal;font-weight:600}
   .lb-empty{color:var(--grey);text-align:center;font-style:italic;padding:26px 16px;font-size:13px}
   .lb-you{margin:4px 16px;background:rgba(131,245,44,.08);border:1px solid rgba(131,245,44,.3);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
@@ -1531,7 +1532,7 @@ async function loadLeaderboard(){
 function lbLoad(raw){
   return (raw||[]).map(function(r){
     var p={ id:r.id, first:r.first, last:r.last, blocks:r.blocks||[] };
-    return { id:r.id, name:((r.first||'')+' '+(r.last||'')).trim()||'Unnamed', sport:(r.sport||'baseball'), cs:careerStats(p), dev:devStats(p) };
+    return { id:r.id, name:((r.first||'')+' '+(r.last||'')).trim()||'Unnamed', sport:(r.sport||'baseball'), facility:(r.facility||''), cs:careerStats(p), dev:devStats(p) };
   });
 }
 async function openLeaderboard(pid){
@@ -1573,6 +1574,7 @@ function viewLeaderboard(){
       var rk=idx+1; var cls='lb-row'+(r.id===meId?' me':'')+(rk===1?' top1':rk===2?' top2':rk===3?' top3':'');
       return '<div class="'+cls+'"><div class="rk">'+rk+'</div>'
         +'<div class="nm">'+esc(r.name)+(r.id===meId?' <small>You</small>':'')+'</div>'
+        +'<div class="loc">'+esc(facilityName(r.facility))+'</div>'
         +'<div class="vl">'+lbFmt(r.cs[def.k]||0,def.dec)+'<small> '+def.unit+'</small></div></div>';
     }).join('') : '<div class="lb-empty">No results in this category yet. Rankings fill in as tests are logged.</div>';
   var youLine='';
@@ -1614,6 +1616,7 @@ function viewDevelopment(){
       return '<div class="'+cls+'"><div class="rk">'+rk+'</div>'
         +'<div class="nm">'+esc(r.name)+(r.id===meId?' <small>You</small>':'')
           +'<small class="ft">'+lbFmt(d.first,def.dec)+' → '+lbFmt(d.last,def.dec)+' '+def.unit+'</small></div>'
+        +'<div class="loc">'+esc(facilityName(r.facility))+'</div>'
         +'<div class="vl '+(d.delta>=0?'up':'down')+'">'+dStr(d.delta)+'<small> '+def.unit+'</small></div></div>';
     }).join('') : '<div class="lb-empty">Development rankings begin in Weeks 6–10. Once a player logs a test in a second block, their gain vs. their first test appears here.</div>';
   var youLine='';
