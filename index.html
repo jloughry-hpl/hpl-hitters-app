@@ -194,6 +194,36 @@
   .add-row .p-info h3{font-size:16px}
   .chk{width:24px;height:24px;flex:0 0 auto;border-radius:7px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:#0a0b0a;font-size:14px;font-weight:900;background:var(--panel-2)}
   .chk.on{background:var(--green);border-color:var(--green)}
+  .wk-area{margin:12px 16px 0;background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden}
+  .wk-area .wk-hd{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid var(--line)}
+  .wk-area .wk-hd .n{width:26px;height:26px;border-radius:8px;background:rgba(131,245,44,.12);border:1px solid rgba(131,245,44,.3);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Anton';font-style:italic;font-size:14px;flex:0 0 auto}
+  .wk-area .wk-hd h4{flex:1;font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:14px}
+  .wk-area .wk-hd .ef{font-size:10.5px;color:var(--grey);font-weight:600}
+  .wk-area .wk-bd{padding:11px 14px}
+  .wk-pelo{display:flex;align-items:center;gap:8px;background:rgba(61,123,255,.08);border:1px solid rgba(61,123,255,.3);border-radius:10px;padding:9px 11px;font-size:12.5px;color:#9db8ff;font-weight:600;margin-bottom:8px}
+  .wk-pelo svg{width:15px;height:15px;flex:0 0 auto}
+  .wk-drill{display:inline-flex;align-items:center;gap:6px;margin:0 6px 6px 0;padding:8px 11px;border-radius:9px;background:var(--panel-2);border:1px solid var(--line);color:#fff;font-family:'Barlow Semi Condensed';font-weight:700;font-size:13.5px;cursor:default}
+  .wk-drill.has-cue{cursor:pointer;border-color:rgba(131,245,44,.35)}
+  .wk-drill.sec{border-left:3px solid var(--amber)}
+  .wk-drill.need{background:rgba(131,245,44,.1);border-color:var(--green);color:var(--green)}
+  .wk-drill .ci{width:15px;height:15px;border-radius:50%;background:var(--green);color:#0a0b0a;font-size:9px;font-style:italic;font-family:'Anton';display:inline-flex;align-items:center;justify-content:center}
+  .wk-flag{font-size:11.5px;color:#f0d9a8;font-style:italic;margin-top:6px;line-height:1.4}
+  .wk-mind{margin:10px 0 0;background:rgba(255,176,32,.08);border:1px solid rgba(255,176,32,.3);border-radius:11px;padding:11px 13px;color:var(--amber);font-weight:700;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;text-align:left}
+  .wk-mind svg{width:16px;height:16px;flex:0 0 auto}
+  .wk-modal{position:fixed;inset:0;z-index:80;background:rgba(6,7,6,.86);display:none;align-items:center;justify-content:center;padding:24px}
+  .wk-modal-card{background:var(--panel);border:1px solid var(--green);border-radius:16px;padding:20px;max-width:340px}
+  .wk-modal-card h3{font-family:'Anton';font-style:italic;font-size:20px;margin-bottom:10px}
+  .wk-modal-card p{font-size:14px;line-height:1.55;color:#d6e8c8;margin-bottom:16px}
+  .wk-choose{display:flex;flex-direction:column;gap:12px;padding:8px 16px}
+  .wk-cbtn{padding:20px;border-radius:15px;font-family:'Anton';font-style:italic;font-size:22px;text-align:center;cursor:pointer;border:1px solid var(--line);letter-spacing:.5px}
+  .wk-cbtn.bs{background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;border-color:var(--green)}
+  .wk-cbtn.bs.off{background:var(--panel);color:var(--grey-d);border-color:var(--line);cursor:not-allowed}
+  .wk-cbtn.no{background:var(--panel);color:#fff}
+  .wk-cbtn .sub{display:block;font-family:'Barlow';font-style:normal;font-size:12px;font-weight:600;margin-top:6px;text-transform:none;letter-spacing:0;line-height:1.4}
+  .wk-cbtn.bs .sub{color:#0a3d0a}
+  .wk-cbtn.bs.off .sub{color:var(--grey)}
+  .wk-cbtn.no .sub{color:var(--grey)}
+  .wk-empty{margin:20px 16px;padding:22px;text-align:center;color:var(--grey);font-style:italic;background:var(--panel);border:1px solid var(--line);border-radius:14px;line-height:1.5}
 
   /* profile */
   .prof-hero{text-align:center;padding:6px 16px 0}
@@ -1056,6 +1086,10 @@ function viewProfile(){
       +rnAgg('Max EV',gMaxEV,'mph','best')+rnAgg('Avg EV',gAvgEV,'mph','avg')+rnAgg('Hard Hit',gHH,'%','all swings')
       +rnAgg('Max Dist',gMaxDist,'ft','best')+rnAgg('Avg Dist',gAvgDist,'ft','avg')+rnAgg('Avg LA',gAvgLA,'°','avg')
     +'</div>'
+    +'<div class="pad" style="padding-bottom:0">'
+      +'<button class="btn" style="background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;font-family:\'Anton\';font-style:italic;font-size:18px;letter-spacing:.5px" onclick="openWorkout(\''+p.id+'\')">TODAY\'S WORKOUT'+(wkProfileStatus(p)?'<span style="display:block;font-family:\'Barlow Semi Condensed\';font-style:normal;font-size:12px;font-weight:600;margin-top:3px;opacity:.75">'+esc(wkProfileStatus(p))+'</span>':'')+'</button>'
+      +(isCoach?'<button class="btn ghost" style="margin-top:8px" onclick="openWorkoutSetup(\''+p.id+'\')">Workout Program</button>':'')
+    +'</div>'
     +'<div class="section-lbl">Test Blocks · 25-Week Program</div>'
     +'<div class="wk-note" style="margin-bottom:6px">Tap a block to log a hitting test or Rapsodo results.</div>'
     +'<div class="assess" style="flex-wrap:wrap;gap:8px">'
@@ -1072,6 +1106,128 @@ function viewProfile(){
       +(isCoach?('<button class="btn" style="margin-top:14px;background:rgba(226,59,59,.12);border:1px solid var(--red);color:#ff7b6b" onclick="deletePlayer(\''+p.id+'\')">Delete Player</button>'):'')
     +'</div></div>';
 }
+
+/* ==================== WORKOUT ENGINE ==================== */
+var WK_PROGRAMS={25:{blocks:5,wpb:5,levels:[1,2,3,4,5],testFormat:'week'},20:{blocks:4,wpb:5,levels:[1,2,3,4],testFormat:'week'},16:{blocks:4,wpb:4,levels:[1,2,3,4],testFormat:'day'},12:{blocks:3,wpb:4,levels:[1,2,3],testFormat:'day'}};
+var WK_BLOCK_NAMES={1:'Foundation',2:'Build',3:'Sharpen',4:'Peak',5:'Compete'};
+var WK_PILLAR_PAIR={Path:'Vision',Vision:'Approach',Approach:'Timing',Timing:'Path'};
+var WK_PILLAR_LABEL={Path:'Bat Path / Direction / Control',Vision:'Vision / Pitch Recognition',Approach:'Approach',Timing:'Timing'};
+var WK_BATSPEED_ROT=[['Normal','Flamingos','Babe Ruth','Step Backs'],['Happy Gilmores','Step Backs','Rhythm','Wind-Up'],['2 Strike Stance','Rhythm','Normal','Flamingos'],['Babe Ruth','Wind-Up','Happy Gilmores','2 Strike Stance'],['Step Backs','Normal','Flamingos','Rhythm'],['Flamingos','2 Strike Stance','Wind-Up','Babe Ruth'],['Rhythm','Happy Gilmores','Step Backs','Normal'],['Wind-Up','Babe Ruth','2 Strike Stance','Happy Gilmores']];
+var WK_HPL_TEE=['Tap','Ortiz','Beltre','Open Hip','Low Tee','High Tee'];
+var WK_ADDON=['Walk Thrus','Swing Backs','Split Stance','Ortiz Drill','Beltre Drill','Power Position','Tap Drill'];
+/* v2 main-focus config: per level(1-5) x pillar. d=darts main drills; sec=fixed secondary; angles=alt Open/Closed as 2nd main; noDarts/noFrontToss/noBP; la=launch-angle package; comp=competition week; rounds2; mach=extra machine area */
+var WK_MAIN={
+1:{Path:{d:['Around the World','3-3-3']},Vision:{d:['Ball-Pop','2 Seam / 4 Seam Reads']},Approach:{d:['7 Ball','3 Ball']},Timing:{d:['Fast / Slow Alternate','FB / CB Tee']}},
+2:{Path:{d:['Walk Thrus','Swing Backs']},Vision:{d:['Color Ball Reads'],sec:'No Hit Red'},Approach:{d:['5 Ball','2 Strike Hitting']},Timing:{d:['Fast / Slow Reaction','Load Hold']}},
+3:{Path:{d:['Short Bat Low / In'],angles:true},Vision:{d:['FB / CB Live Reads','CB High / Low Reads'],sec:'Only Blue'},Approach:{noDarts:true,bp:'3 Ball Focus + 1 Strike Focus'},Timing:{noDarts:true,bp:'Machine FB & Curveballs — vary speeds and shape'}},
+4:{Path:{la:true,noBP:true,d:['10° Launch Angle','20° Launch Angle','30° Launch Angle','40° Launch Angle','Launch Angle Calls']},Vision:{noFrontToss:true,noDarts:true,bp:'FB / CB — Hit FB, Take CB',mach:'Pitching Machine — Curveballs'},Approach:{d:['Situations'],noSec:true,rounds2:true},Timing:{noDarts:true,bp:'FB / CB / FB · CB / FB / CB'}},
+5:{Path:{comp:true},Vision:{comp:true},Approach:{comp:true,bp:'2 Strike — off machine, FB & CB using 7 Ball'},Timing:{noDarts:true,bp:'Drop / Pause · 2 Machine'}}
+};
+/* rotating secondary pool by level — Bat Path drills + 3 Plate + Small Balls + Tap Drill. No Approach drills (banned as secondary). */
+var WK_SEC_POOL={1:['Swing Direction','3 Plate','Small Balls / Skinny Trainer','Tap Drill','Around the World'],2:['Walk Thrus','Swing Backs','Swing Direction','3-3-3','3 Plate','Tap Drill'],3:['Short Bat Away','Small Balls / Skinny Trainer','3 Plate','Tap Drill'],4:['Around the World','3-3-3','Tap Drill','3 Plate'],5:['Around the World','3-3-3','Tap Drill','3 Plate']};
+/* random-day Darts pool (players training 4-6x/week). 7 Ball added only alongside bat speed. */
+var WK_RANDOM_POOL=['Swing Direction','Around the World','3-3-3','Walk Thrus','Small Balls / Skinny Trainer','Tap Drill'];
+var WK_COMP_DARTS=['Small Balls / Skinny Trainer','Short Trainer Bat','Around the World','3 Plate','Launch Angle Calls','Off-set Sliders'];
+var WK_COMP_NOTE='Competition — mix BP & Machine, Rapsodo reads. Pool: No Red, Only Blue, 3 Plate, Random Counts, Launch Angle Call-outs, Off-set Sliders.';
+var WK_CUES={'Swing Direction':'60-70% effort on a controlled swing, stopping/recoiling the swing at contact to point toward ball flight','Around the World':'2 each LF, LCF, CF, RCF, RF','3-3-3':'3 grounders, 3 line drives, 3 long fly balls','Walk Thrus':'After contact, walk toward ball flight 2 steps','Swing Backs':'Bat held out in front over the plate, take the bat back 90% of the way tracing bat path. Overexaggerate hip and spine coil','Short Bat Low / In':'Throw low and in, hit the opposite gap','Ball-Pop':'Say ball when you pick the ball up in the pitcher hand, say pop at contact','No Hit Red':'Cannot hit the color red','Only Blue':'Only hit the color blue','3 Ball Focus':'90% of max EV plus 10 degrees or higher','3 Plate':'Plates 2 feet apart, one behind home plate and one in front. 2 pitches each spot: 2 back, 2 middle, 2 front, 2 back. Then reverse: 2 front, 2 middle, 2 back, 2 front','FB / CB Tee':'Set tee with ball on the outside corner. Toss FB inner half, fake the toss and the player reads CB and hits the ball off the tee oppo','Machine FB':'Vary speeds and shape','FB / CB / FB':'3 of each — MUST swing at first pitch of sequence','CB / FB / CB':'3 of each — MUST swing at first pitch of sequence','Drop / Pause':'Off machine — drop for FB, pause for CH','2 Machine':'Side by side or stacked — 1 FB, 1 CB'};
+var WK_MINDSET='The result of the hit does not matter. There is one rule: swing as hard as you can, every single swing. Ground ball, pop up, swing and miss — none of it counts here. If you recognize your swing is mechanically flawed, make the adjustment while maintaining 100% effort. Never trade effort for a better-looking result.';
+function wkParseDate(s){if(s instanceof Date)return new Date(s.getFullYear(),s.getMonth(),s.getDate());var p=String(s).slice(0,10).split('-');return new Date(+p[0],(+p[1])-1,+p[2]);}
+function wkMondayOf(d){var x=wkParseDate(d);var day=x.getDay();var diff=(day===0?6:day-1);x.setDate(x.getDate()-diff);return x;}
+function wkDayDiff(a,b){return Math.round((wkParseDate(a)-wkParseDate(b))/86400000);}
+function wkYMD(d){var x=(d instanceof Date)?d:wkParseDate(d);var m=x.getMonth()+1,day=x.getDate();return x.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(day<10?'0':'')+day;}
+function todayStr(){return wkYMD(new Date());}
+function wkResolveWeek(s,t,pause,startWeek){var m=wkMondayOf(s);return Math.max(1,Math.floor(wkDayDiff(t,m)/7)+(startWeek||1)-(pause||0));}
+function wkResolveBlock(len,weekNo){var P=WK_PROGRAMS[len==='wow'?25:len];if(!P)return null;var tot=P.blocks*P.wpb;var w=Math.min(Math.max(1,weekNo),tot);var bi=Math.floor((w-1)/P.wpb)+1;var wib=((w-1)%P.wpb)+1;var lvl=P.levels[bi-1];var itw=(P.testFormat==='week'&&wib===1);var itd=(P.testFormat==='day'&&wib===1);var mp=P.wpb===5?[null,'Path','Vision','Approach','Timing'][wib-1]:['Path','Vision','Approach','Timing'][wib-1];return{weekNo:w,blockIndex:bi,level:lvl,blockName:WK_BLOCK_NAMES[lvl],weekInBlock:wib,isTestWeek:itw,isTestDay:itd,mainPillar:mp,secondaryPillar:mp?WK_PILLAR_PAIR[mp]:null,totalBlocks:P.blocks,totalWeeks:tot};}
+function wkBatSpeedCount(bi,a){if(bi<=1)return 2;var c=a[bi-1],p=a[bi-2];if(typeof c!=='number'||typeof p!=='number')return 2;var g=c-p;if(g>=3.5)return 2;if(g>=1.0)return 3;return 4;}
+function wkBatSpeedEligible(today,log,ov){var bs=(log||[]).filter(function(e){return e.bat;}).map(function(e){return e.date;}).sort();var last=bs.length?bs[bs.length-1]:null;var mon=wkYMD(wkMondayOf(today));var sd=wkMondayOf(today);sd.setDate(sd.getDate()+6);var sun=wkYMD(sd);var tw=bs.filter(function(d){return d>=mon&&d<=sun;}).length;if(ov)return{allowed:true,reason:'Coach override',nextEligible:null,thisWeek:tw};if(tw>=3)return{allowed:false,reason:'Weekly cap reached (3 bat-speed days this week).',nextEligible:null,thisWeek:tw};if(last){var diff=wkDayDiff(today,last);if(diff<2){var ne=wkParseDate(last);ne.setDate(ne.getDate()+2);return{allowed:false,reason:'Needs 2 days between bat-speed days.',nextEligible:wkYMD(ne),thisWeek:tw};}}return{allowed:true,reason:'',nextEligible:null,thisWeek:tw};}
+function wkBatRot(w){return WK_BATSPEED_ROT[(w-1)%8];}
+function wkHplTee(w){var i=((w-1)*2)%6;return[WK_HPL_TEE[i],WK_HPL_TEE[(i+1)%6]];}
+function wkAddon(w){return WK_ADDON[(w-1)%7];}
+function wkSeed(s){var h=2166136261,str=String(s);for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=(h*16777619)>>>0;}return h>>>0;}
+function wkPickN(pool,n,seed){var a=pool.slice(),out=[],s=(seed>>>0)||1;while(a.length&&out.length<n){s=(s*1103515245+12345)>>>0;var idx=s%a.length;out.push(a.splice(idx,1)[0]);}return out;}
+function wkDayIdx(today){var d=wkParseDate(today).getDay();return (d+6)%7;} /* Mon=0 .. Sun=6 */
+function wkMonSatCount(log,today){var mon=wkMondayOf(today);var sat=new Date(mon);sat.setDate(sat.getDate()+5);var m=wkYMD(mon),s=wkYMD(sat);return (log||[]).filter(function(e){return e.date>=m&&e.date<=s;}).length;}
+function wkRandomActive(p,today){return wkMonSatCount((p&&p.workoutLog)||[],today)>=3;}
+function wkCue(name){return WK_CUES[name]||null;}
+var WK_NOREP={'Around the World':1,'3-3-3':1,'Pick 1 Flip':1};
+function wkD(n,extra){var o={name:n,cue:wkCue(n)};if(extra)for(var k in extra)o[k]=extra[k];if(!o.rep&&!WK_NOREP[n])o.rep='1 × 8';return o;}
+function wkGenerate(o){var blk=wkResolveBlock(o.programLength,o.weekNo);var out={block:blk,isBatSpeed:o.isBatSpeed,batCount:o.batCount,areas:{}};
+  if(blk.isTestWeek){out.test=true;out.areas.tee={label:null,note:'5 warm-up reps, no coaching',drills:[]};out.areas.frontToss={label:null,note:'Assessment protocol. On non-test days this week, bat speed continues at your normal count.',drills:[]};out.areas.darts={note:'Player Development Report assessment protocol',drills:[],flags:[]};out.areas.bp={note:'Scored live at-bats',drills:[]};out.areas.machine=null;return out;}
+  var lvl=blk.level,wk=blk.weekNo,main=blk.mainPillar,dayIdx=(typeof o.dayIdx==='number'?o.dayIdx:0),count=o.isBatSpeed?(o.batCount||2):0,rot=wkBatRot(wk);
+  var cfg=(WK_MAIN[lvl]&&WK_MAIN[lvl][main])||{};
+  var tee={label:'',drills:[]};
+  if(o.isBatSpeed){ if(count===4){tee.label='Pelotero Tee + Flips';tee.drills=[wkD(rot[2],{rep:'bs'}),wkD(rot[3],{rep:'bs'})];} else tee.label='Pelotero Tee Only'; }
+  else { tee.label='Pelotero Tee + Flips';var h=wkHplTee(wk);tee.drills=[wkD(h[0]),wkD(h[1])]; }
+  out.areas.tee=tee;
+  if(cfg.noFrontToss){ out.areas.frontToss=null; }
+  else { var ft={label:'',drills:[],note:''};
+    if(o.isBatSpeed){ if(count===2)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(wkAddon(wk))]; else if(count===3)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(rot[2],{rep:'bs'})]; else if(count===4)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD('Pick 1 Flip')]; }
+    else { ft.label='Pelotero Flip';ft.note='Do 3 Pelotero flip drills'; }
+    (o.drillNeeds||[]).forEach(function(n){ft.drills.push(wkD(n,{need:true}));});
+    out.areas.frontToss=ft; }
+  var darts=null;
+  if(o.randomDarts){ var pool=WK_RANDOM_POOL.slice(); if(o.isBatSpeed)pool.push('7 Ball'); var picks=wkPickN(pool,3,wkSeed((o.today||('w'+wk))+'r'+dayIdx)); darts={random:true,drills:[wkD(picks[0]),wkD(picks[1]),wkD(picks[2],{secondary:true})],flags:['Random mix — 4+ training days this week.']}; }
+  else if(cfg.comp){ var cd=wkPickN(WK_COMP_DARTS,1,wkSeed((o.today||('w'+wk))+'c'+dayIdx)); darts={comp:true,drills:[wkD(cd[0])],flags:[WK_COMP_NOTE]}; }
+  else if(cfg.noDarts){ darts=null; }
+  else { darts={drills:[],flags:[]}; var md=(cfg.d||[]).slice(); if(cfg.angles)md.push(dayIdx<3?'Open Angle':'Closed Angle'); md.forEach(function(n){darts.drills.push(wkD(n));});
+    if(!cfg.noSec&&!cfg.la){ var s2=null; if(cfg.sec)s2=cfg.sec; else if(wk%3===0&&dayIdx===2)s2='2 Strike Hitting'; else {var sp=WK_SEC_POOL[lvl]||[];if(sp.length)s2=sp[dayIdx%sp.length];} if(s2)darts.drills.push(wkD(s2,{secondary:true})); }
+    if(cfg.angles)darts.flags.push('Open / Closed Angle alternate — first half of the week Open, second half Closed.');
+    if(cfg.la)darts.flags.push('All 5 launch-angle drills on ONE day, run through the week. No BP/Machine this week.');
+    if(cfg.rounds2)darts.flags.push('2 rounds — no secondary focus this week.'); }
+  out.areas.darts=darts;
+  if(cfg.noBP){ out.areas.bp=null; }
+  else { var bpTxt=cfg.bp||(cfg.comp?'Competition — mix BP & Machine, Rapsodo reads':'Normal + 2 Strike Hitting'); out.areas.bp={text:bpTxt,drills:bpTxt.split(/\s*[·+]\s*/).map(function(s){return s.trim();}).filter(Boolean).map(function(n){return wkD(n);})}; }
+  out.areas.machine=cfg.mach?{text:cfg.mach,drills:[wkD(cfg.mach)]}:null;
+  out.rounds2=!!cfg.rounds2; out.comp=!!cfg.comp; out.laWeek=!!cfg.la; out.noFrontToss=!!cfg.noFrontToss; out.testDay=!!blk.isTestDay;
+  return out;}
+function wkAssessments(p){var list=[];(p.blocks||[]).forEach(function(b){var rapMax=0;(b.entries||[]).forEach(function(e){if(e.type==='rapsodo'&&e.rap&&e.rap.maxEV>rapMax)rapMax=e.rap.maxEV;});(b.entries||[]).forEach(function(e){if(e.type==='test'&&e.status!=='inprogress'&&e.test){var mx=0;['frontToss','bp','machine'].forEach(function(k){(e.test[k]||[]).forEach(function(pt){if(pt.ev>0&&pt.color!=='Red'&&pt.ev>mx)mx=pt.ev;});});if(rapMax>mx)mx=rapMax;list.push({date:e.date||'',ev:mx});}});});list.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});return list.map(function(x){return x.ev;});}
+function wkHasProgram(p){var w=p.workout||{};return !!(w.programLength&&w.programStart);}
+function wkProfileStatus(p){if(!wkHasProgram(p))return '';var w=p.workout;var wn=wkResolveWeek(w.programStart,todayStr(),w.pauseWeeks||0,w.startWeek);var b=wkResolveBlock(w.programLength,wn);if(!b)return '';return (w.programLength==='wow'?'Workout of the Week · ':'')+'Week '+wn+' · '+(b.isTestWeek||b.isTestDay?'Test · ':'')+b.blockName;}
+function wkYearCount(p){var y=new Date().getFullYear();return (p.workoutLog||[]).filter(function(e){return String(e.date).slice(0,4)===String(y);}).length;}
+function wkModal(title,body){var el=document.getElementById('wkmodal');if(!el){el=document.createElement('div');el.id='wkmodal';document.body.appendChild(el);}el.className='wk-modal';el.style.display='flex';el.innerHTML='<div class="wk-modal-card"><h3>'+esc(title)+'</h3><p>'+esc(body)+'</p><button class="btn" onclick="wkCloseModal()">Got it</button></div>';}
+function wkCloseModal(){var el=document.getElementById('wkmodal');if(el)el.style.display='none';}
+function wkCueModal(name){var c=wkCue(name);if(c)wkModal(name,c);}
+function wkMindsetModal(){wkModal('Bat Speed Mindset',WK_MINDSET);}
+var WORKOUT=null;
+function openWorkout(pid){WORKOUT={playerId:pid,isBatSpeed:undefined};go('workout',{playerId:pid});}
+function chooseBatSpeed(bs){if(!WORKOUT)return;WORKOUT.isBatSpeed=bs;if(bs&&!(curPlayer().workoutLog||[]).some(function(e){return e.bat;}))wkMindsetModal();render();}
+async function completeDay(){var p=curPlayer();if(!p)return;if(!p.workoutLog)p.workoutLog=[];var bs=!!(WORKOUT&&WORKOUT.isBatSpeed===true);p.workoutLog.push({date:todayStr(),bat:bs});await savePlayer(p);WORKOUT=null;toast('Training day logged'+(bs?' · bat speed':''));go('profile',{playerId:p.id});}
+function wkDrillHtml(d){var cue=d.cue;var cls='wk-drill'+(d.need?' need':'')+(d.secondary?' sec':'')+(cue?' has-cue':'');var safe=String(d.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'");var rep=(d.rep==='bs')?'5H · 5L · 5N':(d.rep||'');var repHtml=rep?(' <span style="opacity:.55;font-size:10.5px;font-weight:600;white-space:nowrap">'+rep+'</span>'):'';return '<button class="'+cls+'" '+(cue?('onclick="wkCueModal(\''+safe+'\')"'):'disabled')+'>'+esc(d.name)+repHtml+(cue?' <span class="ci">i</span>':'')+'</button>';}
+function wkAreaCard(n,title,extra,pelo,drills,note,flags){var h='<div class="wk-area"><div class="wk-hd"><div class="n">'+n+'</div><h4>'+title+'</h4>'+(extra?'<span class="ef">'+extra+'</span>':'')+'</div><div class="wk-bd">';if(pelo)h+='<div class="wk-pelo">'+IC.sync+' '+esc(pelo)+' — open the Pelotero app</div>';if(note)h+='<div class="wk-flag" style="color:var(--grey);font-style:normal;margin-top:0;margin-bottom:'+(drills&&drills.length?'8px':'0')+'">'+esc(note)+'</div>';if(drills&&drills.length)h+='<div>'+drills.map(wkDrillHtml).join('')+'</div>';(flags||[]).forEach(function(f){h+='<div class="wk-flag">'+esc(f)+'</div>';});h+='</div></div>';return h;}
+function viewWorkout(){var p=curPlayer();if(!p)return viewLogin();var coach=DB.user&&DB.user.role==='coach';var back='<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>';if(!wkHasProgram(p)){return '<div class="scroll">'+topbar(back)+'<div class="pad"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>TODAY\'S <em>WORKOUT</em></h2></div></div><div class="wk-empty">'+(coach?'No program set yet. Open <b>Workout Program</b> on this player\'s profile to assign a length and start date.':'Your coach hasn\'t set up your program yet — check back soon.')+'</div></div>';}var w=p.workout;var wn=wkResolveWeek(w.programStart,todayStr(),w.pauseWeeks||0,w.startWeek);var blk=wkResolveBlock(w.programLength,wn);if(blk.isTestWeek)return viewWorkoutSession(p,w,wn,blk,null);if(w.programLength==='wow'){WORKOUT={playerId:p.id,isBatSpeed:true};return viewWorkoutSession(p,w,wn,blk,true,true);}if(!WORKOUT||WORKOUT.playerId!==p.id)WORKOUT={playerId:p.id,isBatSpeed:undefined};if(WORKOUT.isBatSpeed===undefined)return viewWorkoutChoose(p,w,wn,blk);return viewWorkoutSession(p,w,wn,blk,WORKOUT.isBatSpeed);}
+function viewWorkoutChoose(p,w,wn,blk){var back='<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>';var elig=wkBatSpeedEligible(todayStr(),p.workoutLog||[],!!w.batOverride);var bsCls='wk-cbtn bs'+(elig.allowed?'':' off');var bsSub=elig.allowed?(w.batOverride?'Unlocked by coach':'Ready — swing as hard as you can'):(elig.reason+(elig.nextEligible?(' Next eligible '+elig.nextEligible):''));return '<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+' · Week '+wn+' · '+esc(blk.blockName)+'</p><h2>TODAY\'S <em>WORKOUT</em></h2></div></div><div class="wk-note" style="margin:2px 16px 10px">Choose your session type for today.</div><div class="wk-choose"><button class="'+bsCls+'" '+(elig.allowed?'onclick="chooseBatSpeed(true)"':'disabled')+'>BAT SPEED<span class="sub">'+esc(bsSub)+'</span></button><button class="wk-cbtn no" onclick="chooseBatSpeed(false)">NO BAT SPEED<span class="sub">Mechanics &amp; skill work — always available</span></button></div><div style="height:16px"></div></div>';}
+function viewWorkoutSession(p,w,wn,blk,isBatSpeed,wow){var back='<button class="icon-btn" onclick="'+(blk.isTestWeek||wow?'go(\'profile\',{playerId:\''+p.id+'\'})':'workoutBack(\''+p.id+'\')')+'" title="Back">'+IC.back+'</button>';var assess=wkAssessments(p);var batCount=wow?3:wkBatSpeedCount(blk.blockIndex,assess);var tdy=todayStr();var rnd=wow?false:wkRandomActive(p,tdy);var dIdx=wow?0:wkDayIdx(tdy);var g=wkGenerate({programLength:w.programLength,weekNo:wn,isBatSpeed:isBatSpeed,batCount:batCount,drillNeeds:(p.drillNeeds||[]),dayIdx:dIdx,today:tdy,randomDarts:rnd});var head='Week '+wn+' · '+(g.test?'TEST · ':'')+esc(blk.blockName)+(wow?' · Workout of the Week (3 drills)':(isBatSpeed?(' · Bat Speed ('+batCount+' drills)'):(g.test?'':' · Skill Day')))+(rnd?' · Random':'');var tee=g.areas.tee;var html='<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>'+(wow?'WORKOUT OF THE <em>WEEK</em>':(g.test?'TEST <em>DAY</em>':'TODAY\'S <em>WORKOUT</em>'))+'</h2></div></div><div class="wk-note" style="margin:2px 16px 8px"><b>'+head+'</b></div>'+(g.testDay?'<div class="wk-flag" style="margin:2px 16px 10px;color:#f0c040;font-style:normal;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.35);border-radius:10px;padding:9px 12px"><b>Test Day</b> — first session this week is the Player Development assessment (Front Toss → BP → Machine, log every swing). Train the rest of the week as normal below.</div>':'');
+  var AR=[];
+  AR.push({t:'Tee',ef:(g.test?'':'60–70% effort'),pelo:tee.label,drills:tee.drills,note:tee.note,flags:[]});
+  if(g.areas.frontToss){var fo=g.areas.frontToss;AR.push({t:'Front Toss',ef:'',pelo:fo.label,drills:fo.drills,note:fo.note,flags:[],mind:isBatSpeed});}
+  if(g.areas.darts){var dao=g.areas.darts;AR.push({t:'Darts',ef:'',pelo:null,drills:dao.drills,note:'',flags:dao.flags||[]});}
+  if(g.areas.bp){var bpo=g.areas.bp;AR.push({t:'BP / Machine',ef:'',pelo:null,drills:bpo.drills,note:'',flags:[]});}
+  if(g.areas.machine){var mo=g.areas.machine;AR.push({t:'Pitching Machine',ef:'',pelo:null,drills:mo.drills,note:'',flags:[]});}
+  AR.forEach(function(a,i){var card=wkAreaCard(String(i+1),a.t,a.ef,a.pelo,a.drills,a.note,a.flags);if(a.mind)card=card.replace('</div></div>','<button class="wk-mind" onclick="wkMindsetModal()">'+IC.ball+' Bat Speed Mindset — tap to read</button></div></div>');html+=card;});
+  html+='<div class="pad">'+(g.test?'<div class="wk-flag" style="color:var(--grey);font-style:normal;margin:0 0 10px">Regular game bat only · no coaching or cues during the test · always Front Toss → BP → Machine · log every swing.</div>':'')+'<button class="btn" onclick="completeDay()">Complete Day</button><div style="height:16px"></div></div></div>';
+  return html;}
+function workoutBack(pid){if(WORKOUT)WORKOUT.isBatSpeed=undefined;render();}
+var WSETUP=null;
+function openWorkoutSetup(pid){var p=playerById(pid);var w=(p&&p.workout)||{};WSETUP={playerId:pid,programLength:w.programLength||25,programStart:w.programStart||wkYMD(wkMondayOf(todayStr())),pauseWeeks:w.pauseWeeks||0,startWeek:w.startWeek||1,batOverride:!!w.batOverride,drillNeeds:(p&&p.drillNeeds||[]).slice(),needInput:''};go('workoutSetup',{playerId:pid});}
+function wsSetLen(n){WSETUP.programLength=n;render();}
+function wsSetStart(v){if(!WSETUP)return;WSETUP.programStart=wkYMD(wkMondayOf(v));render();}
+function wsPause(d){WSETUP.pauseWeeks=Math.max(0,(WSETUP.pauseWeeks||0)+d);render();}
+function wsStartWeek(d){var tot=(WK_PROGRAMS[WSETUP.programLength==='wow'?25:WSETUP.programLength]||{blocks:5,wpb:5});var max=tot.blocks*tot.wpb;WSETUP.startWeek=Math.min(max,Math.max(1,(WSETUP.startWeek||1)+d));render();}
+function wsToggleOverride(){WSETUP.batOverride=!WSETUP.batOverride;render();}
+function wsNeedInput(v){WSETUP.needInput=v;}
+function wsAddNeed(){var n=(WSETUP.needInput||'').trim();if(!n)return;WSETUP.drillNeeds.push(n);WSETUP.needInput='';render();}
+function wsRemoveNeed(i){WSETUP.drillNeeds.splice(i,1);render();}
+async function wsSave(){var p=playerById(WSETUP.playerId);if(!p)return;var prevOv=(p.workout&&p.workout.batOverride)||false;p.workout=p.workout||{};p.workout.programLength=WSETUP.programLength;p.workout.programStart=WSETUP.programStart;p.workout.pauseWeeks=WSETUP.pauseWeeks;p.workout.startWeek=WSETUP.startWeek;p.workout.batOverride=WSETUP.batOverride;if(WSETUP.batOverride&&!prevOv){p.workout.overrideLog=(p.workout.overrideLog||[]);p.workout.overrideLog.push({date:todayStr(),coach:(DB.user&&DB.user.name)||''});}p.drillNeeds=WSETUP.drillNeeds.slice();await savePlayer(p);toast('Program saved');go('profile',{playerId:p.id});}
+function viewWorkoutSetup(){if(!(DB.user&&DB.user.role==='coach'))return viewProfile();var p=playerById(WSETUP.playerId);if(!p)return viewRoster();var s=WSETUP;var wn=wkResolveWeek(s.programStart,todayStr(),s.pauseWeeks,s.startWeek);var b=wkResolveBlock(s.programLength,wn);var lens=[25,20,16,12].map(function(n){return '<button class="seg'+(s.programLength===n?' on':'')+'" onclick="wsSetLen('+n+')">'+n+' wk</button>';}).join('')+'<button class="seg'+(s.programLength==='wow'?' on':'')+'" onclick="wsSetLen(\'wow\')" style="white-space:nowrap">Wkt of Week</button>';var needs=s.drillNeeds.length?s.drillNeeds.map(function(n,i){return '<div class="add-row" style="cursor:default"><div class="p-info"><h3>'+esc(n)+'</h3><div class="meta">appends to Front Toss</div></div><button class="icon-btn" style="flex:0 0 auto;color:#ff7b6b" onclick="wsRemoveNeed('+i+')">✕</button></div>';}).join(''):'<div class="wk-flag" style="color:var(--grey);font-style:normal;margin:0">No drill needs assigned.</div>';
+  return '<div class="scroll">'+topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>')+'<div class="pad"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>WORKOUT <em>PROGRAM</em></h2></div>'
+    +'<div class="section-lbl" style="margin:14px 0 8px">Program Length</div><div class="segrow">'+lens+'</div>'
+    +'<div class="section-lbl" style="margin:16px 0 8px">Program Start (snaps to Monday)</div><input class="dev-in" type="date" value="'+esc(s.programStart)+'" oninput="wsSetStart(this.value)">'
+    +'<div class="section-lbl" style="margin:16px 0 8px">Pause Weeks</div><div style="display:flex;align-items:center;gap:12px"><button class="seg" style="flex:0 0 auto;padding:10px 16px" onclick="wsPause(-1)">−</button><div style="font-family:\'Anton\';font-style:italic;font-size:22px;min-width:30px;text-align:center">'+s.pauseWeeks+'</div><button class="seg" style="flex:0 0 auto;padding:10px 16px" onclick="wsPause(1)">+</button><span style="color:var(--grey);font-size:12px">weeks paused</span></div>'
+    +'<div class="section-lbl" style="margin:16px 0 8px">Start at Week #</div><div style="display:flex;align-items:center;gap:12px"><button class="seg" style="flex:0 0 auto;padding:10px 16px" onclick="wsStartWeek(-1)">−</button><div style="font-family:\'Anton\';font-style:italic;font-size:22px;min-width:30px;text-align:center">'+(s.startWeek||1)+'</div><button class="seg" style="flex:0 0 auto;padding:10px 16px" onclick="wsStartWeek(1)">+</button><span style="color:var(--grey);font-size:12px">week they begin on</span></div>'
+    +'<div class="wk-note" style="margin:12px 0 0">Currently: Week '+wn+' · '+(b.isTestWeek||b.isTestDay?'Test · ':'')+esc(b.blockName)+' (Level '+b.level+')</div>'
+    +'<div class="section-lbl" style="margin:16px 0 8px">Bat Speed Override</div><button class="seg'+(s.batOverride?' on':'')+'" style="width:100%" onclick="wsToggleOverride()">'+(s.batOverride?'ON — bat speed unlocked':'OFF — normal eligibility rules')+'</button>'
+    +'<div class="section-lbl" style="margin:16px 0 8px">Drill Needs (append to Front Toss)</div><div style="display:flex;gap:8px"><input class="dev-in" placeholder="Drill name" value="'+esc(s.needInput||'')+'" oninput="wsNeedInput(this.value)"><button class="btn" style="flex:0 0 auto;width:auto;padding:0 16px" onclick="wsAddNeed()">Add</button></div><div style="margin-top:8px">'+needs+'</div>'
+    +'<button class="btn" style="margin-top:18px" onclick="wsSave()">Save Program</button><div style="height:16px"></div></div></div>';}
 
 /* ================= EDIT PROFILE ================= */
 var EP=null;
@@ -2111,6 +2267,8 @@ function render(){
     else if(v==='drillMenu') h=viewDrillMenu();
     else if(v==='drill') h=viewDrill();
     else if(v==='drillResult') h=viewDrillResult();
+    else if(v==='workout') h=viewWorkout();
+    else if(v==='workoutSetup') h=viewWorkoutSetup();
     else h=viewLogin();
     vp.innerHTML=h; bindDynamic();
     var nowScroll=vp.querySelector?vp.querySelector('.scroll'):null;
