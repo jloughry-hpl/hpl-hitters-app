@@ -927,7 +927,7 @@ function viewHome(){
       +IC.chev+'</button>';
   }).join('');
   var unN=DB.players.filter(function(p){return !(p.facility);}).length;
-  var un=unN?'<button class="p-card" style="border-left-color:var(--amber)" onclick="openFacility(\'\')">'
+  var un=unN?'<button class="p-card" style="border-left-color:var(--amber)" onclick="openUnassigned()">'
       +'<div class="fac-ic" style="background:rgba(255,176,32,.1);border-color:rgba(255,176,32,.3);color:var(--amber)">'+IC.user+'</div>'
       +'<div class="p-info"><h3>Unassigned</h3><div class="meta">'+unN+' player'+(unN===1?'':'s')+' · not placed yet</div></div>'+IC.chev+'</button>':'';
   return '<div class="scroll">'
@@ -939,6 +939,41 @@ function viewHome(){
       +'<div style="height:12px"></div>'
     +'</div></div>'
     +tabbar('home');
+}
+var UNA={};
+function openUnassigned(){ UNA={}; go('unassigned'); }
+function unaSet(id,field,val){ UNA[id]=UNA[id]||{}; UNA[id][field]=val; }
+async function unaDone(){
+  var ids=Object.keys(UNA).filter(function(id){var u=UNA[id];return u&&(u.fac||u.prog);});
+  if(!ids.length){ toast('Pick a program or service first'); return; }
+  var mon=wkYMD(wkMondayOf(todayStr()));
+  toast('Updating '+ids.length+' player'+(ids.length===1?'':'s')+'…');
+  for(var i=0;i<ids.length;i++){ var p=playerById(ids[i]); if(!p) continue; var u=UNA[ids[i]];
+    if(u.fac) p.facility=u.fac;
+    if(u.prog){ p.workout=p.workout||{}; p.workout.programLength=(u.prog==='wow'?'wow':parseInt(u.prog,10)); if(!p.workout.programStart)p.workout.programStart=mon; if(!p.workout.startWeek)p.workout.startWeek=1; if(p.workout.pauseWeeks==null)p.workout.pauseWeeks=0; }
+    await savePlayer(p);
+  }
+  UNA={}; toast('Players moved'); go('home');
+}
+function viewUnassigned(){
+  if(!(DB.user&&DB.user.role==='coach')) return viewHome();
+  var back='<button class="icon-btn" onclick="go(\'home\')" title="Back">'+IC.back+'</button>';
+  var list=DB.players.filter(function(p){return !(p.facility);}); /* DB.players already ordered by sign-up date */
+  var progOpts=function(sel){return '<option value="">— program —</option>'+[['25','25 Week'],['20','20 Week'],['16','16 Week'],['12','12 Week'],['wow','Workout of the Week']].map(function(o){return '<option value="'+o[0]+'"'+(sel===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('');};
+  var facOpts=function(sel){return '<option value="">— service —</option>'+FACILITIES.map(function(f){return '<option value="'+f.k+'"'+(sel===f.k?' selected':'')+'>'+esc(f.name)+'</option>';}).join('');};
+  var ddStyle='flex:1;min-width:132px;padding:9px 10px;border-radius:9px;background:var(--panel-2);border:1px solid var(--line);color:#fff;font-size:13px';
+  var rows=list.length?list.map(function(p,i){var u=UNA[p.id]||{};
+    return '<div style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px">'
+      +'<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px"><span style="width:22px;height:22px;border-radius:6px;background:rgba(131,245,44,.12);border:1px solid rgba(131,245,44,.3);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:\'Anton\';font-style:italic;font-size:12px;flex:0 0 auto">'+(i+1)+'</span><span style="font-family:\'Barlow Semi Condensed\';font-weight:700;font-size:15px">'+esc(((p.first||'')+' '+(p.last||'')).trim()||'Unnamed')+'</span></div>'
+      +'<div style="display:flex;gap:8px"><select style="'+ddStyle+'" onchange="unaSet(\''+p.id+'\',\'prog\',this.value)">'+progOpts(u.prog)+'</select><select style="'+ddStyle+'" onchange="unaSet(\''+p.id+'\',\'fac\',this.value)">'+facOpts(u.fac)+'</select></div>'
+      +'</div>';
+  }).join(''):'<div class="wk-empty">No unassigned players — everyone is placed.</div>';
+  return '<div class="scroll">'+topbar(back)
+    +'<div class="pad"><div class="hello"><p>Coach dashboard</p><h2>UNASSIGNED <em>PLAYERS</em></h2></div>'
+    +'<div class="wk-note" style="margin:2px 0 12px">Listed by sign-up date, earliest first. Choose a program and a service for each player, then tap Done to move them.</div>'
+    +rows
+    +(list.length?'<button class="btn" style="margin-top:14px" onclick="unaDone()">Done — Apply &amp; Move Players</button>':'')
+    +'<div style="height:16px"></div></div></div>'+tabbar('home');
 }
 function openAddToRoster(){ ADD_SEL={}; go('addToRoster'); }
 function addToggle(id){ if(ADD_SEL[id]) delete ADD_SEL[id]; else ADD_SEL[id]=true; render(); }
@@ -2269,6 +2304,7 @@ function render(){
     else if(v==='drillResult') h=viewDrillResult();
     else if(v==='workout') h=viewWorkout();
     else if(v==='workoutSetup') h=viewWorkoutSetup();
+    else if(v==='unassigned') h=viewUnassigned();
     else h=viewLogin();
     vp.innerHTML=h; bindDynamic();
     var nowScroll=vp.querySelector?vp.querySelector('.scroll'):null;
