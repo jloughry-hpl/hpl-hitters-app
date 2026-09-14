@@ -920,10 +920,36 @@ function clearRosterSearch(){
   var x=document.getElementById('rosterClear'); if(x) x.style.display='none';
 }
 var FACILITIES=[{k:'lex',name:'HPL Lex'},{k:'marion',name:'HPL Marion'},{k:'bright',name:'Bright Academy'},{k:'morse',name:'Morse Academy'},{k:'columbus',name:'HPL Columbus'}];
+var WK_WOW_FACILITIES=['bright','marion','morse'];
 var ADD_SEL={};
 function facilityName(k){ var f=FACILITIES.filter(function(x){return x.k===k;})[0]; return f?f.name:'Unassigned'; }
 function alphaCmp(a,b){ return ((a.first||'')+' '+(a.last||'')).toLowerCase().localeCompare(((b.first||'')+' '+(b.last||'')).toLowerCase()); }
 function openFacility(k){ DB.facility=k; DB.search=''; go('roster'); }
+function facilityRepWorkout(){ var fac=DB.facility; var ps=DB.players.filter(function(p){return (p.facility||'')===fac&&p.workout&&p.workout.programLength&&p.workout.programStart;}); return ps.length?ps[0].workout:null; }
+function openFacilityWoW(){ go('facilityWoW'); }
+function viewFacilityWoW(){
+  if(!(DB.user&&DB.user.role==='coach')) return viewHome();
+  var facN=facilityName(DB.facility);
+  var back='<button class="icon-btn" onclick="go(\'roster\')" title="Back">'+IC.back+'</button>';
+  var w=facilityRepWorkout();
+  var top='<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(facN)+'</p><h2>WORKOUT OF THE <em>WEEK</em></h2></div></div>';
+  if(!w) return top+'<div class="wk-empty">No players with a program set in this facility yet.</div></div>'+tabbar('home');
+  var wn=wkResolveWeek(w.programStart,todayStr(),w.pauseWeeks||0,w.startWeek);
+  var blk=wkResolveBlock(w.programLength,wn);
+  var head='Week '+wn+' · '+(blk.isTestWeek?'TEST · ':'')+esc(blk.blockName)+(blk.isTestWeek?'':' · 3 drills');
+  var html=top+'<div class="wk-note" style="margin:2px 16px 8px"><b>'+head+'</b></div>';
+  if(blk.isTestWeek){ html+='<div class="wk-area"><div class="wk-hd"><div class="n">T</div><h4>Test Week</h4></div><div class="wk-bd"><div class="wk-flag" style="color:var(--grey);font-style:normal;margin:0">Player Development assessment this week — Front Toss → BP → Machine, log every swing.</div></div></div><div style="height:16px"></div></div>'+tabbar('home'); return html; }
+  var g=wkGenerate({programLength:w.programLength,weekNo:wn,isBatSpeed:true,batCount:3,drillNeeds:[],dayIdx:0,today:todayStr(),randomDarts:false});
+  var AR=[];
+  AR.push({t:'Tee',ef:'60–70% effort',pelo:g.areas.tee.label,drills:g.areas.tee.drills,note:g.areas.tee.note,flags:[]});
+  if(g.areas.frontToss){var fo=g.areas.frontToss;AR.push({t:'Front Toss',ef:'',pelo:fo.label,drills:fo.drills,note:fo.note,flags:[]});}
+  if(g.areas.darts){var da=g.areas.darts;AR.push({t:'Darts',ef:'',pelo:null,drills:da.drills,note:'',flags:da.flags||[]});}
+  if(g.areas.bp){var bp=g.areas.bp;AR.push({t:'BP / Machine',ef:'',pelo:null,drills:bp.drills,note:'',flags:[]});}
+  if(g.areas.machine){var mo=g.areas.machine;AR.push({t:'Pitching Machine',ef:'',pelo:null,drills:mo.drills,note:'',flags:[]});}
+  AR.forEach(function(a,i){html+=wkAreaCard(String(i+1),a.t,a.ef,a.pelo,a.drills,a.note,a.flags);});
+  html+='<div style="height:16px"></div></div>'+tabbar('home');
+  return html;
+}
 function viewHome(){
   var cards=FACILITIES.map(function(f){
     var n=DB.players.filter(function(p){return (p.facility||'')===f.k;}).length;
@@ -1024,6 +1050,7 @@ function viewRoster(){
     +'</div>'
     +'<div class="pad">'
       +'<div class="hello"><p>'+esc(facilityName(DB.facility))+' · '+(DB.sport==='softball'?'Softball':'Baseball')+'</p><h2>'+esc(facilityName(DB.facility)).toUpperCase()+'</h2></div>'
+      +((WK_WOW_FACILITIES.indexOf(DB.facility)>=0)?'<button class="btn" style="background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;font-family:\'Anton\';font-style:italic;font-size:15px;letter-spacing:.5px;margin:0 0 12px" onclick="openFacilityWoW()">WORKOUT OF THE WEEK</button>':'')
       +'<div class="searchbar">'+IC.search+'<input id="rosterSearch" placeholder="Search by first or last name" value="'+esc(DB.search||'')+'" oninput="onRosterSearch(this.value)">'
         +'<button id="rosterClear" onclick="clearRosterSearch()" title="Clear search" style="flex:0 0 auto;display:'+((DB.search||'').length?'flex':'none')+';align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--line);border:none;color:#fff;font-size:12px;line-height:1;cursor:pointer">X</button>'
       +'</div>'
@@ -2311,6 +2338,7 @@ function render(){
     else if(v==='workout') h=viewWorkout();
     else if(v==='workoutSetup') h=viewWorkoutSetup();
     else if(v==='unassigned') h=viewUnassigned();
+    else if(v==='facilityWoW') h=viewFacilityWoW();
     else h=viewLogin();
     vp.innerHTML=h; bindDynamic();
     var nowScroll=vp.querySelector?vp.querySelector('.scroll'):null;
