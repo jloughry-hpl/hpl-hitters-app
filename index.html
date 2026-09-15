@@ -1219,6 +1219,7 @@ function wkRandomActive(p,today){return wkMonSatCount((p&&p.workoutLog)||[],toda
 function wkCue(name){return WK_CUES[name]||null;}
 var WK_NOREP={'Around the World':1,'3-3-3':1,'Pick 1 Flip':1};
 function wkD(n,extra){var o={name:n,cue:wkCue(n)};if(extra)for(var k in extra)o[k]=extra[k];if(!o.rep&&!WK_NOREP[n])o.rep='1 × 8';return o;}
+function wkTwoStrikeFirst(arr){if(!arr||arr.length<2)return arr;var a=[],b=[];arr.forEach(function(d){(/2\s*strike/i.test(d.name)?a:b).push(d);});return a.concat(b);}
 function wkGenerate(o){var blk=wkResolveBlock(o.programLength,o.weekNo);var out={block:blk,isBatSpeed:o.isBatSpeed,batCount:o.batCount,areas:{}};
   if(blk.isTestWeek){out.test=true;out.areas.tee={label:null,note:'5 warm-up reps, no coaching',drills:[]};out.areas.frontToss={label:null,note:'Assessment protocol. On non-test days this week, bat speed continues at your normal count.',drills:[]};out.areas.darts={note:'Player Development Report assessment protocol',drills:[],flags:[]};out.areas.bp={note:'Scored live at-bats',drills:[]};out.areas.machine=null;return out;}
   var lvl=blk.level,wk=blk.weekNo,main=blk.mainPillar,dayIdx=(typeof o.dayIdx==='number'?o.dayIdx:0),count=o.isBatSpeed?(o.batCount||2):0,rot=wkBatRot(wk);
@@ -1244,8 +1245,8 @@ function wkGenerate(o){var blk=wkResolveBlock(o.programLength,o.weekNo);var out=
     if(cfg.rounds2)darts.flags.push('2 rounds — no secondary focus this week.'); }
   out.areas.darts=darts;
   if(cfg.noBP){ out.areas.bp=null; }
-  else { var bpTxt=cfg.bp||(cfg.comp?'Competition — mix BP & Machine, Rapsodo reads':'Normal + 2 Strike Hitting'); out.areas.bp={text:bpTxt,drills:bpTxt.split(/\s*[·+]\s*/).map(function(s){return s.trim();}).filter(Boolean).map(function(n){return wkD(n);})}; }
-  out.areas.machine=cfg.mach?{text:cfg.mach,drills:[wkD(cfg.mach)]}:null;
+  else { var bpTxt=cfg.bp||(cfg.comp?'Competition — mix BP & Machine, Rapsodo reads':'Normal + 2 Strike Hitting'); out.areas.bp={text:bpTxt,drills:wkTwoStrikeFirst(bpTxt.split(/\s*[·+]\s*/).map(function(s){return s.trim();}).filter(Boolean).map(function(n){return wkD(n);}))}; }
+  out.areas.machine=cfg.mach?{text:cfg.mach,drills:wkTwoStrikeFirst([wkD(cfg.mach)])}:null;
   out.rounds2=!!cfg.rounds2; out.comp=!!cfg.comp; out.laWeek=!!cfg.la; out.noFrontToss=!!cfg.noFrontToss; out.testDay=!!blk.isTestDay;
   return out;}
 function wkAssessments(p){var list=[];(p.blocks||[]).forEach(function(b){var rapMax=0;(b.entries||[]).forEach(function(e){if(e.type==='rapsodo'&&e.rap&&e.rap.maxEV>rapMax)rapMax=e.rap.maxEV;});(b.entries||[]).forEach(function(e){if(e.type==='test'&&e.status!=='inprogress'&&e.test){var mx=0;['frontToss','bp','machine'].forEach(function(k){(e.test[k]||[]).forEach(function(pt){if(pt.ev>0&&pt.color!=='Red'&&pt.ev>mx)mx=pt.ev;});});if(rapMax>mx)mx=rapMax;list.push({date:e.date||'',ev:mx});}});});list.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});return list.map(function(x){return x.ev;});}
