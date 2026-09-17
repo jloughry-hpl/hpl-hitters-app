@@ -1157,6 +1157,7 @@ function viewProfile(){
     +'<div class="pad" style="padding-bottom:0">'
       +'<button class="btn" style="background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;font-family:\'Anton\';font-style:italic;font-size:18px;letter-spacing:.5px" onclick="openWorkout(\''+p.id+'\')">TODAY\'S WORKOUT'+(wkProfileStatus(p)?'<span style="display:block;font-family:\'Barlow Semi Condensed\';font-style:normal;font-size:12px;font-weight:600;margin-top:3px;opacity:.75">'+esc(wkProfileStatus(p))+'</span>':'')+'</button>'
       +(isCoach?'<button class="btn ghost" style="margin-top:8px" onclick="openWorkoutSetup(\''+p.id+'\')">Workout Program</button>':'')
+      +'<div style="text-align:center;margin-top:11px;color:var(--grey);font-size:12.5px;font-weight:600">Workouts completed: <span style="color:var(--green);font-weight:800;font-size:14px">'+((p.workoutLog||[]).length)+'</span></div>'
     +'</div>'
     +'<div class="section-lbl">Test Blocks · 25-Week Program</div>'
     +'<div class="wk-note" style="margin-bottom:6px">Tap a block to log a hitting test or Rapsodo results.</div>'
@@ -1266,7 +1267,6 @@ function wkAreaCard(n,title,extra,pelo,drills,note,flags){var h='<div class="wk-
 function viewWorkout(){var p=curPlayer();if(!p)return viewLogin();var coach=DB.user&&DB.user.role==='coach';var back='<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>';if(!wkHasProgram(p)){return '<div class="scroll">'+topbar(back)+'<div class="pad"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>TODAY\'S <em>WORKOUT</em></h2></div></div><div class="wk-empty">'+(coach?'No program set yet. Open <b>Workout Program</b> on this player\'s profile to assign a length and start date.':'Your coach hasn\'t set up your program yet — check back soon.')+'</div></div>';}var w=p.workout;var wn=wkResolveWeek(w.programStart,todayStr(),w.pauseWeeks||0,w.startWeek);var blk=wkResolveBlock(w.programLength,wn);if(blk.isTestWeek)return viewWorkoutSession(p,w,wn,blk,null);if(w.programLength==='wow'){WORKOUT={playerId:p.id,isBatSpeed:true};return viewWorkoutSession(p,w,wn,blk,true,true);}if(!WORKOUT||WORKOUT.playerId!==p.id)WORKOUT={playerId:p.id,isBatSpeed:undefined};if(WORKOUT.isBatSpeed===undefined)return viewWorkoutChoose(p,w,wn,blk);return viewWorkoutSession(p,w,wn,blk,WORKOUT.isBatSpeed);}
 function viewWorkoutChoose(p,w,wn,blk){var back='<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>';var elig=wkBatSpeedEligible(todayStr(),p.workoutLog||[],!!w.batOverride);var bsCls='wk-cbtn bs'+(elig.allowed?'':' off');var bsSub=elig.allowed?(w.batOverride?'Unlocked by coach':'Ready — swing as hard as you can'):(elig.reason+(elig.nextEligible?(' Next eligible '+elig.nextEligible):''));return '<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+' · Week '+wn+' · '+esc(blk.blockName)+'</p><h2>TODAY\'S <em>WORKOUT</em></h2></div></div><div class="wk-note" style="margin:2px 16px 10px">Choose your session type for today.</div><div class="wk-choose"><button class="'+bsCls+'" '+(elig.allowed?'onclick="chooseBatSpeed(true)"':'disabled')+'>BAT SPEED<span class="sub">'+esc(bsSub)+'</span></button><button class="wk-cbtn no" onclick="chooseBatSpeed(false)">NO BAT SPEED<span class="sub">Mechanics &amp; skill work — always available</span></button></div><div style="height:16px"></div></div>';}
 function viewWorkoutSession(p,w,wn,blk,isBatSpeed,wow){var back='<button class="icon-btn" onclick="'+(blk.isTestWeek||wow?'go(\'profile\',{playerId:\''+p.id+'\'})':'workoutBack(\''+p.id+'\')')+'" title="Back">'+IC.back+'</button>';var assess=wkAssessments(p);var batCount=wow?3:wkBatSpeedCount(blk.blockIndex,assess);var tdy=todayStr();var rnd=wow?false:wkRandomActive(p,tdy);var dIdx=wow?0:wkDayIdx(tdy);var g=wkGenerate({programLength:w.programLength,weekNo:wn,isBatSpeed:isBatSpeed,batCount:batCount,drillNeeds:(p.drillNeeds||[]),dayIdx:dIdx,today:tdy,randomDarts:rnd});var head='Week '+wn+' · '+(g.test?'TEST · ':'')+esc(blk.blockName)+(wow?' · Workout of the Week (3 drills)':(isBatSpeed?(' · Bat Speed ('+batCount+' drills)'):(g.test?'':' · Skill Day')))+(rnd?' · Random':'');var tee=g.areas.tee;var html='<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>'+(wow?'WORKOUT OF THE <em>WEEK</em>':(g.test?'TEST <em>DAY</em>':'TODAY\'S <em>WORKOUT</em>'))+'</h2></div></div><div class="wk-note" style="margin:2px 16px 8px"><b>'+head+'</b></div>'+(g.testDay?'<div class="wk-flag" style="margin:2px 16px 10px;color:#f0c040;font-style:normal;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.35);border-radius:10px;padding:9px 12px"><b>Test Day</b> — first session this week is the Player Development assessment (Front Toss → BP → Machine, log every swing). Train the rest of the week as normal below.</div>':'');
-  html+='<div style="margin:2px 16px 12px;color:#0a0b0a;background:linear-gradient(180deg,var(--green),var(--green-deep));border-radius:11px;padding:10px 13px;font-weight:800;font-size:12.5px;display:flex;align-items:center;gap:8px">'+IC.ball+'<span>Don\'t forget — tap the green <u>COMPLETE DAY</u> button at the bottom when you finish. That\'s what logs your workout!</span></div>';
   var AR=[];
   AR.push({t:'Tee',ef:(g.test?'':'60–70% effort'),pelo:tee.label,drills:tee.drills,note:tee.note,flags:[]});
   if(g.areas.frontToss){var fo=g.areas.frontToss;AR.push({t:'Front Toss',ef:'',pelo:fo.label,drills:fo.drills,note:fo.note,flags:[],mind:isBatSpeed});}
@@ -1709,7 +1709,8 @@ var LB_METRICS=[
   {k:'maxDist',   lbl:'Max Distance',  unit:'ft',  dec:0, desc:'Longest batted-ball distance recorded.'},
   {k:'avgDist',   lbl:'Avg Distance',  unit:'ft',  dec:0, desc:'Average batted-ball distance across tests.'},
   {k:'colorAcc',  lbl:'Vision',        unit:'%',   dec:0, desc:'Pitch recognition — colored ball read correctly.'},
-  {k:'decAcc',    lbl:'Swing Decision',unit:'%',   dec:0, desc:'Correct swing / take decisions on colored balls.'}
+  {k:'decAcc',    lbl:'Swing Decision',unit:'%',   dec:0, desc:'Correct swing / take decisions on colored balls.'},
+  {k:'workouts',  lbl:'Workouts',      unit:'',    dec:0, desc:'Total training days logged — the grind leaderboard. Show up, get counted.'}
 ];
 function lbFmt(v,dec){ if(dec){ return (Math.round(v*10)/10).toFixed(1).replace(/\.0$/,''); } return Math.round(v); }
 function devStats(p){
@@ -1758,7 +1759,9 @@ async function loadLeaderboard(){
 function lbLoad(raw){
   return (raw||[]).map(function(r){
     var p={ id:r.id, first:r.first, last:r.last, blocks:r.blocks||[] };
-    return { id:r.id, name:((r.first||'')+' '+(r.last||'')).trim()||'Unnamed', sport:(r.sport||'baseball'), facility:(r.facility||''), cs:careerStats(p), dev:devStats(p) };
+    var cs=careerStats(p);
+    cs.workouts=(typeof r.workouts==='number')?r.workouts:((r.workout_count!=null)?(+r.workout_count||0):0);
+    return { id:r.id, name:((r.first||'')+' '+(r.last||'')).trim()||'Unnamed', sport:(r.sport||'baseball'), facility:(r.facility||''), cs:cs, dev:devStats(p) };
   });
 }
 async function openLeaderboard(pid){
@@ -1836,7 +1839,7 @@ function viewDevelopment(){
   var myRank=0, myD=null;
   if(meId){ for(var i=0;i<elig.length;i++){ if(elig[i].id===meId){ myRank=i+1; myD=elig[i].dev[def.k]; break; } } }
   function dStr(d){ return (d>=0?'+':'')+lbFmt(d,def.dec); }
-  var chips=LB_METRICS.map(function(m){ return '<button class="lb-chip '+(m.k===mk?'on':'')+'" onclick="setDevMetric(\''+m.k+'\')">'+m.lbl+'</button>'; }).join('');
+  var chips=LB_METRICS.filter(function(m){return m.k!=='workouts';}).map(function(m){ return '<button class="lb-chip '+(m.k===mk?'on':'')+'" onclick="setDevMetric(\''+m.k+'\')">'+m.lbl+'</button>'; }).join('');
   var list = top.length ? top.map(function(r,idx){
       var rk=idx+1; var d=r.dev[def.k]; var cls='lb-row'+(r.id===meId?' me':'')+(rk===1?' top1':rk===2?' top2':rk===3?' top3':'');
       return '<div class="'+cls+'"><div class="rk">'+rk+'</div>'
