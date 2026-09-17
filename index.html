@@ -206,8 +206,8 @@
   .wk-drill.has-cue{cursor:pointer;border-color:rgba(131,245,44,.35)}
   .wk-drill.sec{border-left:3px solid var(--amber)}
   .wk-drill.need{background:rgba(131,245,44,.1);border-color:var(--green);color:var(--green)}
-  .wk-drill.bs{border-left:3px solid var(--green);background:rgba(131,245,44,.07)}
-  .wk-drill.addon{border-left:3px solid var(--amber);background:rgba(255,176,32,.06)}
+  .wk-drill.bs{border:1.5px solid var(--green);background:rgba(131,245,44,.17);color:#eafff0}
+  .wk-drill.addon{border:1.5px solid var(--amber);background:rgba(255,176,32,.17);color:#fff2d8}
   .wk-drill .dtag{font-size:8.5px;font-weight:800;letter-spacing:.5px;padding:2px 5px;border-radius:4px;text-transform:uppercase;line-height:1}
   .wk-drill .dtag.bs{background:var(--green);color:#0a0b0a}
   .wk-drill .dtag.add{background:var(--amber);color:#241a00}
@@ -1181,7 +1181,7 @@ var WK_BLOCK_NAMES={1:'Foundation',2:'Build',3:'Sharpen',4:'Peak',5:'Compete'};
 var WK_PILLAR_PAIR={Path:'Vision',Vision:'Approach',Approach:'Timing',Timing:'Path'};
 var WK_PILLAR_LABEL={Path:'Bat Path / Direction / Control',Vision:'Vision / Pitch Recognition',Approach:'Approach',Timing:'Timing'};
 var WK_BATSPEED_ROT=[['Normal','Flamingos','Babe Ruth','Step Backs'],['Happy Gilmores','Step Backs','Rhythm','Wind-Up'],['2 Strike Stance','Rhythm','Normal','Flamingos'],['Babe Ruth','Wind-Up','Happy Gilmores','2 Strike Stance'],['Step Backs','Normal','Flamingos','Rhythm'],['Flamingos','2 Strike Stance','Wind-Up','Babe Ruth'],['Rhythm','Happy Gilmores','Step Backs','Normal'],['Wind-Up','Babe Ruth','2 Strike Stance','Happy Gilmores']];
-var WK_HPL_TEE=['Tap','Ortiz','Beltre','Open Hip','Low Tee','High Tee'];
+var WK_HPL_TEE=['Tap','Ortiz','Open Hip','Low Tee','High Tee'];
 var WK_ADDON=['Walk Thrus','Swing Backs','Split Stance','Ortiz Drill','Beltre Drill','Power Position','Tap Drill'];
 /* v2 main-focus config: per level(1-5) x pillar. d=darts main drills; sec=fixed secondary; angles=alt Open/Closed as 2nd main; noDarts/noFrontToss/noBP; la=launch-angle package; comp=competition week; rounds2; mach=extra machine area */
 var WK_MAIN={
@@ -1209,7 +1209,7 @@ function wkResolveBlock(len,weekNo){var P=WK_PROGRAMS[len==='wow'?25:len];if(!P)
 function wkBatSpeedCount(bi,a){if(bi<=1)return 2;var c=a[bi-1],p=a[bi-2];if(typeof c!=='number'||typeof p!=='number')return 2;var g=c-p;if(g>=3.5)return 2;if(g>=1.0)return 3;return 4;}
 function wkBatSpeedEligible(today,log,ov){var bs=(log||[]).filter(function(e){return e.bat;}).map(function(e){return e.date;}).sort();var last=bs.length?bs[bs.length-1]:null;var mon=wkYMD(wkMondayOf(today));var sd=wkMondayOf(today);sd.setDate(sd.getDate()+6);var sun=wkYMD(sd);var tw=bs.filter(function(d){return d>=mon&&d<=sun;}).length;if(ov)return{allowed:true,reason:'Coach override',nextEligible:null,thisWeek:tw};if(tw>=3)return{allowed:false,reason:'Weekly cap reached (3 bat-speed days this week).',nextEligible:null,thisWeek:tw};if(last){var diff=wkDayDiff(today,last);if(diff<2){var ne=wkParseDate(last);ne.setDate(ne.getDate()+2);return{allowed:false,reason:'Needs 2 days between bat-speed days.',nextEligible:wkYMD(ne),thisWeek:tw};}}return{allowed:true,reason:'',nextEligible:null,thisWeek:tw};}
 function wkBatRot(w){return WK_BATSPEED_ROT[(w-1)%8];}
-function wkHplTee(w){var i=((w-1)*2)%6;return[WK_HPL_TEE[i],WK_HPL_TEE[(i+1)%6]];}
+function wkHplTee(w){var L=WK_HPL_TEE.length;var i=((w-1)*2)%L;return[WK_HPL_TEE[i],WK_HPL_TEE[(i+1)%L]];}
 function wkAddon(w){return WK_ADDON[(w-1)%7];}
 function wkSeed(s){var h=2166136261,str=String(s);for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=(h*16777619)>>>0;}return h>>>0;}
 function wkPickN(pool,n,seed){var a=pool.slice(),out=[],s=(seed>>>0)||1;while(a.length&&out.length<n){s=(s*1103515245+12345)>>>0;var idx=s%a.length;out.push(a.splice(idx,1)[0]);}return out;}
@@ -1224,14 +1224,14 @@ function wkGenerate(o){var blk=wkResolveBlock(o.programLength,o.weekNo);var out=
   if(blk.isTestWeek){out.test=true;out.areas.tee={label:null,note:'5 warm-up reps, no coaching',drills:[]};out.areas.frontToss={label:null,note:'Assessment protocol. On non-test days this week, bat speed continues at your normal count.',drills:[]};out.areas.darts={note:'Player Development Report assessment protocol',drills:[],flags:[]};out.areas.bp={note:'Scored live at-bats',drills:[]};out.areas.machine=null;return out;}
   var lvl=blk.level,wk=blk.weekNo,main=blk.mainPillar,dayIdx=(typeof o.dayIdx==='number'?o.dayIdx:0),count=o.isBatSpeed?(o.batCount||2):0,rot=wkBatRot(wk);
   var cfg=(WK_MAIN[lvl]&&WK_MAIN[lvl][main])||{};
-  var tee={label:'',drills:[]};
-  if(o.isBatSpeed){ if(count===4){tee.label='Pelotero Tee + Flips';tee.drills=[wkD(rot[2],{rep:'bs'}),wkD(rot[3],{rep:'bs'})];} else tee.label='Pelotero Tee Only'; }
-  else { tee.label='Pelotero Tee + Flips';var h=wkHplTee(wk);tee.drills=[wkD(h[0]),wkD(h[1])]; }
+  var tee={label:'',drills:[],note:''};
+  if(o.isBatSpeed){ if(count===4){tee.label='Pelotero Tee + Flips';tee.drills=[wkD(rot[2],{rep:'bs'}),wkD(rot[3],{rep:'bs'})];tee.note='Do both Pelotero tee drills (1 set of 8 each), then the 2 tee drills shown (1 set of 8 each).';} else {tee.label='Pelotero Tee Only';tee.note='Do all 4 Pelotero tee drills — 1 set of 8 each.';} }
+  else { tee.label='Pelotero Tee + Flips';var h=wkHplTee(wk);tee.drills=[wkD(h[0]),wkD(h[1])];tee.note='Do both Pelotero tee drills (1 set of 8 each), then the 2 tee drills shown (1 set of 8 each).'; }
   out.areas.tee=tee;
   if(cfg.noFrontToss){ out.areas.frontToss=null; }
   else { var ft={label:'',drills:[],note:''};
-    if(o.isBatSpeed){ if(count===2)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(wkAddon(wk),{addon:true})]; else if(count===3)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(rot[2],{rep:'bs'})]; else if(count===4)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD('Pick 1 Flip')]; }
-    else { ft.label='Pelotero Flip';ft.note='Do 3 Pelotero flip drills'; }
+    if(o.isBatSpeed){ if(count===2)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(wkAddon(wk),{addon:true})]; else if(count===3)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(rot[2],{rep:'bs'})]; else if(count===4)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD('Pick 1 Flip')]; ft.note='Green “Bat Speed” drills = 5 heavy · 5 light · 5 normal each. Any drill without the green tag is NOT bat speed — 1 set of 8.'; }
+    else { ft.label='Pelotero Flip';ft.note='Do 3 Pelotero flip drills — 1 set of 8 each. If a flip drill is overload/underload, ask your instructor for a replacement.'; }
     (o.drillNeeds||[]).forEach(function(n){ft.drills.push(wkD(n,{need:true}));});
     out.areas.frontToss=ft; }
   var darts=null;
