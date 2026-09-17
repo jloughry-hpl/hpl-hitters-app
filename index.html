@@ -1781,7 +1781,7 @@ async function openDevelopment(pid){
 function setLbMetric(k){ DB.lbMetric=k; render(); }
 function viewLeaderboard(){
   var isCoach=DB.user&&DB.user.role==='coach';
-  var meId=DB.ctx&&DB.ctx.playerId;
+  var meId=isCoach?null:(DB.ctx&&DB.ctx.playerId);
   var mk=DB.lbMetric||'maxEV';
   var def=LB_METRICS.filter(function(m){return m.k===mk;})[0]||LB_METRICS[0];
   var stats=DB.lbStats||[];
@@ -1826,7 +1826,7 @@ function viewLeaderboard(){
 function setDevMetric(k){ DB.devMetric=k; render(); }
 function viewDevelopment(){
   var isCoach=DB.user&&DB.user.role==='coach';
-  var meId=DB.ctx&&DB.ctx.playerId;
+  var meId=isCoach?null:(DB.ctx&&DB.ctx.playerId);
   var mk=DB.devMetric||'maxEV';
   var def=LB_METRICS.filter(function(m){return m.k===mk;})[0]||LB_METRICS[0];
   var stats=DB.lbStats||[];
