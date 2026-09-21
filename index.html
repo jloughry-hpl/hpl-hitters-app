@@ -1247,7 +1247,21 @@ function wkApplyEquip(out,eq){if(!eq)return out;out.equipNotes=out.equipNotes||[
   if(!eq.colorBalls)out.equipNotes.push('No color balls — color-read drills are done with normal balls or coach-directed; color reads aren\'t scored.');
   return out;}
 function wkGenerate(o){var blk=wkResolveBlock(o.programLength,o.weekNo);var out={block:blk,isBatSpeed:o.isBatSpeed,batCount:o.batCount,areas:{}};
-  if(blk.isTestWeek){out.test=true;out.areas.tee={label:null,note:'5 warm-up reps, no coaching',drills:[]};out.areas.frontToss={label:null,note:'Assessment protocol. On non-test days this week, bat speed continues at your normal count.',drills:[]};out.areas.darts={note:'Player Development Report assessment protocol',drills:[],flags:[]};out.areas.bp={note:'Scored live at-bats',drills:[]};out.areas.machine=null;return out;}
+  if(blk.isTestWeek){
+    if(o.nonTest){
+      var wkT=blk.weekNo,lvlT=blk.level,rotT=wkBatRot(wkT),noPeloT=o.equip&&o.equip.pelotero===false;
+      if(noPeloT){out.areas.tee={label:null,drills:wkNoPeloTee(wkT,o.equip).map(function(n){return wkD(n);}),note:'Rotate these 4 tee drills — 1 set of 8 each.'};}
+      else{out.areas.tee={label:'Pelotero Tee Only',drills:[],note:'Do all 4 Pelotero tee drills — 1 set of 8 each.'};}
+      out.areas.frontToss={label:'',drills:[wkD(rotT[0],{rep:'bs'}),wkD(rotT[1],{rep:'bs'}),wkD(wkAddon(wkT),{addon:true})],note:'Green “Bat Speed” drills = 5 heavy · 5 light · 5 normal each. Last drill is a standard front-toss drill — 1 set of 8.'};
+      var poolT=[];['Path','Vision','Approach','Timing'].forEach(function(pil){var c=WK_MAIN[lvlT]&&WK_MAIN[lvlT][pil];if(c&&c.d)c.d.forEach(function(n){poolT.push(n);});});if(!poolT.length)poolT=WK_RANDOM_POOL.slice();
+      var picksT=wkPickN(poolT,2,wkSeed((o.today||('w'+wkT))+'nt'));
+      out.areas.darts={drills:[wkD(picksT[0]),wkD(picksT[1])],flags:['Non-test day — 2 random drills pulled from the four pillars.']};
+      out.areas.bp=null;
+      out.areas.machine={text:'2 Strike + Normal',drills:wkTwoStrikeFirst([wkD('2 Strike Hitting'),wkD('Normal Rounds')])};
+      out.nonTest=true;out.testDay=false;
+      return wkApplyEquip(out,o.equip);
+    }
+    out.test=true;out.areas.tee={label:null,note:'5 warm-up reps, no coaching',drills:[]};out.areas.frontToss={label:null,note:'Assessment protocol. On non-test days this week, bat speed continues at your normal count.',drills:[]};out.areas.darts={note:'Player Development Report assessment protocol',drills:[],flags:[]};out.areas.bp={note:'Scored live at-bats',drills:[]};out.areas.machine=null;return out;}
   var lvl=blk.level,wk=blk.weekNo,main=blk.mainPillar,dayIdx=(typeof o.dayIdx==='number'?o.dayIdx:0),count=o.isBatSpeed?(o.batCount||2):0,rot=wkBatRot(wk);
   var cfg=(WK_MAIN[lvl]&&WK_MAIN[lvl][main])||{};
   var tee={label:'',drills:[],note:''};
@@ -1292,9 +1306,12 @@ function chooseBatSpeed(bs){if(!WORKOUT)return;WORKOUT.isBatSpeed=bs;if(bs&&!(cu
 async function completeDay(){var p=curPlayer();if(!p)return;if(!p.workoutLog)p.workoutLog=[];if(p.workoutLog.some(function(e){return e.date===todayStr();})){toast('Already logged today');go('profile',{playerId:p.id});return;}var bs=!!(WORKOUT&&WORKOUT.isBatSpeed===true);p.workoutLog.push({date:todayStr(),bat:bs});await savePlayer(p);WORKOUT=null;toast('Training day logged'+(bs?' · bat speed':''));go('profile',{playerId:p.id});}
 function wkDrillHtml(d){var cue=d.cue;var kind=(d.rep==='bs')?'bs':(d.addon?'addon':'');var cls='wk-drill'+(d.need?' need':'')+(d.secondary?' sec':'')+(kind?' '+kind:'')+(cue?' has-cue':'');var safe=String(d.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'");var rep=(d.rep==='bs')?'5H · 5L · 5N':(d.rep||'');var badge=(kind==='bs')?'<span class="dtag bs">Bat Speed</span>':(kind==='addon')?'<span class="dtag add">Add-On</span>':'';var repHtml=rep?('<span class="drep">'+rep+'</span>'):'';return '<button class="'+cls+'" '+(cue?('onclick="wkCueModal(\''+safe+'\')"'):'disabled')+'>'+esc(d.name)+badge+repHtml+(cue?' <span class="ci">i</span>':'')+'</button>';}
 function wkAreaCard(n,title,extra,pelo,drills,note,flags){var h='<div class="wk-area"><div class="wk-hd"><div class="n">'+n+'</div><h4>'+title+'</h4>'+(extra?'<span class="ef">'+extra+'</span>':'')+'</div><div class="wk-bd">';if(pelo)h+='<div class="wk-pelo">'+IC.sync+' '+esc(pelo)+' — open the Pelotero app</div>';if(note)h+='<div class="wk-flag" style="color:var(--grey);font-style:normal;margin-top:0;margin-bottom:'+(drills&&drills.length?'8px':'0')+'">'+esc(note)+'</div>';if(drills&&drills.length)h+='<div>'+drills.map(wkDrillHtml).join('')+'</div>';(flags||[]).forEach(function(f){h+='<div class="wk-flag">'+esc(f)+'</div>';});h+='</div></div>';return h;}
-function viewWorkout(){var p=curPlayer();if(!p)return viewLogin();var coach=DB.user&&DB.user.role==='coach';var back='<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>';if(!wkHasProgram(p)){return '<div class="scroll">'+topbar(back)+'<div class="pad"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>TODAY\'S <em>WORKOUT</em></h2></div></div><div class="wk-empty">'+(coach?'No program set yet. Open <b>Workout Program</b> on this player\'s profile to assign a length and start date.':'Your coach hasn\'t set up your program yet — check back soon.')+'</div></div>';}var w=p.workout;var wn=wkResolveWeek(w.programStart,todayStr(),w.pauseWeeks||0,w.startWeek);var blk=wkResolveBlock(w.programLength,wn);if(blk.isTestWeek)return viewWorkoutSession(p,w,wn,blk,null);if(w.programLength==='wow'){WORKOUT={playerId:p.id,isBatSpeed:true};return viewWorkoutSession(p,w,wn,blk,true,true);}if(!WORKOUT||WORKOUT.playerId!==p.id)WORKOUT={playerId:p.id,isBatSpeed:undefined};if(WORKOUT.isBatSpeed===undefined)return viewWorkoutChoose(p,w,wn,blk);return viewWorkoutSession(p,w,wn,blk,WORKOUT.isBatSpeed);}
+function viewWorkout(){var p=curPlayer();if(!p)return viewLogin();var coach=DB.user&&DB.user.role==='coach';var back='<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>';if(!wkHasProgram(p)){return '<div class="scroll">'+topbar(back)+'<div class="pad"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>TODAY\'S <em>WORKOUT</em></h2></div></div><div class="wk-empty">'+(coach?'No program set yet. Open <b>Workout Program</b> on this player\'s profile to assign a length and start date.':'Your coach hasn\'t set up your program yet — check back soon.')+'</div></div>';}var w=p.workout;var wn=wkResolveWeek(w.programStart,todayStr(),w.pauseWeeks||0,w.startWeek);var blk=wkResolveBlock(w.programLength,wn);if(blk.isTestWeek){if(!WORKOUT||WORKOUT.playerId!==p.id)WORKOUT={playerId:p.id,isBatSpeed:undefined,testChoice:undefined};if(!WORKOUT.testChoice)return viewTestWeekChoose(p,w,wn,blk);if(WORKOUT.testChoice==='nontest'){WORKOUT.isBatSpeed=true;return viewWorkoutSession(p,w,wn,blk,true,false,true);}return viewWorkoutSession(p,w,wn,blk,null,false,false);}if(w.programLength==='wow'){WORKOUT={playerId:p.id,isBatSpeed:true};return viewWorkoutSession(p,w,wn,blk,true,true);}if(!WORKOUT||WORKOUT.playerId!==p.id)WORKOUT={playerId:p.id,isBatSpeed:undefined};if(WORKOUT.isBatSpeed===undefined)return viewWorkoutChoose(p,w,wn,blk);return viewWorkoutSession(p,w,wn,blk,WORKOUT.isBatSpeed);}
 function viewWorkoutChoose(p,w,wn,blk){var back='<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>';var elig=wkBatSpeedEligible(todayStr(),p.workoutLog||[],!!w.batOverride);var bsCls='wk-cbtn bs'+(elig.allowed?'':' off');var bsSub=elig.allowed?(w.batOverride?'Unlocked by coach':'Ready — swing as hard as you can'):(elig.reason+(elig.nextEligible?(' Next eligible '+elig.nextEligible):''));return '<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+' · Week '+wn+' · '+esc(blk.blockName)+'</p><h2>TODAY\'S <em>WORKOUT</em></h2></div></div><div class="wk-note" style="margin:2px 16px 10px">Choose your session type for today.</div><div class="wk-choose"><button class="'+bsCls+'" '+(elig.allowed?'onclick="chooseBatSpeed(true)"':'disabled')+'>BAT SPEED<span class="sub">'+esc(bsSub)+'</span></button><button class="wk-cbtn no" onclick="chooseBatSpeed(false)">NO BAT SPEED<span class="sub">Mechanics &amp; skill work — always available</span></button></div><div style="height:16px"></div></div>';}
-function viewWorkoutSession(p,w,wn,blk,isBatSpeed,wow){var back='<button class="icon-btn" onclick="'+(blk.isTestWeek||wow?'go(\'profile\',{playerId:\''+p.id+'\'})':'workoutBack(\''+p.id+'\')')+'" title="Back">'+IC.back+'</button>';var assess=wkAssessments(p);var batCount=wow?3:wkBatSpeedCount(blk.blockIndex,assess);var tdy=todayStr();var rnd=wow?false:wkRandomActive(p,tdy);var dIdx=wow?0:wkDayIdx(tdy);var g=wkGenerate({programLength:w.programLength,weekNo:wn,isBatSpeed:isBatSpeed,batCount:batCount,drillNeeds:(p.drillNeeds||[]),dayIdx:dIdx,today:tdy,randomDarts:rnd,equip:wkEquip(p)});var head='Week '+wn+' · '+(g.test?'TEST · ':'')+esc(blk.blockName)+(wow?' · Workout of the Week (3 drills)':(isBatSpeed?(' · Bat Speed ('+batCount+' drills)'):(g.test?'':' · Skill Day')))+(rnd?' · Random':'');var tee=g.areas.tee;var html='<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>'+(wow?'WORKOUT OF THE <em>WEEK</em>':(g.test?'TEST <em>DAY</em>':'TODAY\'S <em>WORKOUT</em>'))+'</h2></div></div><div class="wk-note" style="margin:2px 16px 8px"><b>'+head+'</b></div>'+(g.testDay?'<div class="wk-flag" style="margin:2px 16px 10px;color:#f0c040;font-style:normal;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.35);border-radius:10px;padding:9px 12px"><b>Test Day</b> — first session this week is the Player Development assessment (Front Toss → BP → Machine, log every swing). Train the rest of the week as normal below.</div>':'');
+function chooseTestMode(mode){var p=curPlayer();if(!p)return;if(!WORKOUT||WORKOUT.playerId!==p.id)WORKOUT={playerId:p.id};WORKOUT.testChoice=mode;if(mode==='nontest')WORKOUT.isBatSpeed=true;render();}
+function testWeekBack(pid){if(WORKOUT)WORKOUT.testChoice=undefined;render();}
+function viewTestWeekChoose(p,w,wn,blk){var back='<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>';return '<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+' · Week '+wn+' · Test Week</p><h2>TODAY\'S <em>WORKOUT</em></h2></div></div><div class="wk-note" style="margin:2px 16px 10px">Testing today, or already tested this week?</div><div class="wk-choose"><button class="wk-cbtn bs" onclick="chooseTestMode(\'test\')">TEST DAY<span class="sub">Player Development assessment — Front Toss → BP → Machine</span></button><button class="wk-cbtn no" onclick="chooseTestMode(\'nontest\')">NON-TEST DAY<span class="sub">Already tested — full training session instead</span></button></div><div style="height:16px"></div></div>';}
+function viewWorkoutSession(p,w,wn,blk,isBatSpeed,wow,nonTest){var back='<button class="icon-btn" onclick="'+(blk.isTestWeek?'testWeekBack(\''+p.id+'\')':(wow?'go(\'profile\',{playerId:\''+p.id+'\'})':'workoutBack(\''+p.id+'\')'))+'" title="Back">'+IC.back+'</button>';var assess=wkAssessments(p);var batCount=wow?3:wkBatSpeedCount(blk.blockIndex,assess);var tdy=todayStr();var rnd=wow?false:wkRandomActive(p,tdy);var dIdx=wow?0:wkDayIdx(tdy);var g=wkGenerate({programLength:w.programLength,weekNo:wn,isBatSpeed:isBatSpeed,batCount:batCount,drillNeeds:(p.drillNeeds||[]),dayIdx:dIdx,today:tdy,randomDarts:rnd,equip:wkEquip(p),nonTest:nonTest});var head='Week '+wn+' · '+(g.test?'TEST · ':'')+esc(blk.blockName)+(nonTest?' · Non-Test Day':(wow?' · Workout of the Week (3 drills)':(isBatSpeed?(' · Bat Speed ('+batCount+' drills)'):(g.test?'':' · Skill Day'))))+(rnd?' · Random':'');var tee=g.areas.tee;var html='<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>'+(wow?'WORKOUT OF THE <em>WEEK</em>':(g.test?'TEST <em>DAY</em>':'TODAY\'S <em>WORKOUT</em>'))+'</h2></div></div><div class="wk-note" style="margin:2px 16px 8px"><b>'+head+'</b></div>'+(g.testDay?'<div class="wk-flag" style="margin:2px 16px 10px;color:#f0c040;font-style:normal;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.35);border-radius:10px;padding:9px 12px"><b>Test Day</b> — first session this week is the Player Development assessment (Front Toss → BP → Machine, log every swing). Train the rest of the week as normal below.</div>':'');
   if(g.equipNotes&&g.equipNotes.length){g.equipNotes.forEach(function(nn){html+='<div class="wk-flag" style="margin:2px 16px 8px;color:#9db8ff;font-style:normal;background:rgba(61,123,255,.08);border:1px solid rgba(61,123,255,.3);border-radius:10px;padding:8px 11px">'+esc(nn)+'</div>';});}
   var AR=[];
   AR.push({t:'Tee',ef:(g.test?'':'60–70% effort'),pelo:tee.label,drills:tee.drills,note:tee.note,flags:[]});
@@ -1931,6 +1948,8 @@ var DRILL_META={
   sevenBall:{name:'7 Ball', tag:'Location Read', icon:'chart', blurb:'Call the ball 1–7 across the plate. Recognition accuracy.'},
   zeroStrike:{name:'0 Strike', tag:'Zone Discipline', icon:'trend', blurb:'Swing in-zone, take out. Great AB = 90% of max EV.'}
 };
+var DRILL_LOCS={ bpReads:['bp','machine'], sevenBall:['frontToss','bp','machine'], zeroStrike:['frontToss','bp','machine'] };
+var LOC_LABEL={ frontToss:'Front Toss', bp:'BP', machine:'Pitching Machine' };
 function drillIcon(k){ return IC[(DRILL_META[k]||{}).icon]||IC.ball; }
 function adjOrder(){ var o=[]; [[1,'FB',3],[1,'CB',3],[1,'FB',3],[2,'CB',3],[2,'FB',3],[2,'CB',3]].forEach(function(s){ for(var i=0;i<s[2];i++) o.push({round:s[0],type:s[1]}); }); return o; }
 var ADJ_ORDER=adjOrder();
@@ -1986,9 +2005,10 @@ function gradeZeroStrike(P,maxEV){
 }
 function newDrillPitches(drill){
   var a=[];
-  if(drill==='adjustment'){ ADJ_ORDER.forEach(function(s){ a.push({round:s.round,type:s.type,result:null,ev:null,na:false}); }); }
-  else if(drill==='sevenBall'){ for(var i=0;i<10;i++) a.push({actual:null,called:null}); }
-  else if(drill==='zeroStrike'){ for(var j=0;j<10;j++) a.push({zone:null,action:null,ev:null,na:false}); }
+  if(drill==='adjustment'){ ADJ_ORDER.forEach(function(s){ a.push({round:s.round,type:s.type,result:null,ev:null,na:false}); }); return a; }
+  function mk(loc){ if(drill==='sevenBall') return {loc:loc,actual:null,called:null}; if(drill==='zeroStrike') return {loc:loc,zone:null,action:null,ev:null,na:false}; return {loc:loc,type:null,action:null,ev:null,na:false}; }
+  var locs=DRILL_LOCS[drill];
+  if(locs){ locs.forEach(function(loc){ for(var i=0;i<10;i++) a.push(mk(loc)); }); }
   else { for(var k=0;k<10;k++) a.push({type:null,action:null,ev:null,na:false}); }
   return a;
 }
@@ -2001,7 +2021,7 @@ function drillFilled(drill,pt){
 function startDrill(drill){
   if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
   var p=curPlayer(); if(!p){ toast('No player'); return; }
-  DRILL={ drill:drill, playerId:p.id, pitches:newDrillPitches(drill), eid:null, round:1 };
+  DRILL={ drill:drill, playerId:p.id, pitches:newDrillPitches(drill), eid:null, round:1, loc:(DRILL_LOCS[drill]?DRILL_LOCS[drill][0]:null) };
   go('drill',{playerId:p.id, drill:drill});
 }
 function dSet(i,field,val){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt[field]=(pt[field]===val)?null:val; if(field==='result'&&(pt.result==='take'||pt.result==='whiff')){ pt.ev=null; pt.na=false; } render(); }
@@ -2023,10 +2043,11 @@ async function saveDrill(finalize){
   else{ toast('Saved — finish later anytime'); go('drillMenu',{playerId:pid}); }
 }
 function setDrillRound(r){ if(!DRILL)return; DRILL.round=r; render(); }
+function setDrillLoc(L){ if(!DRILL)return; DRILL.loc=L; render(); }
 function resumeDrill(pid,eid){
   var p=playerById(pid); if(!p)return;
   var e=(p.drills||[]).filter(function(x){return x.id===eid;})[0]; if(!e)return;
-  DRILL={ drill:e.drill, playerId:pid, pitches:(e.pitches&&e.pitches.length?e.pitches.slice():newDrillPitches(e.drill)), eid:e.id, round:1 };
+  DRILL={ drill:e.drill, playerId:pid, pitches:(e.pitches&&e.pitches.length?e.pitches.slice():newDrillPitches(e.drill)), eid:e.id, round:1, loc:(DRILL_LOCS[e.drill]?DRILL_LOCS[e.drill][0]:null) };
   go('drill',{playerId:pid, drill:e.drill});
 }
 function drillCancel(pid){ DRILL=null; go('drillMenu',{playerId:pid}); }
@@ -2045,19 +2066,19 @@ function dEvRow(i,pt){
     +'<button class="seg '+(pt.na?'on':'')+'" style="margin-left:8px;flex:0 0 auto;padding:8px 12px" onclick="dNA('+i+')">NA</button>'
   +'</div>';
 }
-function drillStrip(d,p){
-  var P=DRILL.pitches, g;
+function drillStrip(d,p,P){
+  P=P||DRILL.pitches; var g;
   if(d==='bpReads'){ g=gradeBpReads(P); return strip3([{k:'Reads',v:g.total?g.acc+'%':'—'},{k:'FB Attack EV',v:g.fbEvAvg||'—'},{k:'Reps',v:g.total}]); }
   if(d==='adjustment'){ g=gradeAdjustment(P); return strip3([{k:'Aggression',v:g.total?g.aggression+'%':'—'},{k:'Contact',v:g.swings?g.contactRate+'%':'—'},{k:'Contact EV',v:g.evAvg||'—'}]); }
   if(d==='sevenBall'){ g=gradeSevenBall(P); return strip3([{k:'Exact',v:g.total?g.exactPct+'%':'—'},{k:'Within 1',v:g.total?g.within1Pct+'%':'—'},{k:'2+ Off',v:g.off2}]); }
   var cs=careerStats(p); g=gradeZeroStrike(P,cs.maxEV||0); return strip3([{k:'Discipline',v:g.total?g.acc+'%':'—'},{k:'Great ABs',v:g.great},{k:'Chases',v:g.chase}]);
 }
-function cardBpReads(i,pt){
+function cardBpReads(i,pt,num){
   var needEV=(pt.type==='FB'&&pt.action==='swing'), done=pt.type&&pt.action;
   var good=done&&((pt.type==='FB'&&pt.action==='swing')||(pt.type==='CB'&&pt.action==='take'));
   var cls=done?(good?'correct':'wrong'):'empty';
   return '<div class="swing '+cls+'">'
-    +'<div class="sh"><span class="n">Pitch · #'+(i+1)+'</span><span class="tag round">'+(pt.type==='FB'?'Fastball':pt.type==='CB'?'Curveball':'set pitch')+'</span></div>'
+    +'<div class="sh"><span class="n">Pitch · #'+(num||i+1)+'</span><span class="tag round">'+(pt.type==='FB'?'Fastball':pt.type==='CB'?'Curveball':'set pitch')+'</span></div>'
     +'<div class="lab">Pitch Type</div><div class="segrow">'
       +'<button class="seg '+(pt.type==='FB'?'on':'')+'" onclick="dSet('+i+',\'type\',\'FB\')">Fastball</button>'
       +'<button class="seg '+(pt.type==='CB'?'on':'')+'" onclick="dSet('+i+',\'type\',\'CB\')">Curveball</button></div>'
@@ -2071,7 +2092,7 @@ function cardAdjustment(i,pt){
   var done=!!pt.result, needEV=(pt.result==='contact');
   var cls=!done?'empty':pt.result==='contact'?'correct':pt.result==='take'?'wrong':'';
   return '<div class="swing '+cls+'">'
-    +'<div class="sh"><span class="n">R'+pt.round+' · #'+(i+1)+'</span><span class="tag round">'+(pt.type==='FB'?'Fastball':'Curveball')+'</span></div>'
+    +'<div class="sh"><span class="n">R'+pt.round+' · #'+(num||i+1)+'</span><span class="tag round">'+(pt.type==='FB'?'Fastball':'Curveball')+'</span></div>'
     +'<div class="lab">Result</div><div class="segrow">'
       +'<button class="seg '+(pt.result==='contact'?'on':'')+'" onclick="dSet('+i+',\'result\',\'contact\')">Contact</button>'
       +'<button class="seg '+(pt.result==='whiff'?'on':'')+'" onclick="dSet('+i+',\'result\',\'whiff\')">Whiff</button>'
@@ -2079,22 +2100,22 @@ function cardAdjustment(i,pt){
     +(needEV?dEvRow(i,pt):'')
   +'</div>';
 }
-function cardSevenBall(i,pt){
+function cardSevenBall(i,pt,num){
   var done=pt.actual!=null&&pt.called!=null, diff=done?Math.abs(pt.actual-pt.called):null;
   var cls=!done?'empty':diff===0?'correct':diff>=2?'wrong':'';
   function grid(field){ var out=''; for(var n=1;n<=7;n++){ out+='<button class="seg'+(pt[field]===n?' on':'')+'" style="flex:1;min-width:0;padding:10px 0;font-family:\'Anton\';font-style:italic;font-size:16px" onclick="dSet('+i+',\''+field+'\','+n+')">'+n+'</button>'; } return '<div class="segrow" style="gap:5px">'+out+'</div>'; }
   return '<div class="swing '+cls+'">'
-    +'<div class="sh"><span class="n">Ball · #'+(i+1)+'</span>'+(done?'<span class="tag round">'+pt.actual+' → '+pt.called+'</span>':'')+'</div>'
+    +'<div class="sh"><span class="n">Ball · #'+(num||i+1)+'</span>'+(done?'<span class="tag round">'+pt.actual+' → '+pt.called+'</span>':'')+'</div>'
     +'<div class="lab">Actual number (coach)</div>'+grid('actual')
     +'<div class="lab">Player called</div>'+grid('called')
   +'</div>';
 }
-function cardZeroStrike(i,pt){
+function cardZeroStrike(i,pt,num){
   var done=pt.zone&&pt.action, needEV=(pt.action==='swing');
   var good=done&&((pt.zone==='in'&&pt.action==='swing')||(pt.zone==='out'&&pt.action==='take'));
   var cls=done?(good?'correct':'wrong'):'empty';
   return '<div class="swing '+cls+'">'
-    +'<div class="sh"><span class="n">Pitch · #'+(i+1)+'</span><span class="tag round">'+(pt.zone==='in'?'In Zone':pt.zone==='out'?'Out of Zone':'set zone')+'</span></div>'
+    +'<div class="sh"><span class="n">Pitch · #'+(num||i+1)+'</span><span class="tag round">'+(pt.zone==='in'?'In Zone':pt.zone==='out'?'Out of Zone':'set zone')+'</span></div>'
     +'<div class="lab">Location</div><div class="segrow">'
       +'<button class="seg '+(pt.zone==='in'?'on':'')+'" onclick="dSet('+i+',\'zone\',\'in\')">In Zone</button>'
       +'<button class="seg '+(pt.zone==='out'?'on':'')+'" onclick="dSet('+i+',\'zone\',\'out\')">Out of Zone</button></div>'
@@ -2106,25 +2127,32 @@ function cardZeroStrike(i,pt){
 }
 function viewDrill(){
   var p=curPlayer(); if(!p) return viewLogin();
-  if(!DRILL||DRILL.drill!==DB.ctx.drill){ DRILL={drill:DB.ctx.drill, playerId:p.id, pitches:newDrillPitches(DB.ctx.drill), eid:null, round:1}; }
+  if(!DRILL||DRILL.drill!==DB.ctx.drill){ DRILL={drill:DB.ctx.drill, playerId:p.id, pitches:newDrillPitches(DB.ctx.drill), eid:null, round:1, loc:(DRILL_LOCS[DB.ctx.drill]?DRILL_LOCS[DB.ctx.drill][0]:null)}; }
   var d=DRILL.drill, m=DRILL_META[d]||{name:'Drill'};
   var filledN=DRILL.pitches.filter(function(pt){return drillFilled(d,pt);}).length, total=DRILL.pitches.length;
-  function card(i,pt){ return d==='bpReads'?cardBpReads(i,pt):d==='adjustment'?cardAdjustment(i,pt):d==='sevenBall'?cardSevenBall(i,pt):cardZeroStrike(i,pt); }
-  var subtabs='', list='';
+  function card(i,pt,num){ return d==='bpReads'?cardBpReads(i,pt,num):d==='adjustment'?cardAdjustment(i,pt):d==='sevenBall'?cardSevenBall(i,pt,num):cardZeroStrike(i,pt,num); }
+  var subtabs='', list='', curPitches=DRILL.pitches;
   if(d==='adjustment'){
     var r=DRILL.round||1;
     subtabs='<div class="subtabs">'+[1,2].map(function(x){return '<button class="'+(x===r?'on':'')+'" onclick="setDrillRound('+x+')">Round '+x+'</button>';}).join('')+'</div>';
     list=DRILL.pitches.map(function(pt,i){return {pt:pt,i:i};}).filter(function(o){return o.pt.round===r;}).map(function(o){return card(o.i,o.pt);}).join('');
+  } else if(DRILL_LOCS[d]){
+    var loc=DRILL.loc||DRILL_LOCS[d][0];
+    subtabs='<div class="subtabs">'+DRILL_LOCS[d].map(function(L){return '<button class="'+(L===loc?'on':'')+'" onclick="setDrillLoc(\''+L+'\')">'+LOC_LABEL[L]+'</button>';}).join('')+'</div>';
+    curPitches=DRILL.pitches.filter(function(pt){return pt.loc===loc;});
+    var nloc=0;
+    list=DRILL.pitches.map(function(pt,i){return {pt:pt,i:i};}).filter(function(o){return o.pt.loc===loc;}).map(function(o){nloc++;return card(o.i,o.pt,nloc);}).join('');
   } else {
     list=DRILL.pitches.map(function(pt,i){return card(i,pt);}).join('');
   }
-  var desc=d==='adjustment'?'2 rounds × 9 pitches · guided FB/CB order':'10 pitches';
+  var desc=d==='adjustment'?'2 rounds × 9 pitches · guided FB/CB order':(DRILL_LOCS[d]?(DRILL_LOCS[d].length+' locations × 10 reps · pick how the ball is thrown'):'10 pitches');
   return '<div class="scroll">'
     +topbar('<button class="icon-btn" onclick="drillCancel(\''+p.id+'\')" title="Back">'+IC.back+'</button>')
     +'<div class="logger-head"><h2>'+esc(m.name).toUpperCase()+'</h2><div class="desc">'+esc(p.first)+' '+esc(p.last)+' · '+desc+(DRILL.eid?' · resuming':'')+'</div></div>'
     +'<div class="wk-note" style="display:flex;align-items:center;justify-content:space-between"><span>Recorded <b>'+filledN+' / '+total+'</b> — Save &amp; Finish Later and come back anytime.</span></div>'
     +subtabs
-    +drillStrip(d,p)
+    +(DRILL_LOCS[d]?'<div class="wk-note" style="margin-bottom:6px">Logging <b>'+esc(LOC_LABEL[DRILL.loc||DRILL_LOCS[d][0]])+'</b> — this tab\'s score. Fill all '+DRILL_LOCS[d].length+' location tabs.</div>':'')
+    +drillStrip(d,p,curPitches)
     +'<div class="swing-list">'+list+'</div>'
     +'<div class="save-bar" style="display:flex;gap:8px"><button class="btn ghost" style="flex:1" onclick="saveDrill(false)">Save &amp; Finish Later</button><button class="btn" style="flex:1" onclick="saveDrill(true)">Finish &amp; See Results</button></div>'
   +'</div>';
@@ -2176,6 +2204,20 @@ function wellWork(wells,works){
     +(works.length?works.map(function(t){return insight(false,t);}).join(''):insight(true,'Clean session — nothing flagged.'));
 }
 function strip3(a){ return '<div class="score-strip">'+a.map(function(s){return '<div class="sc '+(s.cls||'')+'"><div class="k">'+s.k+'</div><div class="v">'+s.v+'</div></div>';}).join('')+'</div>'; }
+function drillLocStrips(e,cs){
+  var locs=DRILL_LOCS[e.drill]; if(!locs) return '';
+  if(!(e.pitches||[]).some(function(p){return p.loc;})) return '';
+  var out='<div class="section-lbl">By Location</div>';
+  locs.forEach(function(L){
+    var P=(e.pitches||[]).filter(function(p){return p.loc===L;}); if(!P.length) return;
+    var strip;
+    if(e.drill==='bpReads'){ var g=gradeBpReads(P); strip=strip3([{k:'Reads',v:g.total?g.acc+'%':'—',cls:g.acc>=70?'pass':'fail'},{k:'FB EV',v:g.fbEvAvg||'—'},{k:'Reps',v:g.total}]); }
+    else if(e.drill==='sevenBall'){ var g2=gradeSevenBall(P); strip=strip3([{k:'Exact',v:g2.total?g2.exactPct+'%':'—',cls:g2.exactPct>=50?'pass':'fail'},{k:'Within 1',v:g2.total?g2.within1Pct+'%':'—'},{k:'2+ Off',v:g2.off2,cls:g2.off2?'fail':'pass'}]); }
+    else { var g3=gradeZeroStrike(P,(cs&&cs.maxEV)||0); strip=strip3([{k:'Discipline',v:g3.total?g3.acc+'%':'—',cls:g3.acc>=70?'pass':'fail'},{k:'Great ABs',v:g3.great},{k:'Chases',v:g3.chase,cls:g3.chase?'fail':'pass'}]); }
+    out+='<div class="wk-note" style="margin:8px 0 3px;font-weight:700;color:#cfd8cf">'+esc(LOC_LABEL[L])+'</div>'+strip;
+  });
+  return out;
+}
 function resBpReads(e,cs){
   var g=gradeBpReads(e.pitches), wells=[], works=[];
   if(g.acc>=80) wells.push('Sharp reads — <b>'+g.acc+'%</b> correct on FB vs CB.');
@@ -2184,7 +2226,7 @@ function resBpReads(e,cs){
   if(g.cbSwings>0) works.push('Chased <b>'+g.cbSwings+'</b> curveball'+(g.cbSwings>1?'s':'')+' — lay off the CB.');
   if(g.fbTakes>0) works.push('Took <b>'+g.fbTakes+'</b> hittable fastball'+(g.fbTakes>1?'s':'')+' — be on time to attack.');
   if(g.acc<70) works.push('Reads at '+g.acc+'% — recognize spin out of the hand earlier.');
-  return strip3([{k:'Reads',v:g.acc+'%',cls:g.acc>=70?'pass':'fail'},{k:'FB Attack EV',v:g.fbEvAvg||'—'},{k:'Pitches',v:g.total}])+wellWork(wells,works);
+  return strip3([{k:'Reads',v:g.acc+'%',cls:g.acc>=70?'pass':'fail'},{k:'FB Attack EV',v:g.fbEvAvg||'—'},{k:'Pitches',v:g.total}])+drillLocStrips(e,cs)+wellWork(wells,works);
 }
 function resAdjustment(e,cs){
   var g=gradeAdjustment(e.pitches), base=cs.avgEV||0, wells=[], works=[];
@@ -2221,7 +2263,7 @@ function resSevenBall(e,cs){
   if(g.off2===0&&g.total) wells.push('Never more than one off — no big misreads.');
   if(g.off2>0) works.push('<b>'+g.off2+'</b> call'+(g.off2>1?'s':'')+' 2+ balls off — poor recognition on those; track release longer.');
   if(g.exactPct<40) works.push('Exact reads at '+g.exactPct+'% — work on pinpointing location, not just side.');
-  return strip3([{k:'Exact',v:g.exactPct+'%',cls:g.exactPct>=50?'pass':'fail'},{k:'Within 1',v:g.within1Pct+'%',cls:g.within1Pct>=80?'pass':''},{k:'2+ Off',v:g.off2,cls:g.off2?'fail':'pass'}])+wellWork(wells,works);
+  return strip3([{k:'Exact',v:g.exactPct+'%',cls:g.exactPct>=50?'pass':'fail'},{k:'Within 1',v:g.within1Pct+'%',cls:g.within1Pct>=80?'pass':''},{k:'2+ Off',v:g.off2,cls:g.off2?'fail':'pass'}])+drillLocStrips(e,cs)+wellWork(wells,works);
 }
 function resZeroStrike(e,cs){
   var mx=cs.maxEV||0, g=gradeZeroStrike(e.pitches,mx), wells=[], works=[];
@@ -2231,7 +2273,7 @@ function resZeroStrike(e,cs){
   if(g.chase>0) works.push('Chased <b>'+g.chase+'</b> pitch'+(g.chase>1?'es':'')+' out of the zone — a swing at a ball is a bad decision.');
   if(g.tookStrike>0) works.push('Took <b>'+g.tookStrike+'</b> hittable strike'+(g.tookStrike>1?'s':'')+' — be ready to fire in the zone.');
   if(g.fail>0&&mx) works.push('<b>'+g.fail+'</b> swing'+(g.fail>1?'s':'')+' under 80% of max EV — failed to execute; drive through contact.');
-  return strip3([{k:'Discipline',v:g.acc+'%',cls:g.acc>=75?'pass':'fail'},{k:'Great ABs',v:mx?g.great:'—'},{k:'Chases',v:g.chase,cls:g.chase?'fail':'pass'}])+wellWork(wells,works);
+  return strip3([{k:'Discipline',v:g.acc+'%',cls:g.acc>=75?'pass':'fail'},{k:'Great ABs',v:mx?g.great:'—'},{k:'Chases',v:g.chase,cls:g.chase?'fail':'pass'}])+drillLocStrips(e,cs)+wellWork(wells,works);
 }
 function viewReport(){
   var p=curPlayer(); if(!p) return viewLogin();
