@@ -129,6 +129,107 @@
     text-transform:uppercase;letter-spacing:.5px;background:none}
   .tab svg{width:21px;height:21px}
   .tab.on{color:var(--green)}
+  .lb-chips{display:flex;gap:7px;overflow-x:auto;padding:10px 16px 4px}
+  .lb-chips::-webkit-scrollbar{height:0}
+  .lb-chip{flex:0 0 auto;padding:8px 13px;border-radius:11px;font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:11.5px;color:var(--grey);background:var(--panel);border:1px solid var(--line);white-space:nowrap;cursor:pointer}
+  .lb-chip.on{background:var(--green);color:#0a0b0a;border-color:var(--green)}
+  .lb-cat{padding:6px 16px 2px}
+  .lb-cat .t{font-family:'Anton';font-style:italic;font-size:21px}
+  .lb-cat .d{color:var(--grey);font-size:12px;margin-top:2px;line-height:1.4}
+  .lb-list{padding:8px 16px 4px}
+  .lb-row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:12px 14px;margin-bottom:8px}
+  .lb-row.me{border-color:var(--green);box-shadow:0 0 12px rgba(131,245,44,.18)}
+  .lb-row .rk{font-family:'Anton';font-style:italic;font-size:20px;color:var(--grey-d);width:34px;text-align:center;flex:0 0 auto}
+  .lb-row.top1 .rk{color:var(--amber)}
+  .lb-row.top2 .rk,.lb-row.top3 .rk{color:#cdeeb0}
+  .lb-row .nm{flex:1;font-family:'Barlow Semi Condensed';font-weight:700;font-size:16.5px}
+  .lb-row .nm small{color:var(--green);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.5px;margin-left:6px}
+  .lb-row .vl{font-family:'Anton';font-style:italic;font-size:20px;flex:1;text-align:right}
+  .lb-row .loc{flex:0 0 auto;white-space:nowrap;text-align:center;font-family:'Barlow Semi Condensed';font-weight:700;font-size:12.5px;color:var(--green);text-transform:uppercase;letter-spacing:.4px;line-height:1.15;padding:0 12px}
+  .lb-row .vl small{font-size:10px;color:var(--grey);font-family:'Barlow';font-style:normal;font-weight:600}
+  .lb-empty{color:var(--grey);text-align:center;font-style:italic;padding:26px 16px;font-size:13px}
+  .lb-you{margin:4px 16px;background:rgba(131,245,44,.08);border:1px solid rgba(131,245,44,.3);border-radius:12px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between}
+  .lb-you .l{font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.6px;font-size:12px;color:var(--grey)}
+  .lb-you .r{font-family:'Anton';font-style:italic;font-size:18px;color:var(--green)}
+  .lb-row .nm small.ft{display:block;color:var(--grey);font-weight:600;font-size:11px;margin-top:2px;letter-spacing:0;text-transform:none}
+  .lb-row .vl.up{color:var(--green)}
+  .lb-row .vl.down{color:#ff7b6b}
+  /* ===== home hub + drills ===== */
+  .hub-hello{padding:16px 16px 0}
+  .hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;padding:12px 16px 16px}
+  .hub-card{background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--green);border-radius:15px;padding:15px 14px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:7px;min-height:98px}
+  .hub-card svg{width:24px;height:24px;color:var(--green)}
+  .hub-card h3{font-family:'Anton';font-style:italic;font-size:16px;line-height:1;margin:0}
+  .hub-card p{color:var(--grey);font-size:11px;line-height:1.35;margin:0}
+  .dlog{padding:6px 16px 20px}
+  .dlog-q{font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.6px;font-size:12px;color:var(--grey);margin:15px 0 8px}
+  .dbtns{display:flex;gap:8px;flex-wrap:wrap}
+  .dbtn{flex:1;min-width:66px;padding:15px 8px;border-radius:12px;background:var(--panel-2);border:1px solid var(--line);color:#fff;font-family:'Barlow Semi Condensed';font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.5px;cursor:pointer}
+  .dbtn.on{background:var(--green);color:#0a0b0a;border-color:var(--green)}
+  .dbtn.fb.on{background:var(--blue);border-color:var(--blue);color:#fff}
+  .dbtn.cb.on{background:var(--amber);border-color:var(--amber);color:#0a0b0a}
+  .dbtn.bad.on{background:var(--red);border-color:var(--red);color:#fff}
+  .dgrid7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .dgrid7 .dbtn{min-width:0;padding:14px 0;font-family:'Anton';font-style:italic;font-size:18px}
+  .dev-in{width:100%;background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:13px 12px;color:#fff;font-size:17px;font-weight:700}
+  .dev-in:focus{outline:none;border-color:var(--green)}
+  .dtally{display:flex;gap:8px;padding:8px 0 2px}
+  .dtally .tc{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:9px 6px;text-align:center}
+  .dtally .tc .n{font-family:'Anton';font-style:italic;font-size:20px}
+  .dtally .tc .l{font-size:9px;text-transform:uppercase;letter-spacing:.4px;color:var(--grey);font-weight:700;margin-top:2px}
+  .dprog{font-size:12.5px;color:var(--grey);text-align:center;margin:10px 0 2px}
+  .dprog b{color:var(--green)}
+  .plist{display:flex;flex-wrap:wrap;gap:5px;margin-top:8px}
+  .pchip{display:inline-flex;align-items:center;gap:5px;padding:5px 9px;border-radius:8px;background:var(--panel-2);border:1px solid var(--line);font-size:11px;font-weight:700;color:var(--grey)}
+  .pchip.good{border-color:rgba(131,245,44,.5);color:var(--green)}
+  .pchip.bad{border-color:rgba(226,59,59,.5);color:#ff7b6b}
+  .sport-toggle{display:flex;gap:8px;margin:10px 16px 2px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px}
+  .sport-toggle button{flex:1;padding:11px;border-radius:9px;font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:13px;color:var(--grey);background:none;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer}
+  .sport-toggle button.on{background:var(--green);color:#0a0b0a}
+  .sport-toggle button svg{width:16px;height:16px}
+  .fac-ic{width:54px;height:54px;border-radius:13px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;background:rgba(131,245,44,.1);border:1px solid rgba(131,245,44,.3);color:var(--green)}
+  .fac-ic svg{width:26px;height:26px}
+  .add-row{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:9px 11px;margin-bottom:8px;width:100%;text-align:left;cursor:pointer}
+  .add-row.on{border-color:var(--green);background:rgba(131,245,44,.06)}
+  .add-row .p-info h3{font-size:16px}
+  .chk{width:24px;height:24px;flex:0 0 auto;border-radius:7px;border:2px solid var(--line);display:flex;align-items:center;justify-content:center;color:#0a0b0a;font-size:14px;font-weight:900;background:var(--panel-2)}
+  .chk.on{background:var(--green);border-color:var(--green)}
+  .wk-area{margin:12px 16px 0;background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:hidden}
+  .wk-area .wk-hd{display:flex;align-items:center;gap:9px;padding:11px 14px;border-bottom:1px solid var(--line)}
+  .wk-area .wk-hd .n{width:26px;height:26px;border-radius:8px;background:rgba(131,245,44,.12);border:1px solid rgba(131,245,44,.3);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:'Anton';font-style:italic;font-size:14px;flex:0 0 auto}
+  .wk-area .wk-hd h4{flex:1;font-family:'Barlow Semi Condensed';font-weight:700;text-transform:uppercase;letter-spacing:.5px;font-size:14px}
+  .wk-area .wk-hd .ef{font-size:10.5px;color:var(--grey);font-weight:600}
+  .wk-area .wk-bd{padding:11px 14px}
+  .wk-pelo{display:flex;align-items:center;gap:8px;background:rgba(61,123,255,.08);border:1px solid rgba(61,123,255,.3);border-radius:10px;padding:9px 11px;font-size:12.5px;color:#9db8ff;font-weight:600;margin-bottom:8px}
+  .wk-pelo svg{width:15px;height:15px;flex:0 0 auto}
+  .wk-drill{display:inline-flex;align-items:center;gap:6px;margin:0 6px 6px 0;padding:8px 11px;border-radius:9px;background:var(--panel-2);border:1px solid var(--line);color:#fff;font-family:'Barlow Semi Condensed';font-weight:700;font-size:13.5px;cursor:default}
+  .wk-drill.has-cue{cursor:pointer;border-color:rgba(131,245,44,.35)}
+  .wk-drill.sec{border-left:3px solid var(--amber)}
+  .wk-drill.need{background:rgba(131,245,44,.1);border-color:var(--green);color:var(--green)}
+  .wk-drill.bs{border:1.5px solid var(--green);background:rgba(131,245,44,.17);color:#eafff0}
+  .wk-drill.addon{border:1.5px solid var(--amber);background:rgba(255,176,32,.17);color:#fff2d8}
+  .wk-drill .dtag{font-size:8.5px;font-weight:800;letter-spacing:.5px;padding:2px 5px;border-radius:4px;text-transform:uppercase;line-height:1}
+  .wk-drill .dtag.bs{background:var(--green);color:#0a0b0a}
+  .wk-drill .dtag.add{background:var(--amber);color:#241a00}
+  .wk-drill .drep{font-size:10px;opacity:.6;font-weight:600;white-space:nowrap}
+  .wk-drill .ci{width:15px;height:15px;border-radius:50%;background:var(--green);color:#0a0b0a;font-size:9px;font-style:italic;font-family:'Anton';display:inline-flex;align-items:center;justify-content:center}
+  .wk-flag{font-size:11.5px;color:#f0d9a8;font-style:italic;margin-top:6px;line-height:1.4}
+  .wk-mind{margin:10px 0 0;background:rgba(61,123,255,.08);border:1px solid rgba(61,123,255,.3);border-radius:11px;padding:11px 13px;color:#9db8ff;font-weight:700;font-size:12.5px;cursor:pointer;display:flex;align-items:center;gap:8px;width:100%;text-align:left}
+  .wk-mind svg{width:16px;height:16px;flex:0 0 auto}
+  .wk-modal{position:fixed;inset:0;z-index:80;background:rgba(6,7,6,.86);display:none;align-items:center;justify-content:center;padding:24px}
+  .wk-modal-card{background:var(--panel);border:1px solid var(--green);border-radius:16px;padding:20px;max-width:340px}
+  .wk-modal-card h3{font-family:'Anton';font-style:italic;font-size:20px;margin-bottom:10px}
+  .wk-modal-card p{font-size:14px;line-height:1.55;color:#d6e8c8;margin-bottom:16px}
+  .wk-choose{display:flex;flex-direction:column;gap:12px;padding:8px 16px}
+  .wk-cbtn{padding:20px;border-radius:15px;font-family:'Anton';font-style:italic;font-size:22px;text-align:center;cursor:pointer;border:1px solid var(--line);letter-spacing:.5px}
+  .wk-cbtn.bs{background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;border-color:var(--green)}
+  .wk-cbtn.bs.off{background:var(--panel);color:var(--grey-d);border-color:var(--line);cursor:not-allowed}
+  .wk-cbtn.no{background:var(--panel);color:#fff}
+  .wk-cbtn .sub{display:block;font-family:'Barlow';font-style:normal;font-size:12px;font-weight:600;margin-top:6px;text-transform:none;letter-spacing:0;line-height:1.4}
+  .wk-cbtn.bs .sub{color:#0a3d0a}
+  .wk-cbtn.bs.off .sub{color:var(--grey)}
+  .wk-cbtn.no .sub{color:var(--grey)}
+  .wk-empty{margin:20px 16px;padding:22px;text-align:center;color:var(--grey);font-style:italic;background:var(--panel);border:1px solid var(--line);border-radius:14px;line-height:1.5}
 
   /* profile */
   .prof-hero{text-align:center;padding:6px 16px 0}
@@ -449,7 +550,8 @@
     .tabbar{padding-left:max(24px, calc((100% - var(--maxw))/2));
             padding-right:max(24px, calc((100% - var(--maxw))/2));
             justify-content:flex-start;gap:6px}
-    .tab{max-width:130px;flex:0 0 auto;padding:0 18px}
+    .tab{max-width:none;flex:1 1 0;min-width:0;padding:0 5px}
+    .tab span{white-space:normal;line-height:1.05;text-align:center;word-break:break-word}
 
     /* keep login + add-forms readable, not stretched */
     .login{max-width:460px;margin:0 auto}
@@ -518,6 +620,8 @@ const IC={
   home:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10l8-6 8 6v9a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/></svg>',
   ball:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M6 7c3 2 9 2 12 0M6 17c3-2 9-2 12 0M12 3v18"/></svg>',
   chart:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg>',
+  trend:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M17 7h4v4"/></svg>',
+  pin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>',
   edit:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>',
   sync:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 1-9 9 9 9 0 0 1-8-5"/><path d="M3 12a9 9 0 0 1 9-9 9 9 0 0 1 8 5"/><path d="M21 3v5h-5M3 21v-5h5"/></svg>',
   lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
@@ -530,7 +634,7 @@ function logoSVG(size){
   return `<img class="hpl-logo" src="${HPL_LOGO_URL}" alt="HPL" onclick="goHome()" style="cursor:pointer;height:${size}px;width:auto;max-width:${Math.round(size*2.4)}px;object-fit:contain">`;
 }
 function goHome(){
-  if(DB.user&&DB.user.role==='coach'){ go('roster'); }
+  if(DB.user&&DB.user.role==='coach'){ go('home'); }
   else if(DB.user){ var mine=(DB.players||[]).filter(function(p){return p.owner===DB.user.id;})[0]||(DB.players||[])[0]; if(mine){ go('profile',{playerId:mine.id}); } else { go('roster'); } }
   else { go('login'); }
 }
@@ -554,7 +658,7 @@ function lastTest(b){ var t=null; blockEntries(b).forEach(function(e){ if(e.type
 function entryById(b,id){ return blockEntries(b).filter(function(e){return e.id===id;})[0]; }
 
 /* ---------- store (Supabase cloud) ---------- */
-var DB={ view:'login', ctx:{}, user:null, players:[], coaches:[], search:'' };
+var DB={ view:'login', ctx:{}, user:null, players:[], coaches:[], search:'', sport:'baseball', facility:'' };
 function persist(){ /* cloud writes happen in savePlayer(); local no-op */ }
 async function loadPlayers(){
   DB.players=[];
@@ -564,6 +668,7 @@ async function loadPlayers(){
     if(res.error){ console.warn(res.error); return; }
     DB.players=(res.data||[]).map(function(r){ return Object.assign({}, r.state||{}, {id:r.id, owner:r.owner}); });
   }catch(e){ console.warn(e); }
+  try{ var fe=await SBc.from('hitters_facility').select('facility,equip'); if(fe&&fe.data){ FAC_EQUIP={}; fe.data.forEach(function(row){ FAC_EQUIP[row.facility]=row.equip||{}; }); } }catch(e){ console.warn(e); }
 }
 async function savePlayer(p){
   if(!SBc||!p) return;
@@ -586,7 +691,7 @@ async function ensureAccount(user){
   }
   if(role==='player'){
     var parts=String(name||'').split(' ');
-    var st={ first:parts[0]||name, last:parts.slice(1).join(' '), photo:null, birthdate:'', height:'', weight:'', position:'', gradClass:'', hand:'R', gripRH:'', gripLH:'', rap:emptyRap(), blocks:emptyBlocks() };
+    var st={ first:parts[0]||name, last:parts.slice(1).join(' '), sport:(meta.sport==='softball'?'softball':'baseball'), photo:null, birthdate:'', height:'', weight:'', position:'', gradClass:'', hand:'R', gripRH:'', gripLH:'', rap:emptyRap(), blocks:emptyBlocks() };
     try{ var hr=await SBc.from('hitters').insert({owner:user.id, first_name:st.first, last_name:st.last, state:st}).select('id').single();
       if(hr.data){ try{ await SBc.from('hitter_accounts').update({hitter_id:hr.data.id}).eq('id',user.id); }catch(e){} }
     }catch(e){ console.warn('hitter',e); }
@@ -604,7 +709,7 @@ async function enterApp(user){
   var role=(acc&&acc.role)||'player';
   DB.user={ id:user.id, email:user.email, role:role, name:(acc&&acc.name)||user.email };
   await loadPlayers();
-  if(role==='coach'){ DB.view='roster'; DB.ctx={}; }
+  if(role==='coach'){ DB.view='home'; DB.ctx={}; }
   else {
     var mine=DB.players.filter(function(p){return p.owner===user.id;})[0]||DB.players[0];
     if(mine){ DB.ctx={playerId:mine.id}; DB.view='profile'; }
@@ -613,7 +718,7 @@ async function enterApp(user){
   render();
 }
 /* ---------- auth (Supabase) ---------- */
-var authMode='login', loginRole='player', pendingEmail='';
+var authMode='login', loginRole='player', pendingEmail='', signupSport='baseball';
 function fval(id){ var el=$('#'+id); return el?(el.value||'').trim():''; }
 async function doAuth(){
   if(!SBc){ toast('Cloud not reachable'); return; }
@@ -622,7 +727,7 @@ async function doAuth(){
   if(authMode==='signup'){
     if(pass.length<6){ toast('Password must be at least 6 characters'); return; }
     var name=fval('f_name')||email;
-    var opts={ data:{ role:loginRole, full_name:name } };
+    var opts={ data:{ role:loginRole, full_name:name, sport:(loginRole==='player'?signupSport:'baseball') } };
     if(loginRole==='coach'){ var code=fval('f_code'); if(!code){ toast('Enter the coach code'); return; } opts.data.coach_code=code; }
     if(typeof location!=='undefined' && String(location.protocol).indexOf('http')===0) opts.emailRedirectTo=location.origin;
     var su=await SBc.auth.signUp({ email:email, password:pass, options:opts });
@@ -755,6 +860,10 @@ function viewLogin(){
       +'<button class="'+(!coach?'on':'')+'" onclick="loginRole=\'player\';render()">I\'m a Player</button>'
       +'<button class="'+(coach?'on':'')+'" onclick="loginRole=\'coach\';render()">I\'m a Coach</button>'
     +'</div>':'')
+    +((su&&!coach)?'<div class="sport-toggle" style="margin:8px 0 0">'
+      +'<button class="'+(signupSport==='baseball'?'on':'')+'" onclick="signupSport=\'baseball\';render()">'+IC.ball+' Baseball</button>'
+      +'<button class="'+(signupSport==='softball'?'on':'')+'" onclick="signupSport=\'softball\';render()">'+IC.ball+' Softball</button>'
+    +'</div>':'')
     +(su?'<div class="field"><label>Full Name</label><input id="f_name" placeholder="First Last"></div>':'')
     +'<div class="field"><label>Email</label><input id="f_email" type="email" placeholder="you@email.com"></div>'
     +'<div class="field"><label>Password</label><input id="f_pass" type="password" placeholder="'+(su?'Create a password (6+ characters)':'Your password')+'"></div>'
@@ -777,11 +886,15 @@ function viewConfirm(){
 }
 
 /* ================= COACH ROSTER ================= */
+function setSport(s){ DB.sport=s; DB.search=''; render(); }
 function rosterFiltered(){
+  var sp=DB.sport||'baseball', fac=DB.facility||'';
+  var base=DB.players.filter(function(p){ return (p.sport||'baseball')===sp && (p.facility||'')===fac; });
+  base.sort(alphaCmp);
   var q=(DB.search||'').trim().toLowerCase();
-  if(q.length===0) return DB.players.slice();
+  if(q.length===0) return base;
   if(q.length<3) return null;
-  return DB.players.filter(function(p){
+  return base.filter(function(p){
     var f=String(p.first||'').toLowerCase(), l=String(p.last||'').toLowerCase();
     return f.indexOf(q)>=0 || l.indexOf(q)>=0 || (f+' '+l).indexOf(q)>=0;
   });
@@ -807,27 +920,161 @@ function clearRosterSearch(){
   var c=document.getElementById('rosterCount'); if(c) c.textContent=rosterCountLabel();
   var x=document.getElementById('rosterClear'); if(x) x.style.display='none';
 }
+var FACILITIES=[{k:'lex',name:'HPL Lex'},{k:'marion',name:'HPL Marion'},{k:'bright',name:'Bright Academy'},{k:'morse',name:'Morse Academy'},{k:'columbus',name:'HPL Columbus'},{k:'remote',name:'Remote'}];
+var WK_WOW_FACILITIES=['bright','marion','morse'];
+/* ---- Facility equipment availability ---- */
+var WK_EQUIP_KEYS=[{k:'pelotero',lbl:'Pelotero'},{k:'colorBalls',lbl:'Color Balls'},{k:'smallBalls',lbl:'Small Balls'},{k:'skinnyTrainer',lbl:'Skinny / Short Trainer Bat'},{k:'tap',lbl:'Tap Trainer'},{k:'machine',lbl:'Pitching Machine'}];
+var WK_EQUIP_DEFAULTS={morse:{pelotero:false}};
+var FAC_EQUIP={}; /* facility -> equip, loaded from hitters_facility on boot */
+function wkEquipBase(fac){return Object.assign({pelotero:true,colorBalls:true,smallBalls:true,skinnyTrainer:true,tap:true,machine:true},WK_EQUIP_DEFAULTS[fac]||{});}
+function wkEquip(p){var fac=(p&&p.facility)||'';var sport=((p&&p.sport)==='softball')?'softball':'baseball';var base=wkEquipBase(fac);if(fac==='remote')return Object.assign(base,(p&&p.facilityEquip)||{});var fe=FAC_EQUIP[fac]||{};var sportEq;if(fe.baseball||fe.softball){sportEq=fe[sport]||{};}else{sportEq=(sport==='baseball')?fe:{};}return Object.assign(base,sportEq);}
+var ADD_SEL={};
+function facilityName(k){ var f=FACILITIES.filter(function(x){return x.k===k;})[0]; return f?f.name:'Unassigned'; }
+function alphaCmp(a,b){ return ((a.first||'')+' '+(a.last||'')).toLowerCase().localeCompare(((b.first||'')+' '+(b.last||'')).toLowerCase()); }
+function openFacility(k){ DB.facility=k; DB.search=''; go('roster'); }
+function facilityRepWorkout(){ var fac=DB.facility; var ps=DB.players.filter(function(p){return (p.facility||'')===fac&&p.workout&&p.workout.programLength&&p.workout.programStart;}); return ps.length?ps[0].workout:null; }
+function openFacilityWoW(){ go('facilityWoW'); }
+function viewFacilityWoW(){
+  if(!(DB.user&&DB.user.role==='coach')) return viewHome();
+  var facN=facilityName(DB.facility);
+  var back='<button class="icon-btn" onclick="go(\'roster\')" title="Back">'+IC.back+'</button>';
+  var w=facilityRepWorkout();
+  var top='<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(facN)+'</p><h2>WORKOUT OF THE <em>WEEK</em></h2></div></div>';
+  if(!w) return top+'<div class="wk-empty">No players with a program set in this facility yet.</div></div>'+tabbar('home');
+  var wn=wkResolveWeek(w.programStart,todayStr(),w.pauseWeeks||0,w.startWeek);
+  var blk=wkResolveBlock(w.programLength,wn);
+  var head='Week '+wn+' · '+(blk.isTestWeek?'TEST · ':'')+esc(blk.blockName)+(blk.isTestWeek?'':' · 3 drills');
+  var html=top+'<div class="wk-note" style="margin:2px 16px 8px"><b>'+head+'</b></div>';
+  if(blk.isTestWeek){ html+='<div class="wk-area"><div class="wk-hd"><div class="n">T</div><h4>Test Week</h4></div><div class="wk-bd"><div class="wk-flag" style="color:var(--grey);font-style:normal;margin:0">Player Development assessment this week — Front Toss → BP → Machine, log every swing.</div></div></div><div style="height:16px"></div></div>'+tabbar('home'); return html; }
+  var g=wkGenerate({programLength:w.programLength,weekNo:wn,isBatSpeed:true,batCount:3,drillNeeds:[],dayIdx:0,today:todayStr(),randomDarts:false,equip:wkEquip({facility:DB.facility})});
+  if(g.equipNotes&&g.equipNotes.length){g.equipNotes.forEach(function(nn){html+='<div class="wk-flag" style="margin:2px 16px 8px;color:#9db8ff;font-style:normal;background:rgba(61,123,255,.08);border:1px solid rgba(61,123,255,.3);border-radius:10px;padding:8px 11px">'+esc(nn)+'</div>';});}
+  var AR=[];
+  AR.push({t:'Tee',ef:'60–70% effort',pelo:g.areas.tee.label,drills:g.areas.tee.drills,note:g.areas.tee.note,flags:[]});
+  if(g.areas.frontToss){var fo=g.areas.frontToss;AR.push({t:'Front Toss',ef:'',pelo:fo.label,drills:fo.drills,note:fo.note,flags:[]});}
+  if(g.areas.darts){var da=g.areas.darts;AR.push({t:'Darts',ef:'',pelo:null,drills:da.drills,note:'',flags:da.flags||[]});}
+  if(g.areas.bp){var bp=g.areas.bp;AR.push({t:'BP / Machine',ef:'',pelo:null,drills:bp.drills,note:'',flags:[]});}
+  if(g.areas.machine){var mo=g.areas.machine;AR.push({t:'Pitching Machine',ef:'',pelo:null,drills:mo.drills,note:'',flags:[]});}
+  AR.forEach(function(a,i){html+=wkAreaCard(String(i+1),a.t,a.ef,a.pelo,a.drills,a.note,a.flags);});
+  html+='<div style="height:16px"></div></div>'+tabbar('home');
+  return html;
+}
+function viewHome(){
+  var cards=FACILITIES.map(function(f){
+    var n=DB.players.filter(function(p){return (p.facility||'')===f.k;}).length;
+    return '<button class="p-card" onclick="openFacility(\''+f.k+'\')">'
+      +'<div class="fac-ic">'+IC.pin+'</div>'
+      +'<div class="p-info"><h3>'+esc(f.name)+'</h3><div class="meta">'+n+' player'+(n===1?'':'s')+'</div></div>'
+      +IC.chev+'</button>';
+  }).join('');
+  var unN=DB.players.filter(function(p){return !(p.facility);}).length;
+  var un=unN?'<button class="p-card" style="border-left-color:var(--amber)" onclick="openUnassigned()">'
+      +'<div class="fac-ic" style="background:rgba(255,176,32,.1);border-color:rgba(255,176,32,.3);color:var(--amber)">'+IC.user+'</div>'
+      +'<div class="p-info"><h3>Unassigned</h3><div class="meta">'+unN+' player'+(unN===1?'':'s')+' · not placed yet</div></div>'+IC.chev+'</button>':'';
+  return '<div class="scroll">'
+    +topbar('<div style="display:flex;gap:8px"><button class="icon-btn" onclick="openSettings()" title="Equipment Settings" style="font-size:18px">⚙</button><button class="icon-btn" onclick="logout()" title="Log out">'+IC.user+'</button></div>')
+    +'<div class="pad">'
+      +'<div class="hello"><p>Coach dashboard</p><h2>HPL <em>FACILITIES</em></h2></div>'
+      +'<div class="wk-note" style="margin:2px 0 12px">Select a location to view and manage its roster.</div>'
+      +cards+un
+      +'<div style="height:12px"></div>'
+    +'</div></div>'
+    +tabbar('home');
+}
+var UNA={};
+function openUnassigned(){ UNA={}; go('unassigned'); }
+function unaSet(id,field,val){ UNA[id]=UNA[id]||{}; UNA[id][field]=val; }
+async function unaDone(){
+  var ids=Object.keys(UNA).filter(function(id){var u=UNA[id];return u&&(u.fac||u.prog);});
+  if(!ids.length){ toast('Pick a program or service first'); return; }
+  var mon=wkYMD(wkMondayOf(todayStr()));
+  toast('Updating '+ids.length+' player'+(ids.length===1?'':'s')+'…');
+  for(var i=0;i<ids.length;i++){ var p=playerById(ids[i]); if(!p) continue; var u=UNA[ids[i]];
+    if(u.fac) p.facility=u.fac;
+    if(u.prog){ p.workout=p.workout||{}; p.workout.programLength=(u.prog==='wow'?'wow':parseInt(u.prog,10)); if(!p.workout.programStart)p.workout.programStart=mon; if(!p.workout.startWeek)p.workout.startWeek=1; if(p.workout.pauseWeeks==null)p.workout.pauseWeeks=0; }
+    await savePlayer(p);
+  }
+  UNA={}; toast('Players moved'); go('home');
+}
+function viewUnassigned(){
+  if(!(DB.user&&DB.user.role==='coach')) return viewHome();
+  var back='<button class="icon-btn" onclick="go(\'home\')" title="Back">'+IC.back+'</button>';
+  var list=DB.players.filter(function(p){return !(p.facility);}); /* DB.players already ordered by sign-up date */
+  var progOpts=function(sel){return '<option value="">— program —</option>'+[['25','25 Week'],['20','20 Week'],['16','16 Week'],['12','12 Week'],['wow','Workout of the Week']].map(function(o){return '<option value="'+o[0]+'"'+(sel===o[0]?' selected':'')+'>'+o[1]+'</option>';}).join('');};
+  var facOpts=function(sel){return '<option value="">— service —</option>'+FACILITIES.map(function(f){return '<option value="'+f.k+'"'+(sel===f.k?' selected':'')+'>'+esc(f.name)+'</option>';}).join('');};
+  var ddStyle='flex:1;min-width:132px;padding:9px 10px;border-radius:9px;background:var(--panel-2);border:1px solid var(--line);color:#fff;font-size:13px';
+  var rows=list.length?list.map(function(p,i){var u=UNA[p.id]||{};
+    return '<div style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:11px 13px;margin-bottom:8px">'
+      +'<div style="display:flex;align-items:center;gap:9px;margin-bottom:9px"><span style="width:22px;height:22px;border-radius:6px;background:rgba(131,245,44,.12);border:1px solid rgba(131,245,44,.3);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:\'Anton\';font-style:italic;font-size:12px;flex:0 0 auto">'+(i+1)+'</span><span style="font-family:\'Barlow Semi Condensed\';font-weight:700;font-size:15px">'+esc(((p.first||'')+' '+(p.last||'')).trim()||'Unnamed')+'</span></div>'
+      +'<div style="display:flex;gap:8px"><select style="'+ddStyle+'" onchange="unaSet(\''+p.id+'\',\'prog\',this.value)">'+progOpts(u.prog)+'</select><select style="'+ddStyle+'" onchange="unaSet(\''+p.id+'\',\'fac\',this.value)">'+facOpts(u.fac)+'</select></div>'
+      +'</div>';
+  }).join(''):'<div class="wk-empty">No unassigned players — everyone is placed.</div>';
+  return '<div class="scroll">'+topbar(back)
+    +'<div class="pad"><div class="hello"><p>Coach dashboard</p><h2>UNASSIGNED <em>PLAYERS</em></h2></div>'
+    +'<div class="wk-note" style="margin:2px 0 12px">Listed by sign-up date, earliest first. Choose a program and a service for each player, then tap Done to move them.</div>'
+    +rows
+    +(list.length?'<button class="btn" style="margin-top:14px" onclick="unaDone()">Done — Apply &amp; Move Players</button>':'')
+    +'<div style="height:16px"></div></div></div>'+tabbar('home');
+}
+function openAddToRoster(){ ADD_SEL={}; go('addToRoster'); }
+function addToggle(id){ if(ADD_SEL[id]) delete ADD_SEL[id]; else ADD_SEL[id]=true; render(); }
+async function addSelectedToFacility(){
+  var ids=Object.keys(ADD_SEL).filter(function(k){return ADD_SEL[k];});
+  if(!ids.length){ toast('Select at least one player'); return; }
+  var fac=DB.facility||'';
+  toast('Adding '+ids.length+' player'+(ids.length===1?'':'s')+'…');
+  for(var i=0;i<ids.length;i++){ var p=playerById(ids[i]); if(p){ p.facility=fac; await savePlayer(p); } }
+  ADD_SEL={}; toast('Added to '+facilityName(fac)); go('roster');
+}
+function viewAddToRoster(){
+  var fac=DB.facility||'', facN=facilityName(fac);
+  var avail=DB.players.filter(function(p){return (p.facility||'')!==fac;}); avail.sort(alphaCmp);
+  var nSel=Object.keys(ADD_SEL).filter(function(k){return ADD_SEL[k];}).length;
+  var rows=avail.length?avail.map(function(p){
+    var sel=!!ADD_SEL[p.id];
+    var cur=p.facility?(' · '+facilityName(p.facility)):'';
+    return '<button class="add-row'+(sel?' on':'')+'" onclick="addToggle(\''+p.id+'\')">'
+      +'<div class="chk'+(sel?' on':'')+'">'+(sel?'✓':'')+'</div>'
+      +'<img class="p-photo" style="width:40px;height:40px" src="'+(p.photo||AVATAR)+'">'
+      +'<div class="p-info"><h3>'+esc(p.first)+' '+esc(p.last)+'</h3><div class="meta">'+(p.sport==='softball'?'Softball':'Baseball')+cur+'</div></div>'
+    +'</button>';
+  }).join(''):'<div class="center-note">Every player is already at '+esc(facN)+'.</div>';
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="go(\'roster\')" title="Back">'+IC.back+'</button>')
+    +'<div class="pad">'
+      +'<div class="hello"><p>Add to '+esc(facN)+'</p><h2>ADD <em>PLAYERS</em></h2></div>'
+      +'<div class="wk-note" style="margin:2px 0 10px">Tap players to select, then Add. They\'ll move to this location\'s roster.</div>'
+      +'<div>'+rows+'</div>'
+      +'<button class="btn" style="margin-top:12px;'+(nSel?'':'opacity:.5')+'" onclick="addSelectedToFacility()">Add'+(nSel?(' '+nSel):'')+' Player'+(nSel===1?'':'s')+'</button>'
+      +'<button class="btn ghost" style="margin-top:8px" onclick="coachAddPlayer()">+ Create a brand-new player</button>'
+      +'<div style="height:16px"></div>'
+    +'</div></div>';
+}
 function viewRoster(){
   return '<div class="scroll">'
-    +topbar('<button class="icon-btn" onclick="logout()" title="Log out">'+IC.user+'</button>')
+    +topbar('<button class="icon-btn" onclick="go(\'home\')" title="Facilities">'+IC.back+'</button>')
+    +'<div class="sport-toggle">'
+      +'<button class="'+(DB.sport==='baseball'?'on':'')+'" onclick="setSport(\'baseball\')">'+IC.ball+' Baseball</button>'
+      +'<button class="'+(DB.sport==='softball'?'on':'')+'" onclick="setSport(\'softball\')">'+IC.ball+' Softball</button>'
+    +'</div>'
     +'<div class="pad">'
-      +'<div class="hello"><p>Coach dashboard</p><h2>YOUR <em>HITTERS</em></h2></div>'
+      +'<div class="hello"><p>'+esc(facilityName(DB.facility))+' · '+(DB.sport==='softball'?'Softball':'Baseball')+'</p><h2>'+esc(facilityName(DB.facility)).toUpperCase()+'</h2></div>'
+      +((WK_WOW_FACILITIES.indexOf(DB.facility)>=0)?'<button class="btn" style="background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;font-family:\'Anton\';font-style:italic;font-size:15px;letter-spacing:.5px;margin:0 0 12px" onclick="openFacilityWoW()">WORKOUT OF THE WEEK</button>':'')
       +'<div class="searchbar">'+IC.search+'<input id="rosterSearch" placeholder="Search by first or last name" value="'+esc(DB.search||'')+'" oninput="onRosterSearch(this.value)">'
         +'<button id="rosterClear" onclick="clearRosterSearch()" title="Clear search" style="flex:0 0 auto;display:'+((DB.search||'').length?'flex':'none')+';align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--line);border:none;color:#fff;font-size:12px;line-height:1;cursor:pointer">X</button>'
       +'</div>'
       +'<div class="list-head"><span class="lbl">Players</span><span class="cnt" id="rosterCount">'+rosterCountLabel()+'</span></div>'
       +'<div id="rosterList">'+rosterListHTML()+'</div>'
-      +'<button class="btn ghost" style="margin-top:14px" onclick="coachAddPlayer()">+ Add Player</button>'
+      +'<button class="btn" style="margin-top:14px" onclick="openAddToRoster()">+ Add Players to '+esc(facilityName(DB.facility))+'</button>'
       +'<div style="height:12px"></div>'
     +'</div></div>'
-    +tabbar('roster');
+    +tabbar('home');
 }
 /* ---------- bottom tab bar (coach) ---------- */
 function tabbar(active){
-  var act={roster:"go('roster')", coaches:"openCoaches()", me:"logout()"};
+  var act={home:"go('home')", coaches:"openCoaches()", lead:"openLeaderboard()", dev:"openDevelopment()", me:"logout()"};
   function t(k,ic,lbl){ return '<button class="tab '+(active===k?'on':'')+'" onclick="'+(act[k]||"toast('Coming soon')")+'">'+ic+'<span>'+lbl+'</span></button>'; }
   return '<div class="tabbar">'
-    +t('roster',IC.home,'Roster')+t('coaches',IC.user,'Coaches')+t('me',IC.lock,'Log out')
+    +t('home',IC.home,'Home')+t('coaches',IC.user,'Coaches')+t('lead',IC.chart,'Leaders')+t('dev',IC.trend,'Development')+t('me',IC.lock,'Log out')
   +'</div>';
 }
 /* ---------- COACHES screen ---------- */
@@ -875,7 +1122,7 @@ function pCard(p){
 }
 async function coachAddPlayer(){
   if(!SBc){ toast('Cloud not reachable'); return; }
-  var st={ first:'New', last:'Player', photo:null, birthdate:'', height:'', weight:'', position:'', gradClass:'', hand:'R', gripRH:'', gripLH:'', rap:emptyRap(), blocks:emptyBlocks() };
+  var st={ first:'New', last:'Player', sport:(DB.sport||'baseball'), facility:(DB.facility||''), photo:null, birthdate:'', height:'', weight:'', position:'', gradClass:'', hand:'R', gripRH:'', gripLH:'', rap:emptyRap(), blocks:emptyBlocks() };
   try{
     var r=await SBc.from('hitters').insert({first_name:'New', last_name:'Player', state:st}).select('id,owner,state').single();
     if(r.error){ toast('Add failed: '+r.error.message); return; }
@@ -915,6 +1162,11 @@ function viewProfile(){
       +rnAgg('Max EV',gMaxEV,'mph','best')+rnAgg('Avg EV',gAvgEV,'mph','avg')+rnAgg('Hard Hit',gHH,'%','all swings')
       +rnAgg('Max Dist',gMaxDist,'ft','best')+rnAgg('Avg Dist',gAvgDist,'ft','avg')+rnAgg('Avg LA',gAvgLA,'°','avg')
     +'</div>'
+    +'<div class="pad" style="padding-bottom:0">'
+      +'<button class="btn" style="background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;font-family:\'Anton\';font-style:italic;font-size:18px;letter-spacing:.5px" onclick="openWorkout(\''+p.id+'\')">TODAY\'S WORKOUT'+(wkProfileStatus(p)?'<span style="display:block;font-family:\'Barlow Semi Condensed\';font-style:normal;font-size:12px;font-weight:600;margin-top:3px;opacity:.75">'+esc(wkProfileStatus(p))+'</span>':'')+'</button>'
+      +(isCoach?'<button class="btn ghost" style="margin-top:8px" onclick="openWorkoutSetup(\''+p.id+'\')">Workout Program</button>':'')
+      +'<div style="text-align:center;margin-top:11px;color:var(--grey);font-size:12.5px;font-weight:600">Workouts completed: <span style="color:var(--green);font-weight:800;font-size:14px">'+((p.workoutLog||[]).length)+'</span></div>'
+    +'</div>'
     +'<div class="section-lbl">Test Blocks · 25-Week Program</div>'
     +'<div class="wk-note" style="margin-bottom:6px">Tap a block to log a hitting test or Rapsodo results.</div>'
     +'<div class="assess" style="flex-wrap:wrap;gap:8px">'
@@ -924,9 +1176,212 @@ function viewProfile(){
     +'</div>'
     +'<div class="pad">'
       +'<button class="btn" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
+      +((isCoach && (p.sport||'baseball')!=='softball')?'<button class="btn ghost" style="margin-top:8px" onclick="go(\'drillMenu\',{playerId:\''+p.id+'\'})">Drills</button>':'')
+      +'<button class="btn ghost" style="margin-top:8px" onclick="openLeaderboard(\''+p.id+'\')">View Leaderboard</button>'
+      +'<button class="btn ghost" style="margin-top:8px" onclick="openDevelopment(\''+p.id+'\')">Development Leaders</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
+      +(isCoach?('<button class="btn" style="margin-top:14px;background:rgba(226,59,59,.12);border:1px solid var(--red);color:#ff7b6b" onclick="deletePlayer(\''+p.id+'\')">Delete Player</button>'):'')
     +'</div></div>';
 }
+
+/* ==================== WORKOUT ENGINE ==================== */
+var WK_PROGRAMS={25:{blocks:5,wpb:5,levels:[1,2,3,4,5],testFormat:'week'},20:{blocks:4,wpb:5,levels:[1,2,3,4],testFormat:'week'},16:{blocks:4,wpb:4,levels:[1,2,3,4],testFormat:'day'},12:{blocks:3,wpb:4,levels:[1,2,3],testFormat:'day'}};
+var WK_BLOCK_NAMES={1:'Foundation',2:'Build',3:'Sharpen',4:'Peak',5:'Compete'};
+var WK_PILLAR_PAIR={Path:'Vision',Vision:'Approach',Approach:'Timing',Timing:'Path'};
+var WK_PILLAR_LABEL={Path:'Bat Path / Direction / Control',Vision:'Vision / Pitch Recognition',Approach:'Approach',Timing:'Timing'};
+var WK_BATSPEED_ROT=[['Normal','Flamingos','Babe Ruth','Step Backs'],['Happy Gilmores','Step Backs','Rhythm','Wind-Up'],['2 Strike Stance','Rhythm','Normal','Flamingos'],['Babe Ruth','Wind-Up','Happy Gilmores','2 Strike Stance'],['Step Backs','Normal','Flamingos','Rhythm'],['Flamingos','2 Strike Stance','Wind-Up','Babe Ruth'],['Rhythm','Happy Gilmores','Step Backs','Normal'],['Wind-Up','Babe Ruth','2 Strike Stance','Happy Gilmores']];
+var WK_HPL_TEE=['Tap','Ortiz','Open Hip','Low Tee','High Tee'];
+var WK_ADDON=['Walk Thrus','Swing Backs','Split Stance','Ortiz Drill','Beltre Drill','Power Position','Tap Drill'];
+/* No-Pelotero tee/flip pools. Each inner array = a set; only ONE drill per set may be used on a given day. All usable on tee OR flip. */
+var WK_TEEFLIP_SETS=[["Slow Mo's","Swing Backs"],["Step Backs","Happy Gilmore","Rhythm"],["Flamingo","Windup"],["Open Hip","Babe Ruth"],["Split Stance","Top Hand / Bottom Hand"],["Launch Angle"]];
+/* Flip-only drills (bat path / direction / control + these). Tap Drill gated by the Tap Trainer equipment toggle. */
+var WK_FLIP_ONLY=["Ortiz Drill","Tap Drill","Beltre Drill","Swing Direction","Around the World","3-3-3","Walk Thrus"];
+/* v2 main-focus config: per level(1-5) x pillar. d=darts main drills; sec=fixed secondary; angles=alt Open/Closed as 2nd main; noDarts/noFrontToss/noBP; la=launch-angle package; comp=competition week; rounds2; mach=extra machine area */
+var WK_MAIN={
+1:{Path:{d:['Around the World','3-3-3']},Vision:{d:['Ball-Pop','2 Seam / 4 Seam Reads']},Approach:{d:['7 Ball','3 Ball']},Timing:{d:['Fast / Slow Alternate','FB / CB Tee']}},
+2:{Path:{d:['Walk Thrus','Swing Backs']},Vision:{d:['Color Ball Reads'],sec:'No Hit Red'},Approach:{d:['5 Ball','2 Strike Hitting']},Timing:{d:['Fast / Slow Reaction','Load Hold']}},
+3:{Path:{d:['Short Bat Low / In'],angles:true},Vision:{d:['FB / CB Live Reads','CB High / Low Reads'],sec:'Only Blue'},Approach:{noDarts:true,bp:'3 Ball Focus + 1 Strike Focus'},Timing:{noDarts:true,bp:'Machine FB & Curveballs — vary speeds and shape'}},
+4:{Path:{la:true,noBP:true,d:['10° Launch Angle','20° Launch Angle','30° Launch Angle','40° Launch Angle','Launch Angle Calls']},Vision:{noFrontToss:true,noDarts:true,bp:'FB / CB — Hit FB, Take CB',mach:'Pitching Machine — Curveballs'},Approach:{d:['Situations'],noSec:true,rounds2:true},Timing:{noDarts:true,bp:'FB / CB / FB · CB / FB / CB'}},
+5:{Path:{comp:true},Vision:{comp:true},Approach:{comp:true,bp:'2 Strike — off machine, FB & CB using 7 Ball'},Timing:{noDarts:true,bp:'Drop / Pause · 2 Machine'}}
+};
+/* rotating secondary pool by level — Bat Path drills + 3 Plate + Small Balls + Tap Drill. No Approach drills (banned as secondary). */
+var WK_SEC_POOL={1:['Swing Direction','3 Plate','Small Balls / Skinny Trainer','Tap Drill','Around the World'],2:['Walk Thrus','Swing Backs','Swing Direction','3-3-3','3 Plate','Tap Drill'],3:['Short Bat Away','Small Balls / Skinny Trainer','3 Plate','Tap Drill'],4:['Around the World','3-3-3','Tap Drill','3 Plate'],5:['Around the World','3-3-3','Tap Drill','3 Plate']};
+/* random-day Darts pool (players training 4-6x/week). 7 Ball added only alongside bat speed. */
+var WK_RANDOM_POOL=['Swing Direction','Around the World','3-3-3','Walk Thrus','Small Balls / Skinny Trainer','Tap Drill'];
+var WK_COMP_DARTS=['Small Balls / Skinny Trainer','Short Trainer Bat','Around the World','3 Plate','Launch Angle Calls','Off-set Sliders'];
+var WK_COMP_NOTE='Competition — mix BP & Machine, Rapsodo reads. Pool: No Red, Only Blue, 3 Plate, Random Counts, Launch Angle Call-outs, Off-set Sliders.';
+var WK_CUES={'Swing Direction':'60-70% effort on a controlled swing, stopping/recoiling the swing at contact to point toward ball flight','Around the World':'2 each LF, LCF, CF, RCF, RF','3-3-3':'3 grounders, 3 line drives, 3 long fly balls','Walk Thrus':'After contact, walk toward ball flight 2 steps','Swing Backs':'Bat held out in front over the plate, take the bat back 90% of the way tracing bat path. Overexaggerate hip and spine coil','Short Bat Low / In':'Throw low and in, hit the opposite gap','Ball-Pop':'Say ball when you pick the ball up in the pitcher hand, say pop at contact','No Hit Red':'Cannot hit the color red','Only Blue':'Only hit the color blue','3 Ball Focus':'90% of max EV plus 10 degrees or higher','3 Plate':'Plates 2 feet apart, one behind home plate and one in front. 2 pitches each spot: 2 back, 2 middle, 2 front, 2 back. Then reverse: 2 front, 2 middle, 2 back, 2 front','FB / CB Tee':'Set tee with ball on the outside corner. Toss FB inner half, fake the toss and the player reads CB and hits the ball off the tee oppo','Machine FB':'Vary speeds and shape','FB / CB / FB':'3 of each — MUST swing at first pitch of sequence','CB / FB / CB':'3 of each — MUST swing at first pitch of sequence','Drop / Pause':'Off machine — drop for FB, pause for CH','2 Machine':'Side by side or stacked — 1 FB, 1 CB'};
+var WK_MINDSET='The result of the hit does not matter. There is one rule: swing as hard as you can, every single swing. Ground ball, pop up, swing and miss — none of it counts here. If you recognize your swing is mechanically flawed, make the adjustment while maintaining 100% effort. Never trade effort for a better-looking result.';
+function wkParseDate(s){if(s instanceof Date)return new Date(s.getFullYear(),s.getMonth(),s.getDate());var p=String(s).slice(0,10).split('-');return new Date(+p[0],(+p[1])-1,+p[2]);}
+function wkMondayOf(d){var x=wkParseDate(d);var day=x.getDay();var diff=(day===0?6:day-1);x.setDate(x.getDate()-diff);return x;}
+function wkDayDiff(a,b){return Math.round((wkParseDate(a)-wkParseDate(b))/86400000);}
+function wkYMD(d){var x=(d instanceof Date)?d:wkParseDate(d);var m=x.getMonth()+1,day=x.getDate();return x.getFullYear()+'-'+(m<10?'0':'')+m+'-'+(day<10?'0':'')+day;}
+function todayStr(){return wkYMD(new Date());}
+function wkResolveWeek(s,t,pause,startWeek){var m=wkMondayOf(s);return Math.max(1,Math.floor(wkDayDiff(t,m)/7)+(startWeek||1)-(pause||0));}
+function wkResolveBlock(len,weekNo){var P=WK_PROGRAMS[len==='wow'?25:len];if(!P)return null;var tot=P.blocks*P.wpb;var w=Math.min(Math.max(1,weekNo),tot);var bi=Math.floor((w-1)/P.wpb)+1;var wib=((w-1)%P.wpb)+1;var lvl=P.levels[bi-1];var itw=(P.testFormat==='week'&&wib===1);var itd=(P.testFormat==='day'&&wib===1);var mp=P.wpb===5?[null,'Path','Vision','Approach','Timing'][wib-1]:['Path','Vision','Approach','Timing'][wib-1];return{weekNo:w,blockIndex:bi,level:lvl,blockName:WK_BLOCK_NAMES[lvl],weekInBlock:wib,isTestWeek:itw,isTestDay:itd,mainPillar:mp,secondaryPillar:mp?WK_PILLAR_PAIR[mp]:null,totalBlocks:P.blocks,totalWeeks:tot};}
+function wkBatSpeedCount(bi,a){if(bi<=1)return 2;var c=a[bi-1],p=a[bi-2];if(typeof c!=='number'||typeof p!=='number')return 2;var g=c-p;if(g>=3.5)return 2;if(g>=1.0)return 3;return 4;}
+function wkBatSpeedEligible(today,log,ov){var bs=(log||[]).filter(function(e){return e.bat;}).map(function(e){return e.date;}).sort();var last=bs.length?bs[bs.length-1]:null;var mon=wkYMD(wkMondayOf(today));var sd=wkMondayOf(today);sd.setDate(sd.getDate()+6);var sun=wkYMD(sd);var tw=bs.filter(function(d){return d>=mon&&d<=sun;}).length;if(ov)return{allowed:true,reason:'Coach override',nextEligible:null,thisWeek:tw};if(tw>=3)return{allowed:false,reason:'Weekly cap reached (3 bat-speed days this week).',nextEligible:null,thisWeek:tw};if(last){var diff=wkDayDiff(today,last);if(diff<2){var ne=wkParseDate(last);ne.setDate(ne.getDate()+2);return{allowed:false,reason:'Needs 2 days between bat-speed days.',nextEligible:wkYMD(ne),thisWeek:tw};}}return{allowed:true,reason:'',nextEligible:null,thisWeek:tw};}
+function wkBatRot(w){return WK_BATSPEED_ROT[(w-1)%8];}
+function wkHplTee(w){var L=WK_HPL_TEE.length;var i=((w-1)*2)%L;return[WK_HPL_TEE[i],WK_HPL_TEE[(i+1)%L]];}
+function wkAddon(w){return WK_ADDON[(w-1)%7];}
+function wkNoPeloTee(wk,eq){var idx=WK_TEEFLIP_SETS.map(function(_,i){return i;});var chosen=wkPickN(idx,Math.min(4,idx.length),wkSeed('nptee'+wk));return chosen.map(function(si){var set=WK_TEEFLIP_SETS[si];var mi=wkSeed('nptee'+wk+'x'+si)%set.length;return set[mi];});}
+function wkFlipPool(seedStr,eq){var pool=WK_TEEFLIP_SETS.map(function(set,i){var mi=wkSeed(seedStr+'s'+i)%set.length;return set[mi];});var extra=WK_FLIP_ONLY.filter(function(n){return !(n==='Tap Drill'&&eq&&eq.tap===false);});return pool.concat(extra);}
+function wkNoPeloFlips(wk,dayIdx,eq,n){n=n||3;var seedStr='npflip'+wk+'d'+dayIdx;return wkPickN(wkFlipPool(seedStr,eq),n,wkSeed(seedStr));}
+function wkSeed(s){var h=2166136261,str=String(s);for(var i=0;i<str.length;i++){h^=str.charCodeAt(i);h=(h*16777619)>>>0;}return h>>>0;}
+function wkPickN(pool,n,seed){var a=pool.slice(),out=[],s=(seed>>>0)||1;while(a.length&&out.length<n){s=(s*1103515245+12345)>>>0;var idx=s%a.length;out.push(a.splice(idx,1)[0]);}return out;}
+function wkDayIdx(today){var d=wkParseDate(today).getDay();return (d+6)%7;} /* Mon=0 .. Sun=6 */
+function wkMonSatCount(log,today){var mon=wkMondayOf(today);var sat=new Date(mon);sat.setDate(sat.getDate()+5);var m=wkYMD(mon),s=wkYMD(sat);return (log||[]).filter(function(e){return e.date>=m&&e.date<=s;}).length;}
+function wkRandomActive(p,today){return wkMonSatCount((p&&p.workoutLog)||[],today)>=3;}
+function wkCue(name){return WK_CUES[name]||null;}
+var WK_NOREP={'Around the World':1,'3-3-3':1,'Pick 1 Flip':1};
+function wkD(n,extra){var o={name:n,cue:wkCue(n)};if(extra)for(var k in extra)o[k]=extra[k];if(!o.rep&&!WK_NOREP[n])o.rep='1 × 8';return o;}
+function wkTwoStrikeFirst(arr){if(!arr||arr.length<2)return arr;var a=[],b=[];arr.forEach(function(d){(/2\s*strike/i.test(d.name)?a:b).push(d);});return a.concat(b);}
+function wkApplyEquip(out,eq){if(!eq)return out;out.equipNotes=out.equipNotes||[];
+  function filt(area){if(!area||!area.drills)return;var kept=[];area.drills.forEach(function(d){
+    if(d.name==='Small Balls / Skinny Trainer'){if(eq.smallBalls){kept.push(d);}else if(eq.skinnyTrainer){d.name='Skinny Bat';d.cue='Skinny / short trainer bat with normal balls.';kept.push(d);}return;}
+    if(d.name==='Short Trainer Bat'){if(eq.skinnyTrainer)kept.push(d);return;}
+    if(d.name==='Tap Drill'){if(eq.tap!==false)kept.push(d);return;}
+    kept.push(d);});area.drills=kept;}
+  filt(out.areas.darts);filt(out.areas.bp);filt(out.areas.machine);
+  if(!eq.machine&&out.areas.machine){out.areas.machine=null;out.equipNotes.push('No pitching machine here — do machine drills off Front Toss / BP as your coach directs.');}
+  if(!eq.colorBalls)out.equipNotes.push('No color balls — color-read drills are done with normal balls or coach-directed; color reads aren\'t scored.');
+  return out;}
+function wkGenerate(o){var blk=wkResolveBlock(o.programLength,o.weekNo);var out={block:blk,isBatSpeed:o.isBatSpeed,batCount:o.batCount,areas:{}};
+  if(blk.isTestWeek){
+    if(o.nonTest){
+      var wkT=blk.weekNo,lvlT=blk.level,rotT=wkBatRot(wkT),noPeloT=o.equip&&o.equip.pelotero===false;
+      if(noPeloT){out.areas.tee={label:null,drills:wkNoPeloTee(wkT,o.equip).map(function(n){return wkD(n);}),note:'Rotate these 4 tee drills — 1 set of 8 each.'};}
+      else{out.areas.tee={label:'Pelotero Tee Only',drills:[],note:'Do all 4 Pelotero tee drills — 1 set of 8 each.'};}
+      out.areas.frontToss={label:'',drills:[wkD(rotT[0],{rep:'bs'}),wkD(rotT[1],{rep:'bs'}),wkD(wkAddon(wkT),{addon:true})],note:'Green “Bat Speed” drills = 5 heavy · 5 light · 5 normal each. Last drill is a standard front-toss drill — 1 set of 8.'};
+      var poolT=[];['Path','Vision','Approach','Timing'].forEach(function(pil){var c=WK_MAIN[lvlT]&&WK_MAIN[lvlT][pil];if(c&&c.d)c.d.forEach(function(n){poolT.push(n);});});if(!poolT.length)poolT=WK_RANDOM_POOL.slice();
+      var picksT=wkPickN(poolT,2,wkSeed((o.today||('w'+wkT))+'nt'));
+      out.areas.darts={drills:[wkD(picksT[0]),wkD(picksT[1])],flags:['Non-test day — 2 random drills pulled from the four pillars.']};
+      out.areas.bp=null;
+      out.areas.machine={text:'2 Strike + Normal',drills:wkTwoStrikeFirst([wkD('2 Strike Hitting'),wkD('Normal Rounds')])};
+      out.nonTest=true;out.testDay=false;
+      return wkApplyEquip(out,o.equip);
+    }
+    out.test=true;out.areas.tee={label:null,note:'5 warm-up reps, no coaching',drills:[]};out.areas.frontToss={label:null,note:'Assessment protocol. On non-test days this week, bat speed continues at your normal count.',drills:[]};out.areas.darts={note:'Player Development Report assessment protocol',drills:[],flags:[]};out.areas.bp={note:'Scored live at-bats',drills:[]};out.areas.machine=null;return out;}
+  var lvl=blk.level,wk=blk.weekNo,main=blk.mainPillar,dayIdx=(typeof o.dayIdx==='number'?o.dayIdx:0),count=o.isBatSpeed?(o.batCount||2):0,rot=wkBatRot(wk);
+  var cfg=(WK_MAIN[lvl]&&WK_MAIN[lvl][main])||{};
+  /* ---- TEE ---- */
+  var tee={label:'',drills:[],note:''};
+  var noPelo=o.equip&&o.equip.pelotero===false;
+  if(noPelo){ tee.label=null;tee.drills=wkNoPeloTee(wk,o.equip).map(function(n){return wkD(n);});tee.note='Rotate these 4 tee drills — 1 set of 8 each. No two from the same drill family land on the same day. Coach may swap any drill.'; }
+  else if(o.isBatSpeed){ if(count===4){tee.label='Pelotero Tee + Flips';tee.drills=[wkD(rot[2],{rep:'bs'}),wkD(rot[3],{rep:'bs'})];tee.note='Do both Pelotero tee drills (1 set of 8 each), then the 2 tee drills shown (1 set of 8 each).';} else {tee.label='Pelotero Tee Only';tee.note='Do all 4 Pelotero tee drills — 1 set of 8 each.';} }
+  else { tee.label='Pelotero Tee + Flips';var h=wkHplTee(wk);tee.drills=[wkD(h[0]),wkD(h[1])];tee.note='Do both Pelotero tee drills (1 set of 8 each), then the 2 tee drills shown (1 set of 8 each).'; }
+  out.areas.tee=tee;
+  /* ---- FRONT TOSS ---- (hidden on block-4 Vision) */
+  if(cfg.noFrontToss){ out.areas.frontToss=null; }
+  else { var ft={label:'',drills:[],note:''};
+    if(o.isBatSpeed){ if(count===2)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(wkAddon(wk),{addon:true})]; else if(count===3)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(rot[2],{rep:'bs'})]; else if(count===4)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD('Pick 1 Flip')]; ft.note='Green “Bat Speed” drills = 5 heavy · 5 light · 5 normal each. Any drill without the green tag is NOT bat speed — 1 set of 8.'; }
+    else if(noPelo){ ft.label=null;ft.drills=wkNoPeloFlips(wk,dayIdx,o.equip,3).map(function(n){return wkD(n);});ft.note='Do 3 flip drills — 1 set of 8 each. If a flip drill is overload/underload, ask your instructor for a replacement.'; }
+    else { ft.label='Pelotero Flip';ft.note='Do 3 Pelotero flip drills — 1 set of 8 each. If a flip drill is overload/underload, ask your instructor for a replacement.'; }
+    (o.drillNeeds||[]).forEach(function(n){ft.drills.push(wkD(n,{need:true}));});
+    out.areas.frontToss=ft; }
+  /* ---- DARTS ---- */
+  var darts=null;
+  if(o.randomDarts){ var pool=WK_RANDOM_POOL.slice(); if(o.isBatSpeed)pool.push('7 Ball'); var picks=wkPickN(pool,3,wkSeed((o.today||('w'+wk))+'r'+dayIdx)); darts={random:true,drills:[wkD(picks[0]),wkD(picks[1]),wkD(picks[2],{secondary:true})],flags:['Random mix — 4+ training days this week.']}; }
+  else if(cfg.comp){ var cd=wkPickN(WK_COMP_DARTS,1,wkSeed((o.today||('w'+wk))+'c'+dayIdx)); darts={comp:true,drills:[wkD(cd[0])],flags:[WK_COMP_NOTE]}; }
+  else if(cfg.noDarts){ darts=null; }
+  else { darts={drills:[],flags:[]}; var md=(cfg.d||[]).slice(); if(cfg.angles)md.push(dayIdx<3?'Open Angle':'Closed Angle'); md.forEach(function(n){darts.drills.push(wkD(n));});
+    if(!cfg.noSec&&!cfg.la){ var s2=null; if(cfg.sec)s2=cfg.sec; else if(wk%3===0&&dayIdx===2)s2='2 Strike Hitting'; else {var sp=WK_SEC_POOL[lvl]||[];if(sp.length)s2=sp[dayIdx%sp.length];} if(s2)darts.drills.push(wkD(s2,{secondary:true})); }
+    if(cfg.angles)darts.flags.push('Open / Closed Angle alternate — first half of the week Open, second half Closed.');
+    if(cfg.la)darts.flags.push('All 5 launch-angle drills on ONE day, run through the week. No BP/Machine this week.');
+    if(cfg.rounds2)darts.flags.push('2 rounds — no secondary focus this week.'); }
+  out.areas.darts=darts;
+  /* ---- BP / MACHINE ---- */
+  if(cfg.noBP){ out.areas.bp=null; }
+  else { var bpTxt=cfg.bp||(cfg.comp?'Competition — mix BP & Machine, Rapsodo reads':'Normal + 2 Strike Hitting'); out.areas.bp={text:bpTxt,drills:wkTwoStrikeFirst(bpTxt.split(/\s*[·+]\s*/).map(function(s){return s.trim();}).filter(Boolean).map(function(n){return wkD(n);}))}; }
+  out.areas.machine=cfg.mach?{text:cfg.mach,drills:wkTwoStrikeFirst([wkD(cfg.mach)])}:null;
+  out.rounds2=!!cfg.rounds2; out.comp=!!cfg.comp; out.laWeek=!!cfg.la; out.noFrontToss=!!cfg.noFrontToss; out.testDay=!!blk.isTestDay;
+  return wkApplyEquip(out,o.equip);}
+function wkAssessments(p){var list=[];(p.blocks||[]).forEach(function(b){var rapMax=0;(b.entries||[]).forEach(function(e){if(e.type==='rapsodo'&&e.rap&&e.rap.maxEV>rapMax)rapMax=e.rap.maxEV;});(b.entries||[]).forEach(function(e){if(e.type==='test'&&e.status!=='inprogress'&&e.test){var mx=0;['frontToss','bp','machine'].forEach(function(k){(e.test[k]||[]).forEach(function(pt){if(pt.ev>0&&pt.color!=='Red'&&pt.ev>mx)mx=pt.ev;});});if(rapMax>mx)mx=rapMax;list.push({date:e.date||'',ev:mx});}});});list.sort(function(a,b){return (a.date||'').localeCompare(b.date||'');});return list.map(function(x){return x.ev;});}
+function wkHasProgram(p){var w=p.workout||{};return !!(w.programLength&&w.programStart);}
+function wkProfileStatus(p){if(!wkHasProgram(p))return '';var w=p.workout;var wn=wkResolveWeek(w.programStart,todayStr(),w.pauseWeeks||0,w.startWeek);var b=wkResolveBlock(w.programLength,wn);if(!b)return '';return (w.programLength==='wow'?'Workout of the Week · ':'')+'Week '+wn+' · '+(b.isTestWeek||b.isTestDay?'Test · ':'')+b.blockName;}
+function wkYearCount(p){var y=new Date().getFullYear();return (p.workoutLog||[]).filter(function(e){return String(e.date).slice(0,4)===String(y);}).length;}
+
+/* ---- modals ---- */
+function wkModal(title,body){var el=document.getElementById('wkmodal');if(!el){el=document.createElement('div');el.id='wkmodal';document.body.appendChild(el);}el.className='wk-modal';el.style.display='flex';el.innerHTML='<div class="wk-modal-card"><h3>'+esc(title)+'</h3><p>'+esc(body)+'</p><button class="btn" onclick="wkCloseModal()">Got it</button></div>';}
+function wkCloseModal(){var el=document.getElementById('wkmodal');if(el)el.style.display='none';}
+function wkCueModal(name){var c=wkCue(name);if(c)wkModal(name,c);}
+function wkMindsetModal(){wkModal('Bat Speed Mindset',WK_MINDSET);}
+
+/* ---- player flow ---- */
+var WORKOUT=null;
+function openWorkout(pid){WORKOUT={playerId:pid,isBatSpeed:undefined};go('workout',{playerId:pid});}
+function chooseBatSpeed(bs){if(!WORKOUT)return;WORKOUT.isBatSpeed=bs;if(bs&&!(curPlayer().workoutLog||[]).some(function(e){return e.bat;}))wkMindsetModal();render();}
+async function completeDay(){var p=curPlayer();if(!p)return;if(!p.workoutLog)p.workoutLog=[];if(p.workoutLog.some(function(e){return e.date===todayStr();})){toast('Already logged today');go('profile',{playerId:p.id});return;}var bs=!!(WORKOUT&&WORKOUT.isBatSpeed===true);p.workoutLog.push({date:todayStr(),bat:bs});await savePlayer(p);WORKOUT=null;toast('Training day logged'+(bs?' · bat speed':''));go('profile',{playerId:p.id});}
+function wkDrillHtml(d){var cue=d.cue;var kind=(d.rep==='bs')?'bs':(d.addon?'addon':'');var cls='wk-drill'+(d.need?' need':'')+(d.secondary?' sec':'')+(kind?' '+kind:'')+(cue?' has-cue':'');var safe=String(d.name).replace(/\\/g,'\\\\').replace(/'/g,"\\'");var rep=(d.rep==='bs')?'5H · 5L · 5N':(d.rep||'');var badge=(kind==='bs')?'<span class="dtag bs">Bat Speed</span>':(kind==='addon')?'<span class="dtag add">Add-On</span>':'';var repHtml=rep?('<span class="drep">'+rep+'</span>'):'';return '<button class="'+cls+'" '+(cue?('onclick="wkCueModal(\''+safe+'\')"'):'disabled')+'>'+esc(d.name)+badge+repHtml+(cue?' <span class="ci">i</span>':'')+'</button>';}
+function wkAreaCard(n,title,extra,pelo,drills,note,flags){var h='<div class="wk-area"><div class="wk-hd"><div class="n">'+n+'</div><h4>'+title+'</h4>'+(extra?'<span class="ef">'+extra+'</span>':'')+'</div><div class="wk-bd">';if(pelo)h+='<div class="wk-pelo">'+IC.sync+' '+esc(pelo)+' — open the Pelotero app</div>';if(note)h+='<div class="wk-flag" style="color:var(--grey);font-style:normal;margin-top:0;margin-bottom:'+(drills&&drills.length?'8px':'0')+'">'+esc(note)+'</div>';if(drills&&drills.length)h+='<div>'+drills.map(wkDrillHtml).join('')+'</div>';(flags||[]).forEach(function(f){h+='<div class="wk-flag">'+esc(f)+'</div>';});h+='</div></div>';return h;}
+function viewWorkout(){var p=curPlayer();if(!p)return viewLogin();var coach=DB.user&&DB.user.role==='coach';var back='<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>';if(!wkHasProgram(p)){return '<div class="scroll">'+topbar(back)+'<div class="pad"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>TODAY\'S <em>WORKOUT</em></h2></div></div><div class="wk-empty">'+(coach?'No program set yet. Open <b>Workout Program</b> on this player\'s profile to assign a length and start date.':'Your coach hasn\'t set up your program yet — check back soon.')+'</div></div>';}var w=p.workout;var wn=wkResolveWeek(w.programStart,todayStr(),w.pauseWeeks||0,w.startWeek);var blk=wkResolveBlock(w.programLength,wn);if(blk.isTestWeek){if(!WORKOUT||WORKOUT.playerId!==p.id)WORKOUT={playerId:p.id,isBatSpeed:undefined,testChoice:undefined};if(!WORKOUT.testChoice)return viewTestWeekChoose(p,w,wn,blk);if(WORKOUT.testChoice==='nontest'){WORKOUT.isBatSpeed=true;return viewWorkoutSession(p,w,wn,blk,true,false,true);}return viewWorkoutSession(p,w,wn,blk,null,false,false);}if(w.programLength==='wow'){WORKOUT={playerId:p.id,isBatSpeed:true};return viewWorkoutSession(p,w,wn,blk,true,true);}if(!WORKOUT||WORKOUT.playerId!==p.id)WORKOUT={playerId:p.id,isBatSpeed:undefined};if(WORKOUT.isBatSpeed===undefined)return viewWorkoutChoose(p,w,wn,blk);return viewWorkoutSession(p,w,wn,blk,WORKOUT.isBatSpeed);}
+function viewWorkoutChoose(p,w,wn,blk){var back='<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>';var elig=wkBatSpeedEligible(todayStr(),p.workoutLog||[],!!w.batOverride);var bsCls='wk-cbtn bs'+(elig.allowed?'':' off');var bsSub=elig.allowed?(w.batOverride?'Unlocked by coach':'Ready — swing as hard as you can'):(elig.reason+(elig.nextEligible?(' Next eligible '+elig.nextEligible):''));return '<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+' · Week '+wn+' · '+esc(blk.blockName)+'</p><h2>TODAY\'S <em>WORKOUT</em></h2></div></div><div class="wk-note" style="margin:2px 16px 10px">Choose your session type for today.</div><div class="wk-choose"><button class="'+bsCls+'" '+(elig.allowed?'onclick="chooseBatSpeed(true)"':'disabled')+'>BAT SPEED<span class="sub">'+esc(bsSub)+'</span></button><button class="wk-cbtn no" onclick="chooseBatSpeed(false)">NO BAT SPEED<span class="sub">Mechanics &amp; skill work — always available</span></button></div><div style="height:16px"></div></div>';}
+function chooseTestMode(mode){var p=curPlayer();if(!p)return;if(!WORKOUT||WORKOUT.playerId!==p.id)WORKOUT={playerId:p.id};WORKOUT.testChoice=mode;if(mode==='nontest')WORKOUT.isBatSpeed=true;render();}
+function testWeekBack(pid){if(WORKOUT)WORKOUT.testChoice=undefined;render();}
+function viewTestWeekChoose(p,w,wn,blk){var back='<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>';return '<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+' · Week '+wn+' · Test Week</p><h2>TODAY\'S <em>WORKOUT</em></h2></div></div><div class="wk-note" style="margin:2px 16px 10px">Testing today, or already tested this week?</div><div class="wk-choose"><button class="wk-cbtn bs" onclick="chooseTestMode(\'test\')">TEST DAY<span class="sub">Player Development assessment — Front Toss → BP → Machine</span></button><button class="wk-cbtn no" onclick="chooseTestMode(\'nontest\')">NON-TEST DAY<span class="sub">Already tested — full training session instead</span></button></div><div style="height:16px"></div></div>';}
+function viewWorkoutSession(p,w,wn,blk,isBatSpeed,wow,nonTest){var back='<button class="icon-btn" onclick="'+(blk.isTestWeek?'testWeekBack(\''+p.id+'\')':(wow?'go(\'profile\',{playerId:\''+p.id+'\'})':'workoutBack(\''+p.id+'\')'))+'" title="Back">'+IC.back+'</button>';var assess=wkAssessments(p);var batCount=wow?3:wkBatSpeedCount(blk.blockIndex,assess);var tdy=todayStr();var rnd=wow?false:wkRandomActive(p,tdy);var dIdx=wow?0:wkDayIdx(tdy);var g=wkGenerate({programLength:w.programLength,weekNo:wn,isBatSpeed:isBatSpeed,batCount:batCount,drillNeeds:(p.drillNeeds||[]),dayIdx:dIdx,today:tdy,randomDarts:rnd,equip:wkEquip(p),nonTest:nonTest});var head='Week '+wn+' · '+(g.test?'TEST · ':'')+esc(blk.blockName)+(nonTest?' · Non-Test Day':(wow?' · Workout of the Week (3 drills)':(isBatSpeed?(' · Bat Speed ('+batCount+' drills)'):(g.test?'':' · Skill Day'))))+(rnd?' · Random':'');var tee=g.areas.tee;var html='<div class="scroll">'+topbar(back)+'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>'+(wow?'WORKOUT OF THE <em>WEEK</em>':(g.test?'TEST <em>DAY</em>':'TODAY\'S <em>WORKOUT</em>'))+'</h2></div></div><div class="wk-note" style="margin:2px 16px 8px"><b>'+head+'</b></div>'+(g.testDay?'<div class="wk-flag" style="margin:2px 16px 10px;color:#f0c040;font-style:normal;background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.35);border-radius:10px;padding:9px 12px"><b>Test Day</b> — first session this week is the Player Development assessment (Front Toss → BP → Machine, log every swing). Train the rest of the week as normal below.</div>':'');
+  if(g.equipNotes&&g.equipNotes.length){g.equipNotes.forEach(function(nn){html+='<div class="wk-flag" style="margin:2px 16px 8px;color:#9db8ff;font-style:normal;background:rgba(61,123,255,.08);border:1px solid rgba(61,123,255,.3);border-radius:10px;padding:8px 11px">'+esc(nn)+'</div>';});}
+  var AR=[];
+  AR.push({t:'Tee',ef:(g.test?'':'60–70% effort'),pelo:tee.label,drills:tee.drills,note:tee.note,flags:[]});
+  if(g.areas.frontToss){var fo=g.areas.frontToss;AR.push({t:'Front Toss',ef:'',pelo:fo.label,drills:fo.drills,note:fo.note,flags:[],mind:isBatSpeed});}
+  if(g.areas.darts){var dao=g.areas.darts;AR.push({t:'Darts',ef:'',pelo:null,drills:dao.drills,note:'',flags:dao.flags||[]});}
+  if(g.areas.bp){var bpo=g.areas.bp;AR.push({t:'BP / Machine',ef:'',pelo:null,drills:bpo.drills,note:'',flags:[]});}
+  if(g.areas.machine){var mo=g.areas.machine;AR.push({t:'Pitching Machine',ef:'',pelo:null,drills:mo.drills,note:'',flags:[]});}
+  AR.forEach(function(a,i){var card=wkAreaCard(String(i+1),a.t,a.ef,a.pelo,a.drills,a.note,a.flags);if(a.mind)card=card.replace('</div></div>','<button class="wk-mind" onclick="wkMindsetModal()">'+IC.ball+' Bat Speed Mindset — tap to read</button></div></div>');html+=card;});
+  var doneToday=(p.workoutLog||[]).some(function(e){return e.date===todayStr();});
+  var cdBtn=doneToday
+    ?'<button class="btn" style="font-size:17px;background:#26292b;color:#6f7570;cursor:default;box-shadow:none" disabled>✓ Completed Today</button><div style="text-align:center;margin-top:7px;color:var(--grey);font-size:11.5px">Today\'s workout is already logged — one per day.</div>'
+    :'<button class="btn" style="font-size:17px" onclick="completeDay()">✓ Complete Day</button>';
+  html+=(g.test?'<div class="pad"><div class="wk-flag" style="color:var(--grey);font-style:normal;margin:0 0 6px">Regular game bat only · no coaching or cues during the test · always Front Toss → BP → Machine · log every swing.</div></div>':'')+'<div style="position:sticky;bottom:0;z-index:5;padding:12px 16px calc(16px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(10,11,10,0),#0a0b0a 45%)">'+cdBtn+'</div></div>';
+  return html;}
+function workoutBack(pid){if(WORKOUT)WORKOUT.isBatSpeed=undefined;render();}
+
+/* ---- coach setup ---- */
+var WSETUP=null;
+function openWorkoutSetup(pid){var p=playerById(pid);var w=(p&&p.workout)||{};WSETUP={playerId:pid,programLength:w.programLength||25,programStart:w.programStart||wkYMD(wkMondayOf(todayStr())),pauseWeeks:w.pauseWeeks||0,startWeek:w.startWeek||1,batOverride:!!w.batOverride,drillNeeds:(p&&p.drillNeeds||[]).slice(),needInput:'',equip:Object.assign({},wkEquip(p))};go('workoutSetup',{playerId:pid});}
+function wsToggleEquip(k){if(!WSETUP)return;WSETUP.equip[k]=!WSETUP.equip[k];render();}
+function wsSetLen(n){WSETUP.programLength=n;render();}
+function wsSetStart(v){if(!WSETUP)return;WSETUP.programStart=wkYMD(wkMondayOf(v));render();}
+function wsPause(d){WSETUP.pauseWeeks=Math.max(0,(WSETUP.pauseWeeks||0)+d);render();}
+function wsStartWeek(d){var tot=(WK_PROGRAMS[WSETUP.programLength==='wow'?25:WSETUP.programLength]||{blocks:5,wpb:5});var max=tot.blocks*tot.wpb;WSETUP.startWeek=Math.min(max,Math.max(1,(WSETUP.startWeek||1)+d));render();}
+function wsToggleOverride(){WSETUP.batOverride=!WSETUP.batOverride;render();}
+function wsNeedInput(v){WSETUP.needInput=v;}
+function wsAddNeed(){var n=(WSETUP.needInput||'').trim();if(!n)return;WSETUP.drillNeeds.push(n);WSETUP.needInput='';render();}
+function wsRemoveNeed(i){WSETUP.drillNeeds.splice(i,1);render();}
+async function wsSave(){var p=playerById(WSETUP.playerId);if(!p)return;var prevOv=(p.workout&&p.workout.batOverride)||false;p.workout=p.workout||{};p.workout.programLength=WSETUP.programLength;p.workout.programStart=WSETUP.programStart;p.workout.pauseWeeks=WSETUP.pauseWeeks;p.workout.startWeek=WSETUP.startWeek;p.workout.batOverride=WSETUP.batOverride;if(WSETUP.batOverride&&!prevOv){p.workout.overrideLog=(p.workout.overrideLog||[]);p.workout.overrideLog.push({date:todayStr(),coach:(DB.user&&DB.user.name)||''});}p.drillNeeds=WSETUP.drillNeeds.slice();if(p.facility==='remote'){p.facilityEquip=Object.assign({},WSETUP.equip);}await savePlayer(p);toast('Program saved');go('profile',{playerId:p.id});}
+function viewWorkoutSetup(){if(!(DB.user&&DB.user.role==='coach'))return viewProfile();var p=playerById(WSETUP.playerId);if(!p)return viewRoster();var s=WSETUP;var wn=wkResolveWeek(s.programStart,todayStr(),s.pauseWeeks,s.startWeek);var b=wkResolveBlock(s.programLength,wn);var lens=[25,20,16,12].map(function(n){return '<button class="seg'+(s.programLength===n?' on':'')+'" onclick="wsSetLen('+n+')">'+n+' wk</button>';}).join('')+'<button class="seg'+(s.programLength==='wow'?' on':'')+'" onclick="wsSetLen(\'wow\')" style="white-space:nowrap">Wkt of Week</button>';var needs=s.drillNeeds.length?s.drillNeeds.map(function(n,i){return '<div class="add-row" style="cursor:default"><div class="p-info"><h3>'+esc(n)+'</h3><div class="meta">appends to Front Toss</div></div><button class="icon-btn" style="flex:0 0 auto;color:#ff7b6b" onclick="wsRemoveNeed('+i+')">✕</button></div>';}).join(''):'<div class="wk-flag" style="color:var(--grey);font-style:normal;margin:0">No drill needs assigned.</div>';
+  return '<div class="scroll">'+topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>')+'<div class="pad"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>WORKOUT <em>PROGRAM</em></h2></div>'
+    +'<div class="section-lbl" style="margin:14px 0 8px">Program Length</div><div class="segrow">'+lens+'</div>'
+    +'<div class="section-lbl" style="margin:16px 0 8px">Program Start (snaps to Monday)</div><input class="dev-in" type="date" value="'+esc(s.programStart)+'" oninput="wsSetStart(this.value)">'
+    +'<div class="section-lbl" style="margin:16px 0 8px">Pause Weeks</div><div style="display:flex;align-items:center;gap:12px"><button class="seg" style="flex:0 0 auto;padding:10px 16px" onclick="wsPause(-1)">−</button><div style="font-family:\'Anton\';font-style:italic;font-size:22px;min-width:30px;text-align:center">'+s.pauseWeeks+'</div><button class="seg" style="flex:0 0 auto;padding:10px 16px" onclick="wsPause(1)">+</button><span style="color:var(--grey);font-size:12px">weeks paused</span></div>'
+    +'<div class="section-lbl" style="margin:16px 0 8px">Start at Week #</div><div style="display:flex;align-items:center;gap:12px"><button class="seg" style="flex:0 0 auto;padding:10px 16px" onclick="wsStartWeek(-1)">−</button><div style="font-family:\'Anton\';font-style:italic;font-size:22px;min-width:30px;text-align:center">'+(s.startWeek||1)+'</div><button class="seg" style="flex:0 0 auto;padding:10px 16px" onclick="wsStartWeek(1)">+</button><span style="color:var(--grey);font-size:12px">week they begin on</span></div>'
+    +'<div class="wk-note" style="margin:12px 0 0">Currently: Week '+wn+' · '+(b.isTestWeek||b.isTestDay?'Test · ':'')+esc(b.blockName)+' (Level '+b.level+')</div>'
+    +'<div class="section-lbl" style="margin:16px 0 8px">Bat Speed Override</div><button class="seg'+(s.batOverride?' on':'')+'" style="width:100%" onclick="wsToggleOverride()">'+(s.batOverride?'ON — bat speed unlocked':'OFF — normal eligibility rules')+'</button>'
+    +'<div class="section-lbl" style="margin:16px 0 8px">Drill Needs (append to Front Toss)</div><div style="display:flex;gap:8px"><input class="dev-in" placeholder="Drill name" value="'+esc(s.needInput||'')+'" oninput="wsNeedInput(this.value)"><button class="btn" style="flex:0 0 auto;width:auto;padding:0 16px" onclick="wsAddNeed()">Add</button></div><div style="margin-top:8px">'+needs+'</div>'
+    +(p.facility==='remote'?('<div class="section-lbl" style="margin:18px 0 8px">Player Equipment · Remote</div>'
+    +'<div class="wk-note" style="margin:0 0 8px">Remote players are set individually. Turn off anything this player doesn\'t have at home — their workouts and assessment adapt automatically.</div>'
+    +WK_EQUIP_KEYS.map(function(k){var on=s.equip[k.k]!==false;return '<button class="seg'+(on?' on':'')+'" style="width:100%;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center" onclick="wsToggleEquip(\''+k.k+'\')"><span>'+esc(k.lbl)+'</span><span style="font-size:11px;opacity:.85">'+(on?'✓ Have it':'✕ Not available')+'</span></button>';}).join('')):'')
+    +'<button class="btn" style="margin-top:18px" onclick="wsSave()">Save Program</button><div style="height:16px"></div></div></div>';}
+/* ================= EQUIPMENT SETTINGS (facility-level) ================= */
+var WK_SET_COLS=[{k:'pelotero',lbl:'Pelotero'},{k:'colorBalls',lbl:'Color Balls'},{k:'smallBalls',lbl:'Small Balls'},{k:'skinnyTrainer',lbl:'Skinny Bat'},{k:'tap',lbl:'Tap'},{k:'machine',lbl:'Machine'}];
+var SET_EQUIP=null;
+function openSettings(){ if(!(DB.user&&DB.user.role==='coach'))return; SET_EQUIP={}; FACILITIES.filter(function(f){return f.k!=='remote';}).forEach(function(f){ var fe=FAC_EQUIP[f.k]||{}; var nested=(fe.baseball||fe.softball); var bb=nested?(fe.baseball||{}):fe; var sb=nested?(fe.softball||{}):{}; SET_EQUIP[f.k]={ baseball:Object.assign(wkEquipBase(f.k),bb), softball:Object.assign(wkEquipBase(f.k),sb), softballOffered:(fe.softballOffered!==false) }; }); go('settings'); }
+function setEquipToggle(sport,fac,k){ if(!SET_EQUIP||!SET_EQUIP[fac]||!SET_EQUIP[fac][sport])return; SET_EQUIP[fac][sport][k]=(SET_EQUIP[fac][sport][k]===false); render(); }
+function setSoftballOffered(fac){ if(!SET_EQUIP||!SET_EQUIP[fac])return; SET_EQUIP[fac].softballOffered=(SET_EQUIP[fac].softballOffered===false); render(); }
+async function settingsSave(){ if(!SET_EQUIP)return; var facs=Object.keys(SET_EQUIP); var rows=facs.map(function(f){return {facility:f,equip:{baseball:SET_EQUIP[f].baseball,softball:SET_EQUIP[f].softball,softballOffered:SET_EQUIP[f].softballOffered},updated_at:new Date().toISOString()};}); try{ var r=await SBc.from('hitters_facility').upsert(rows); if(r.error){ toast('Save failed: '+(r.error.message||'')); return; } facs.forEach(function(f){ FAC_EQUIP[f]={baseball:SET_EQUIP[f].baseball,softball:SET_EQUIP[f].softball,softballOffered:SET_EQUIP[f].softballOffered}; }); toast('Changes saved'); }catch(e){ toast('Save failed'); } }
+function equipCellBtn(onclick,on){ return '<button onclick="'+onclick+'" style="width:32px;height:32px;border-radius:9px;border:1.5px solid '+(on?'var(--green)':'rgba(255,90,90,.5)')+';background:'+(on?'rgba(131,245,44,.16)':'rgba(255,90,90,.10)')+';color:'+(on?'var(--green)':'#ff7b6b')+';font-size:14px;font-weight:800;cursor:pointer">'+(on?'✓':'✕')+'</button>'; }
+function equipTable(sport){ var facs=FACILITIES.filter(function(f){return f.k!=='remote';}); var offeredCol=(sport==='softball');
+  var head='<tr><th style="text-align:left;padding:8px 10px">Facility</th>'+(offeredCol?'<th style="padding:8px 5px;font-size:9.5px;font-weight:700">Softball?</th>':'')+WK_SET_COLS.map(function(c){return '<th style="padding:8px 5px;font-size:9.5px;font-weight:700">'+esc(c.lbl)+'</th>';}).join('')+'</tr>';
+  var body=facs.map(function(f){ var row=SET_EQUIP[f.k]||{}; var eq=row[sport]||{}; var offered=(row.softballOffered!==false); var dim=(offeredCol&&!offered);
+    var offCell=offeredCol?('<td style="padding:6px 5px;text-align:center">'+equipCellBtn('setSoftballOffered(\''+f.k+'\')',offered)+'</td>'):'';
+    var cells=WK_SET_COLS.map(function(c){ var on=eq[c.k]!==false; return '<td style="padding:6px 5px;text-align:center'+(dim?';opacity:.35':'')+'">'+equipCellBtn('setEquipToggle(\''+sport+'\',\''+f.k+'\',\''+c.k+'\')',on)+'</td>'; }).join('');
+    return '<tr style="border-top:1px solid #2a2e2a"><td style="padding:9px 10px;font-weight:700;white-space:nowrap;font-size:12.5px'+(dim?';opacity:.5':'')+'">'+esc(f.name)+'</td>'+offCell+cells+'</tr>'; }).join('');
+  return '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table style="border-collapse:collapse;width:100%;min-width:'+(offeredCol?'480':'430')+'px;background:#141614;border:1px solid #2a2e2a;border-radius:10px;font-size:12px"><thead style="background:rgba(131,245,44,.08);color:var(--green);text-transform:uppercase;letter-spacing:.3px">'+head+'</thead><tbody>'+body+'</tbody></table></div>'; }
+function viewSettings(){ if(!(DB.user&&DB.user.role==='coach'))return viewHome(); if(!SET_EQUIP)openSettings();
+  return '<div class="scroll">'+topbar('<button class="icon-btn" onclick="go(\'home\')" title="Back">'+IC.back+'</button>')+'<div class="pad"><div class="hello"><p>Coach dashboard</p><h2>EQUIPMENT <em>SETTINGS</em></h2></div><div class="wk-note" style="margin:2px 0 12px">Mark what each facility has: green ✓ = available, red ✕ = not. Workouts and the assessment adapt for every player at that facility. Remote players are set on their own profile.</div>'
+  +'<div class="section-lbl" style="margin:6px 0 8px">Baseball</div>'+equipTable('baseball')
+  +'<div class="section-lbl" style="margin:18px 0 8px">Softball</div><div class="wk-note" style="margin:0 0 8px">Unmark <b>Softball?</b> for any location that doesn\'t run softball right now.</div>'+equipTable('softball')
+  +'<button class="btn" style="margin-top:16px" onclick="settingsSave()">Save Changes</button><div style="height:24px"></div></div></div>'; }
 
 /* ================= EDIT PROFILE ================= */
 var EP=null;
@@ -1012,6 +1467,21 @@ async function deleteEntry(pid,n,eid){
   if(TEST_EID===eid){ TEST_EID=null; }
   await savePlayer(p); toast('Session deleted'); go('block',{playerId:pid,blockN:n});
 }
+async function deletePlayer(pid){
+  if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
+  var p=playerById(pid); if(!p){ toast('Player not found'); return; }
+  var nm=((p.first||'')+' '+(p.last||'')).trim()||'this player';
+  var ok=(typeof window!=='undefined'&&window.confirm)?window.confirm('Delete '+nm+"'s entire profile? This permanently removes all of their tests and Rapsodo results and cannot be undone."):true;
+  if(!ok) return;
+  if(!SBc){ toast('Not connected'); return; }
+  try{
+    await SBc.from('hitter_accounts').delete().eq('hitter_id',pid);
+    var res=await SBc.from('hitters').delete().eq('id',pid);
+    if(res.error){ console.warn(res.error); toast('Delete failed: '+(res.error.message||'')); return; }
+  }catch(e){ console.warn(e); toast('Delete failed'); return; }
+  DB.players=(DB.players||[]).filter(function(x){return x.id!==pid;});
+  toast('Player deleted'); go('roster');
+}
 function viewBlock(){
   var p=curPlayer(); if(!p) return viewLogin();
   var b=p.blocks[DB.ctx.blockN-1]; if(!b) return viewProfile();
@@ -1033,9 +1503,9 @@ var TEST=null;
 var TEST_EID=null;
 function secMeta(s){ return s==='frontToss'?{name:'Front Toss',nc:10,nn:5}:(s==='bp'?{name:'BP',nc:5,nn:10}:{name:'Machine',nc:5,nn:10}); }
 function mkPitches(nc,nn){ var a=[],i; for(i=0;i<nc;i++)a.push({kind:'color',color:null,pick:null,ev:null,swing:null,na:false}); for(i=0;i<nn;i++)a.push({kind:'normal',color:null,pick:null,ev:null,swing:null,na:false}); return a; }
-function initTest(){ return { section:'frontToss', frontToss:mkPitches(10,5), bp:mkPitches(5,10), machine:mkPitches(5,10) }; }
+function initTest(p){ if(p&&!wkEquip(p).colorBalls){ return { section:'frontToss', noColor:true, frontToss:mkPitches(0,15), bp:mkPitches(0,15), machine:mkPitches(0,15) }; } return { section:'frontToss', frontToss:mkPitches(10,5), bp:mkPitches(5,10), machine:mkPitches(5,10) }; }
 function startTest(pid){ go('block',{playerId:pid,blockN:1}); }
-function startBlockTest(pid,n){ DB.ctx.playerId=pid; TEST=initTest(); TEST_EID=null; DB.ctx.blockN=n; go('test'); }
+function startBlockTest(pid,n){ DB.ctx.playerId=pid; TEST=initTest(playerById(pid)); TEST_EID=null; DB.ctx.blockN=n; go('test'); }
 function continueTest(pid,n,eid){ DB.ctx.playerId=pid; DB.ctx.blockN=n; var p=curPlayer(); var b=p&&p.blocks[n-1]; var e=b&&entryById(b,eid);
   if(!e||!e.test){ toast('Could not open test'); return; }
   TEST=e.test; if(!TEST.section) TEST.section='frontToss'; TEST_EID=eid; go('test');
@@ -1132,10 +1602,10 @@ function viewTest(){
     +'<div class="logger-head"><h2>HITTING <em>TEST</em></h2><div class="desc">Block '+DB.ctx.blockN+' · '+esc(p.first)+' '+esc(p.last)+' · 45 pitches (15 + 15 + 15)'+(TEST_EID?' · resuming':'')+'</div></div>'
     +'<div class="wk-note" style="display:flex;align-items:center;justify-content:space-between"><span>Recorded <b>'+prog.done+' / '+prog.total+'</b> — you can Save &amp; Finish Later and come back anytime.</span></div>'
     +'<div class="subtabs">'+['frontToss','bp','machine'].map(function(s){ return '<button class="'+(s===sec?'on':'')+'" onclick="setSection(\''+s+'\')">'+secMeta(s).name+'</button>'; }).join('')+'</div>'
-    +'<div class="wk-note">'+m.name+': <b>'+m.nc+' color</b> then <b>'+m.nn+' normal</b>. Lay off <b>Red</b> (take). No Rapsodo read? Tap <b>NA</b>.</div>'
+    +'<div class="wk-note">'+(t.noColor?(m.name+': <b>15 exit-velo swings</b> — no color balls at this facility. Log EV for each (or NA). Color reads &amp; swing decisions are skipped.'):(m.name+': <b>'+m.nc+' color</b> then <b>'+m.nn+' normal</b>. Lay off <b>Red</b> (take). No Rapsodo read? Tap <b>NA</b>.'))+'</div>'
     +'<div class="score-strip">'
-      +'<div class="sc '+(a.colorN&&a.colorAcc>=80?'pass':'')+'"><div class="k">Color Read</div><div class="v">'+a.colorCorrect+'/'+a.colorN+'</div></div>'
-      +'<div class="sc '+(a.decN&&a.decAcc>=80?'pass':'')+'"><div class="k">Swing Dec</div><div class="v">'+a.decCorrect+'/'+a.decN+'</div></div>'
+      +'<div class="sc '+(!t.noColor&&a.colorN&&a.colorAcc>=80?'pass':'')+'"><div class="k">Color Read</div><div class="v">'+(t.noColor?'NA':(a.colorCorrect+'/'+a.colorN))+'</div></div>'
+      +'<div class="sc '+(!t.noColor&&a.decN&&a.decAcc>=80?'pass':'')+'"><div class="k">Swing Dec</div><div class="v">'+(t.noColor?'NA':(a.decCorrect+'/'+a.decN))+'</div></div>'
       +'<div class="sc"><div class="k">Avg EV</div><div class="v">'+(a.avgEV||'—')+'</div></div>'
     +'</div>'
     +'<div class="swing-list">'+arr.map(function(pt,i){return pitchCard(sec,i,pt);}).join('')+'</div>'
@@ -1207,8 +1677,8 @@ function reportNotes(sc){
 function sectionTable(secs,bg){
   var rows=['frontToss','bp','machine'].map(function(k){ var s=secs[k]||{};
     return '<tr><td style="padding:8px 8px;text-align:left">'+secLabel(k)+'</td>'
-      +'<td style="padding:8px 6px;text-align:center">'+(s.colorN?s.colorCorrect+'/'+s.colorN+' ('+s.colorAcc+'%)':'—')+'</td>'
-      +'<td style="padding:8px 6px;text-align:center">'+(s.decN?s.decCorrect+'/'+s.decN+' ('+s.decAcc+'%)':'—')+'</td>'
+      +'<td style="padding:8px 6px;text-align:center">'+(s.colorN?s.colorCorrect+'/'+s.colorN+' ('+s.colorAcc+'%)':'NA')+'</td>'
+      +'<td style="padding:8px 6px;text-align:center">'+(s.decN?s.decCorrect+'/'+s.decN+' ('+s.decAcc+'%)':'NA')+'</td>'
       +'<td style="padding:8px 6px;text-align:center">'+(s.avgEV||'—')+'</td></tr>'; }).join('');
   return '<table style="width:100%;border-collapse:collapse;font-size:11.5px;background:'+(bg||'var(--panel)')+';border:1px solid var(--line);border-radius:10px">'
     +'<thead><tr style="background:rgba(131,245,44,.1);color:var(--green);font-family:\'Barlow Semi Condensed\';text-transform:uppercase;font-size:10px;letter-spacing:.4px">'
@@ -1233,6 +1703,7 @@ function viewResults(){
     +'</div>';
   }
   var a=analyzeTest(e.test, playerMaxEV(p));
+  var noColor=e.test&&e.test.noColor;
   var cols=['Green','Black','Blue'].filter(function(c){return a.perColor[c].n;});
   var worst=cols.slice().sort(function(x,y){return a.perColor[x].avg-a.perColor[y].avg;})[0];
   return '<div class="scroll">'
@@ -1244,14 +1715,14 @@ function viewResults(){
       +'<div class="stat"><div class="k">Hard Hit</div><div class="v">'+a.hardHitPct+'<small>%</small></div></div>'
     +'</div>'
     +'<div class="section-lbl">Pitch Recognition &amp; Swing Decisions</div>'
-    +'<div class="analysis"><div class="amx">'
+    +(noColor?'<div class="analysis"><div class="amx"><div class="wk-flag" style="color:var(--grey);font-style:normal;margin:0">No color balls used — Color Read, Swing Decision and Took Red are <b>NA</b> for this test. Exit velo was still logged on all 45 swings.</div></div></div>':('<div class="analysis"><div class="amx">'
       +'<div class="arow"><div class="cl">Color Read</div><div class="bar"><i style="width:'+a.colorAcc+'%;background:linear-gradient(90deg,var(--green-deep),var(--green))"></i></div><div class="pc"><b>'+a.colorCorrect+'</b>/'+a.colorN+'</div></div>'
       +'<div class="arow"><div class="cl">Swing Dec</div><div class="bar"><i style="width:'+a.decAcc+'%;background:linear-gradient(90deg,var(--green-deep),var(--green))"></i></div><div class="pc"><b>'+a.decCorrect+'</b>/'+a.decN+'</div></div>'
       +'<div class="arow"><div class="cl">Took Red</div><div class="bar"><i style="width:'+a.redDiscipline+'%;background:'+(a.redDiscipline>=80?'var(--green)':'var(--amber)')+'"></i></div><div class="pc"><b>'+a.redTakes+'</b>/'+a.reds+'</div></div>'
-    +'</div></div>'
+    +'</div></div>'))
     +'<div class="section-lbl">By Test Section</div>'
     +'<div style="margin:0 16px 4px">'+sectionTable(a.sections)+'</div>'
-    +'<div class="section-lbl">Color vs Normal Ball</div>'
+    +(noColor?'':('<div class="section-lbl">Color vs Normal Ball</div>'
     +'<div class="analysis"><div class="amx">'+evBar('Color balls',a.avgColor,a.maxEV)+evBar('Normal balls',a.avgNormal,a.maxEV)+'</div></div>'
     +'<div class="insight '+(Math.abs(a.evDiff)<2?'good':'')+'">'
       +(a.evDiff===0?'Exit velo is even across color and normal balls.':(a.evDiff>0
@@ -1267,7 +1738,7 @@ function viewResults(){
     +'<div class="insight '+(a.redDiscipline>=80?'good':'')+'">'
       +(a.redDiscipline>=80?'Great discipline — took <b>'+a.redDiscipline+'%</b> of red balls.':'Swung at <b>'+(a.reds-a.redTakes)+'</b> red ball(s). Lay off red to sharpen pitch selection.')
     +'</div>'
-    +(worst?'<div class="insight">Weakest color contact: <b>'+worst+'</b> at '+a.perColor[worst].avg+' mph avg. Add reps on '+worst+' recognition.</div>':'')
+    +(worst?'<div class="insight">Weakest color contact: <b>'+worst+'</b> at '+a.perColor[worst].avg+' mph avg. Add reps on '+worst+' recognition.</div>':'')))
     +'<div class="pad"><button class="btn ghost" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
       +((DB.user&&DB.user.role==='coach')?'<button class="btn ghost" style="margin-top:8px;color:#ff6b6b;border-color:rgba(255,80,80,.4)" onclick="deleteEntry(\''+p.id+'\','+n+',\''+e.id+'\')">Delete This Test</button>':'')
     +'</div>'
@@ -1316,10 +1787,584 @@ function careerStats(p){
     nonRedSwingPct:0, sections:{frontToss:secOut(sec.frontToss),bp:secOut(sec.bp),machine:secOut(sec.machine)},
     swingCount:evs.length, testCount:testCount, rapCount:rapCount, hasTests:testCount>0, hasAny:(testCount>0||rapCount>0) };
 }
+var LB_METRICS=[
+  {k:'maxEV',     lbl:'Max EV',        unit:'mph', dec:1, desc:'Best single-swing exit velocity across all tests.'},
+  {k:'avgEV',     lbl:'Avg EV',        unit:'mph', dec:1, desc:'Average exit velocity across every recorded swing.'},
+  {k:'hardHitPct',lbl:'Hard Hit %',    unit:'%',   dec:0, desc:'Share of swings struck at 80%+ of the hitter max EV.'},
+  {k:'maxDist',   lbl:'Max Distance',  unit:'ft',  dec:0, desc:'Longest batted-ball distance recorded.'},
+  {k:'avgDist',   lbl:'Avg Distance',  unit:'ft',  dec:0, desc:'Average batted-ball distance across tests.'},
+  {k:'colorAcc',  lbl:'Vision',        unit:'%',   dec:0, desc:'Pitch recognition — colored ball read correctly.'},
+  {k:'decAcc',    lbl:'Swing Decision',unit:'%',   dec:0, desc:'Correct swing / take decisions on colored balls.'},
+  {k:'workouts',  lbl:'Workouts',      unit:'',    dec:0, desc:'Total training days logged — the grind leaderboard. Show up, get counted.'}
+];
+function lbFmt(v,dec){ if(dec){ return (Math.round(v*10)/10).toFixed(1).replace(/\.0$/,''); } return Math.round(v); }
+function devStats(p){
+  var H=careerStats(p).maxEV||0;
+  var METS=['maxEV','avgEV','hardHitPct','maxDist','avgDist','colorAcc','decAcc'];
+  var series={}; METS.forEach(function(k){ series[k]=[]; });
+  (p.blocks||[]).forEach(function(b){
+    var evs=[], colorN=0,colorC=0, decN=0,decC=0, rMaxEV=0, rMaxDist=0, rAvgDist=0;
+    blockEntries(b).forEach(function(e){
+      if(e.type==='test'&&e.status!=='inprogress'&&e.test){
+        ['frontToss','bp','machine'].forEach(function(kk){ (e.test[kk]||[]).forEach(function(pt){
+          if(pt.kind==='color'){
+            if(pt.color&&pt.pick){ colorN++; if(pt.pick===pt.color) colorC++; }
+            if(pt.color&&pt.swing){ decN++; if(swingRight(pt)) decC++; }
+          }
+          if(pt.ev>0&&pt.color!=='Red'){ evs.push(pt.ev); }
+        }); });
+      } else if(e.type==='rapsodo'&&e.rap){
+        if(e.rap.maxEV>rMaxEV) rMaxEV=e.rap.maxEV;
+        if(e.rap.maxDist>rMaxDist) rMaxDist=e.rap.maxDist;
+        if(e.rap.avgDist>0) rAvgDist=e.rap.avgDist;
+      }
+    });
+    var n=b.n||0;
+    var sMax=Math.max(evs.length?Math.max.apply(null,evs):0, rMaxEV);
+    if(sMax>0) series.maxEV.push({n:n,v:sMax});
+    if(evs.length) series.avgEV.push({n:n,v:+(evs.reduce(function(a,c){return a+c;},0)/evs.length).toFixed(1)});
+    if(evs.length&&H>0) series.hardHitPct.push({n:n,v:Math.round(evs.filter(function(x){return x>=0.8*H;}).length/evs.length*100)});
+    if(rMaxDist>0) series.maxDist.push({n:n,v:rMaxDist});
+    if(rAvgDist>0) series.avgDist.push({n:n,v:rAvgDist});
+    if(colorN>0) series.colorAcc.push({n:n,v:Math.round(colorC/colorN*100)});
+    if(decN>0) series.decAcc.push({n:n,v:Math.round(decC/decN*100)});
+  });
+  var out={};
+  METS.forEach(function(k){
+    var s=series[k].sort(function(a,b){return a.n-b.n;});
+    out[k]=(s.length>=2)?{ first:s[0].v, last:s[s.length-1].v, delta:+(s[s.length-1].v-s[0].v).toFixed(1), fromN:s[0].n, toN:s[s.length-1].n, count:s.length }:null;
+  });
+  return out;
+}
+/* Aggregate every test in a block: Max EV & Max Distance = the best across all tests that week; everything else = the average across all tests. */
+function blockAgg(b,H){
+  var maxEVs=[],avgEVs=[],hhs=[],maxDs=[],avgDs=[],las=[],dates=[],cnt=0;
+  blockEntries(b).forEach(function(e){
+    if(e.type==='test'&&e.status!=='inprogress'&&e.test){
+      var evs=[]; ['frontToss','bp','machine'].forEach(function(k){ (e.test[k]||[]).forEach(function(pt){ if(pt.ev>0&&pt.color!=='Red') evs.push(pt.ev); }); });
+      if(evs.length){ cnt++; maxEVs.push(Math.max.apply(null,evs)); avgEVs.push(+(evs.reduce(function(a,c){return a+c;},0)/evs.length).toFixed(1)); if(H>0) hhs.push(Math.round(evs.filter(function(x){return x>=0.8*H;}).length/evs.length*100)); if(e.date)dates.push(e.date); }
+    } else if(e.type==='rapsodo'&&e.rap){
+      var R=e.rap,got=false;
+      if(R.maxEV>0){maxEVs.push(R.maxEV);got=true;} if(R.avgEV>0)avgEVs.push(R.avgEV); if(R.hardHitPct>0)hhs.push(R.hardHitPct);
+      if(R.maxDist>0){maxDs.push(R.maxDist);got=true;} if(R.avgDist>0)avgDs.push(R.avgDist); if(R.avgLA>0)las.push(R.avgLA);
+      if(got){cnt++; if(e.date)dates.push(e.date);}
+    }
+  });
+  function mean(a){ return a.length?+(a.reduce(function(x,y){return x+y;},0)/a.length).toFixed(1):0; }
+  function mx(a){ return a.length?Math.max.apply(null,a):0; }
+  dates.sort();
+  return { maxEV:mx(maxEVs), avgEV:mean(avgEVs), hardHitPct:Math.round(mean(hhs)), maxDist:mx(maxDs), avgDist:mean(avgDs), avgLA:mean(las), n:cnt, date:dates[dates.length-1]||'', has:cnt>0 };
+}
+async function loadLeaderboard(){
+  if(!SBc) return null;
+  try{ var r=await SBc.rpc('hpl_leaderboard'); if(r.error){ console.warn(r.error); return null; } return r.data||[]; }
+  catch(e){ console.warn(e); return null; }
+}
+function lbLoad(raw){
+  return (raw||[]).map(function(r){
+    var p={ id:r.id, first:r.first, last:r.last, blocks:r.blocks||[] };
+    var cs=careerStats(p);
+    cs.workouts=(typeof r.workouts==='number')?r.workouts:((r.workout_count!=null)?(+r.workout_count||0):0);
+    return { id:r.id, name:((r.first||'')+' '+(r.last||'')).trim()||'Unnamed', sport:(r.sport||'baseball'), facility:(r.facility||''), cs:cs, dev:devStats(p) };
+  });
+}
+async function openLeaderboard(pid){
+  toast('Loading leaderboard…');
+  var raw=await loadLeaderboard();
+  if(raw===null){ toast('Leaderboard unavailable'); return; }
+  DB.lbStats=lbLoad(raw);
+  go('leaderboard', pid?{playerId:pid}:{});
+}
+async function openDevelopment(pid){
+  toast('Loading development…');
+  var raw=await loadLeaderboard();
+  if(raw===null){ toast('Development board unavailable'); return; }
+  DB.lbStats=lbLoad(raw);
+  go('development', pid?{playerId:pid}:{});
+}
+function setLbMetric(k){ DB.lbMetric=k; render(); }
+function viewLeaderboard(){
+  var isCoach=DB.user&&DB.user.role==='coach';
+  var meId=isCoach?null:(DB.ctx&&DB.ctx.playerId);
+  var mk=DB.lbMetric||'maxEV';
+  var def=LB_METRICS.filter(function(m){return m.k===mk;})[0]||LB_METRICS[0];
+  var stats=DB.lbStats||[];
+  var meRow=meId?stats.filter(function(r){return r.id===meId;})[0]:null;
+  var lbSport=meRow?(meRow.sport||'baseball'):(DB.sport||'baseball');
+  stats=stats.filter(function(r){return (r.sport||'baseball')===lbSport;});
+  var elig=stats.filter(function(r){
+    var v=r.cs[def.k]||0;
+    if(v<=0) return false;
+    if(def.k==='colorAcc' && !(r.cs.colorN>0)) return false;
+    if(def.k==='decAcc' && !(r.cs.decN>0)) return false;
+    return true;
+  }).sort(function(a,b){ return (b.cs[def.k]||0)-(a.cs[def.k]||0); });
+  var top=elig.slice(0,10);
+  var myRank=0, myVal=0;
+  if(meId){ for(var i=0;i<elig.length;i++){ if(elig[i].id===meId){ myRank=i+1; myVal=elig[i].cs[def.k]||0; break; } } }
+  var chips=LB_METRICS.map(function(m){ return '<button class="lb-chip '+(m.k===mk?'on':'')+'" onclick="setLbMetric(\''+m.k+'\')">'+m.lbl+'</button>'; }).join('');
+  var list = top.length ? top.map(function(r,idx){
+      var rk=idx+1; var cls='lb-row'+(r.id===meId?' me':'')+(rk===1?' top1':rk===2?' top2':rk===3?' top3':'');
+      return '<div class="'+cls+'"><div class="rk">'+rk+'</div>'
+        +'<div class="nm">'+esc(r.name)+(r.id===meId?' <small>You</small>':'')+'</div>'
+        +'<div class="loc">'+esc(facilityName(r.facility))+'</div>'
+        +'<div class="vl">'+lbFmt(r.cs[def.k]||0,def.dec)+'<small> '+def.unit+'</small></div></div>';
+    }).join('') : '<div class="lb-empty">No results in this category yet. Rankings fill in as tests are logged.</div>';
+  var youLine='';
+  if(meId && myRank>10){ youLine='<div class="lb-you"><div class="l">Your Rank</div><div class="r">#'+myRank+' · '+lbFmt(myVal,def.dec)+' '+def.unit+'</div></div>'; }
+  else if(meId && myRank===0){ youLine='<div class="lb-you"><div class="l">Your Rank</div><div class="r">No result yet</div></div>'; }
+  var right = isCoach
+    ? '<button class="icon-btn" onclick="go(\'home\')" title="Home">'+IC.back+'</button>'
+    : '<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+(meId||'')+'\'})" title="Back">'+IC.back+'</button>';
+  return '<div class="scroll">'
+    +topbar(right)
+    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+(lbSport==='softball'?'Softball':'Baseball')+' · Top 10 · updates as tests happen</p><h2>HPL <em>LEADERBOARD</em></h2></div></div>'
+    +'<div class="lb-chips">'+chips+'</div>'
+    +'<div class="lb-cat"><div class="t">'+esc(def.lbl)+'</div><div class="d">'+esc(def.desc)+'</div></div>'
+    +'<div class="lb-list">'+list+'</div>'
+    +youLine
+    +'<div style="height:16px"></div>'
+    +'</div>'
+    +(isCoach?tabbar('lead'):'');
+}
+function setDevMetric(k){ DB.devMetric=k; render(); }
+function viewDevelopment(){
+  var isCoach=DB.user&&DB.user.role==='coach';
+  var meId=isCoach?null:(DB.ctx&&DB.ctx.playerId);
+  var mk=DB.devMetric||'maxEV';
+  var def=LB_METRICS.filter(function(m){return m.k===mk;})[0]||LB_METRICS[0];
+  var stats=DB.lbStats||[];
+  var meRow=meId?stats.filter(function(r){return r.id===meId;})[0]:null;
+  var devSport=meRow?(meRow.sport||'baseball'):(DB.sport||'baseball');
+  stats=stats.filter(function(r){return (r.sport||'baseball')===devSport;});
+  var elig=stats.filter(function(r){ return r.dev && r.dev[def.k]; })
+                .sort(function(a,b){ return (b.dev[def.k].delta)-(a.dev[def.k].delta); });
+  var top=elig.slice(0,5);
+  var myRank=0, myD=null;
+  if(meId){ for(var i=0;i<elig.length;i++){ if(elig[i].id===meId){ myRank=i+1; myD=elig[i].dev[def.k]; break; } } }
+  function dStr(d){ return (d>=0?'+':'')+lbFmt(d,def.dec); }
+  var chips=LB_METRICS.filter(function(m){return m.k!=='workouts';}).map(function(m){ return '<button class="lb-chip '+(m.k===mk?'on':'')+'" onclick="setDevMetric(\''+m.k+'\')">'+m.lbl+'</button>'; }).join('');
+  var list = top.length ? top.map(function(r,idx){
+      var rk=idx+1; var d=r.dev[def.k]; var cls='lb-row'+(r.id===meId?' me':'')+(rk===1?' top1':rk===2?' top2':rk===3?' top3':'');
+      return '<div class="'+cls+'"><div class="rk">'+rk+'</div>'
+        +'<div class="nm">'+esc(r.name)+(r.id===meId?' <small>You</small>':'')
+          +'<small class="ft">'+lbFmt(d.first,def.dec)+' → '+lbFmt(d.last,def.dec)+' '+def.unit+'</small></div>'
+        +'<div class="loc">'+esc(facilityName(r.facility))+'</div>'
+        +'<div class="vl '+(d.delta>=0?'up':'down')+'">'+dStr(d.delta)+'<small> '+def.unit+'</small></div></div>';
+    }).join('') : '<div class="lb-empty">Development rankings begin in Weeks 6–10. Once a player logs a test in a second block, their gain vs. their first test appears here.</div>';
+  var youLine='';
+  if(meId && myD && myRank>5){ youLine='<div class="lb-you"><div class="l">Your Gain</div><div class="r">'+dStr(myD.delta)+' '+def.unit+' · #'+myRank+'</div></div>'; }
+  else if(meId && !myD){ youLine='<div class="lb-you"><div class="l">Your Gain</div><div class="r">After your 2nd test</div></div>'; }
+  var right = isCoach
+    ? '<button class="icon-btn" onclick="go(\'home\')" title="Home">'+IC.back+'</button>'
+    : '<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+(meId||'')+'\'})" title="Back">'+IC.back+'</button>';
+  return '<div class="scroll">'
+    +topbar(right)
+    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+(devSport==='softball'?'Softball':'Baseball')+' · Top 5 · biggest gain vs. first test</p><h2>DEVELOPMENT <em>LEADERS</em></h2></div></div>'
+    +'<div class="lb-chips">'+chips+'</div>'
+    +'<div class="lb-cat"><div class="t">'+esc(def.lbl)+'</div><div class="d">Improvement from a player\'s first test (Weeks 1–5) to their latest.</div></div>'
+    +'<div class="lb-list">'+list+'</div>'
+    +youLine
+    +'<div style="height:16px"></div>'
+    +'</div>'
+    +(isCoach?tabbar('dev'):'');
+}
+/* ==================== DRILLS ==================== */
+var DRILL=null;
+var DRILL_META={
+  bpReads:{name:'BP FB / CB Reads', tag:'Pitch Recognition', icon:'ball', blurb:'Swing fastballs, take curveballs. Grades reads + FB attack EV.'},
+  adjustment:{name:'Adjustment', tag:'Machine · 2 Rounds', icon:'bat', blurb:'Contact / whiff / take across alternating FB & CB sets.'},
+  lockedIn:{name:'Locked In', tag:'Machine · Release Reads', icon:'bat', blurb:'3 High / 3 Side / 3 Short-arm release, reversed 2nd round. Tracks EV, distance & launch angle per release + pitch 1→3 adjustment.'},
+  sevenBall:{name:'7 Ball', tag:'Location Read', icon:'chart', blurb:'Call the ball 1–7 across the plate. Recognition accuracy.'},
+  zeroStrike:{name:'0 Strike', tag:'Zone Discipline', icon:'trend', blurb:'Swing in-zone, take out. Great AB = 90% of max EV.'}
+};
+var DRILL_LOCS={ bpReads:['bp','machine'], sevenBall:['frontToss','bp','machine'], zeroStrike:['frontToss','bp','machine'] };
+var LOC_LABEL={ frontToss:'Front Toss', bp:'BP', machine:'Pitching Machine' };
+function drillIcon(k){ return IC[(DRILL_META[k]||{}).icon]||IC.ball; }
+function adjOrder(){ var o=[]; [[1,'FB',3],[1,'CB',3],[1,'FB',3],[2,'CB',3],[2,'FB',3],[2,'CB',3]].forEach(function(s){ for(var i=0;i<s[2];i++) o.push({round:s[0],type:s[1]}); }); return o; }
+var ADJ_ORDER=adjOrder();
+function lockedOrder(){ var o=[]; [[1,[['High',3],['Side',3],['Short',3]]],[2,[['Short',3],['Side',3],['High',3]]]].forEach(function(rd){ rd[1].forEach(function(g){ for(var i=0;i<g[1];i++) o.push({round:rd[0],rel:g[0],pos:i+1}); }); }); return o; }
+var LOCKED_ORDER=lockedOrder();
+var LOCKED_REL_LBL={High:'High Release',Side:'Side Release',Short:'Short-Arm Release'};
+function _avg(a){ return a.length?+(a.reduce(function(x,y){return x+y;},0)/a.length).toFixed(1):0; }
+function _mx(a){ return a.length?Math.max.apply(null,a):0; }
+function gradeBpReads(P){
+  P=P.filter(function(p){return p.type&&p.action;});
+  var tot=P.length,correct=0,fbTakes=0,cbSwings=0,evs=[];
+  P.forEach(function(p){
+    var good=(p.type==='FB'&&p.action==='swing')||(p.type==='CB'&&p.action==='take');
+    if(good) correct++;
+    if(p.type==='FB'&&p.action==='take') fbTakes++;
+    if(p.type==='CB'&&p.action==='swing') cbSwings++;
+    if(p.type==='FB'&&p.action==='swing'&&!p.na&&p.ev>0) evs.push(p.ev);
+  });
+  return { total:tot, correct:correct, acc:tot?Math.round(correct/tot*100):0, fbTakes:fbTakes, cbSwings:cbSwings, fbEvAvg:_avg(evs), fbEvMax:_mx(evs), fbSwings:evs.length };
+}
+function gradeAdjustment(P){
+  var contact=0,whiff=0,take=0,tot=0,evs=[],byType={FB:{c:0,n:0},CB:{c:0,n:0}};
+  var pos={1:[],2:[],3:[]};
+  P.forEach(function(p,idx){
+    if(!p||!p.result) return;
+    tot++;
+    if(p.result==='contact'){contact++; if(byType[p.type])byType[p.type].c++;}
+    else if(p.result==='whiff') whiff++; else take++;
+    if(byType[p.type]) byType[p.type].n++;
+    if(p.result==='contact'&&!p.na&&p.ev>0){ evs.push(p.ev); var pp=(idx%3)+1; if(pos[pp]) pos[pp].push(p.ev); }
+  });
+  var swings=contact+whiff;
+  return { total:tot, contact:contact, whiff:whiff, take:take, swings:swings,
+    aggression:tot?Math.round(swings/tot*100):0, contactRate:swings?Math.round(contact/swings*100):0,
+    fbContact:byType.FB.n?Math.round(byType.FB.c/byType.FB.n*100):0, cbContact:byType.CB.n?Math.round(byType.CB.c/byType.CB.n*100):0,
+    evAvg:_avg(evs), evMax:_mx(evs), evN:evs.length,
+    posEV1:_avg(pos[1]), posEV2:_avg(pos[2]), posEV3:_avg(pos[3]), posN1:pos[1].length, posN2:pos[2].length, posN3:pos[3].length };
+}
+function gradeSevenBall(P){
+  P=P.filter(function(p){return p.actual!=null&&p.called!=null;});
+  var tot=P.length,exact=0,one=0,two=0;
+  P.forEach(function(p){ var d=Math.abs((p.actual||0)-(p.called||0)); if(d===0)exact++; else if(d===1)one++; else two++; });
+  return { total:tot, exact:exact, oneOff:one, off2:two, exactPct:tot?Math.round(exact/tot*100):0, within1Pct:tot?Math.round((exact+one)/tot*100):0, off2Pct:tot?Math.round(two/tot*100):0 };
+}
+function gradeZeroStrike(P,maxEV){
+  P=P.filter(function(p){return p.zone&&p.action;});
+  var tot=P.length,good=0,chase=0,tookStrike=0,great=0,ok=0,fail=0,evs=[];
+  P.forEach(function(p){
+    var g=(p.zone==='in'&&p.action==='swing')||(p.zone==='out'&&p.action==='take');
+    if(g) good++;
+    if(p.zone==='out'&&p.action==='swing') chase++;
+    if(p.zone==='in'&&p.action==='take') tookStrike++;
+    if(p.action==='swing'&&!p.na&&p.ev>0){ evs.push(p.ev); if(maxEV>0){ if(p.ev>=0.9*maxEV) great++; else if(p.ev>=0.8*maxEV) ok++; else fail++; } }
+  });
+  return { total:tot, good:good, acc:tot?Math.round(good/tot*100):0, chase:chase, tookStrike:tookStrike, great:great, ok:ok, fail:fail, evN:evs.length, evAvg:_avg(evs) };
+}
+function gradeLockedIn(P){
+  var rels=['High','Side','Short'];
+  var byRel={}; rels.forEach(function(r){ byRel[r]={ev:[],dist:[],la:[],pos:{1:{ev:[],dist:[],la:[]},2:{ev:[],dist:[],la:[]},3:{ev:[],dist:[],la:[]}}}; });
+  var tot=0;
+  (P||[]).forEach(function(pt){
+    if(!pt||!pt.rel||pt.na) return; var b=byRel[pt.rel]; if(!b) return; var any=false; var pp=b.pos[pt.pos]||{ev:[],dist:[],la:[]};
+    if(pt.ev>0){ b.ev.push(pt.ev); pp.ev.push(pt.ev); any=true; }
+    if(pt.dist>0){ b.dist.push(pt.dist); pp.dist.push(pt.dist); any=true; }
+    if(pt.la>0){ b.la.push(pt.la); pp.la.push(pt.la); any=true; }
+    if(any) tot++;
+  });
+  function m(a){ return a.length?+(a.reduce(function(x,y){return x+y;},0)/a.length).toFixed(1):0; }
+  function mx(a){ return a.length?Math.max.apply(null,a):0; }
+  var out={total:tot, rels:{}}, allEV=[];
+  rels.forEach(function(r){ var b=byRel[r]; allEV=allEV.concat(b.ev);
+    out.rels[r]={ n:b.ev.length, avgEV:m(b.ev), maxEV:mx(b.ev), avgDist:m(b.dist), avgLA:m(b.la),
+      p1EV:m(b.pos[1].ev), p3EV:m(b.pos[3].ev), p1Dist:m(b.pos[1].dist), p3Dist:m(b.pos[3].dist), p1LA:m(b.pos[1].la), p3LA:m(b.pos[3].la),
+      n1:b.pos[1].ev.length, n3:b.pos[3].ev.length }; });
+  var best=null,worst=null; rels.forEach(function(r){ if(out.rels[r].n){ if(!best||out.rels[r].avgEV>out.rels[best].avgEV) best=r; if(!worst||out.rels[r].avgEV<out.rels[worst].avgEV) worst=r; } });
+  out.bestRel=best; out.worstRel=worst; out.avgEV=m(allEV); out.maxEV=mx(allEV);
+  return out;
+}
+function newDrillPitches(drill){
+  var a=[];
+  if(drill==='adjustment'){ ADJ_ORDER.forEach(function(s){ a.push({round:s.round,type:s.type,result:null,ev:null,na:false}); }); return a; }
+  if(drill==='lockedIn'){ LOCKED_ORDER.forEach(function(s){ a.push({round:s.round,rel:s.rel,pos:s.pos,ev:null,dist:null,la:null,na:false}); }); return a; }
+  function mk(loc){ if(drill==='sevenBall') return {loc:loc,actual:null,called:null}; if(drill==='zeroStrike') return {loc:loc,zone:null,action:null,ev:null,na:false}; return {loc:loc,type:null,action:null,ev:null,na:false}; }
+  var locs=DRILL_LOCS[drill];
+  if(locs){ locs.forEach(function(loc){ for(var i=0;i<10;i++) a.push(mk(loc)); }); }
+  else { for(var k=0;k<10;k++) a.push({type:null,action:null,ev:null,na:false}); }
+  return a;
+}
+function drillFilled(drill,pt){
+  if(drill==='adjustment') return !!pt.result;
+  if(drill==='lockedIn') return !!(pt.ev>0||pt.dist>0||pt.la>0||pt.na);
+  if(drill==='sevenBall') return pt.actual!=null&&pt.called!=null;
+  if(drill==='zeroStrike') return !!(pt.zone&&pt.action);
+  return !!(pt.type&&pt.action);
+}
+function startDrill(drill){
+  if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
+  var p=curPlayer(); if(!p){ toast('No player'); return; }
+  DRILL={ drill:drill, playerId:p.id, pitches:newDrillPitches(drill), eid:null, round:1, loc:(DRILL_LOCS[drill]?DRILL_LOCS[drill][0]:null) };
+  go('drill',{playerId:p.id, drill:drill});
+}
+function dSet(i,field,val){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt[field]=(pt[field]===val)?null:val; if(field==='result'&&(pt.result==='take'||pt.result==='whiff')){ pt.ev=null; pt.na=false; } render(); }
+function dEV(i,v){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt.ev=(v===''?null:+v); if(v!=='') pt.na=false; }
+function dNum(i,field,v){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt[field]=(v===''?null:+v); if(v!=='') pt.na=false; }
+function dNA(i){ if(!DRILL)return; var pt=DRILL.pitches[i]; pt.na=!pt.na; if(pt.na){ pt.ev=null; if('dist' in pt) pt.dist=null; if('la' in pt) pt.la=null; } render(); }
+async function saveDrill(finalize){
+  if(!DRILL)return;
+  var filled=DRILL.pitches.filter(function(pt){return drillFilled(DRILL.drill,pt);});
+  if(!filled.length){ toast('Log at least one rep first'); return; }
+  var p=curPlayer(); if(!p)return;
+  if(!p.drills) p.drills=[];
+  var status=finalize?'complete':'inprogress';
+  var ex=DRILL.eid?(p.drills.filter(function(x){return x.id===DRILL.eid;})[0]):null;
+  if(ex){ ex.pitches=DRILL.pitches.slice(); ex.status=status; ex.date=new Date().toISOString().slice(0,10); }
+  else{ var entry={ id:nid(), drill:DRILL.drill, date:new Date().toISOString().slice(0,10), pitches:DRILL.pitches.slice(), status:status }; p.drills.push(entry); DRILL.eid=entry.id; }
+  var eid=DRILL.eid, pid=p.id;
+  await savePlayer(p);
+  if(finalize){ DRILL=null; toast('Drill saved'); go('drillResult',{playerId:pid, entryId:eid}); }
+  else{ toast('Saved — finish later anytime'); go('drillMenu',{playerId:pid}); }
+}
+function setDrillRound(r){ if(!DRILL)return; DRILL.round=r; render(); }
+function setDrillLoc(L){ if(!DRILL)return; DRILL.loc=L; render(); }
+function resumeDrill(pid,eid){
+  var p=playerById(pid); if(!p)return;
+  var e=(p.drills||[]).filter(function(x){return x.id===eid;})[0]; if(!e)return;
+  DRILL={ drill:e.drill, playerId:pid, pitches:(e.pitches&&e.pitches.length?e.pitches.slice():newDrillPitches(e.drill)), eid:e.id, round:1, loc:(DRILL_LOCS[e.drill]?DRILL_LOCS[e.drill][0]:null) };
+  go('drill',{playerId:pid, drill:e.drill});
+}
+function drillCancel(pid){ DRILL=null; go('drillMenu',{playerId:pid}); }
+async function deleteDrill(pid,eid){
+  if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
+  var ok=(typeof window!=='undefined'&&window.confirm)?window.confirm('Delete this drill result? This cannot be undone.'):true;
+  if(!ok)return;
+  var p=playerById(pid); if(!p)return;
+  p.drills=(p.drills||[]).filter(function(x){return x.id!==eid;});
+  await savePlayer(p); toast('Drill deleted'); go('drillMenu',{playerId:pid});
+}
+function insight(good,txt){ return '<div class="insight'+(good?' good':'')+'">'+txt+'</div>'; }
+function dEvRow(i,pt){
+  return '<div class="lab">Exit Velo</div><div class="numrow" style="align-items:center">'
+    +'<input type="number" inputmode="decimal" placeholder="'+(pt.na?'no read':'mph')+'" value="'+(pt.na?'':(pt.ev!=null?pt.ev:''))+'"'+(pt.na?' disabled style="opacity:.5"':'')+' oninput="dEV('+i+',this.value)"><span class="u">mph</span>'
+    +'<button class="seg '+(pt.na?'on':'')+'" style="margin-left:8px;flex:0 0 auto;padding:8px 12px" onclick="dNA('+i+')">NA</button>'
+  +'</div>';
+}
+function drillStrip(d,p,P){
+  P=P||DRILL.pitches; var g;
+  if(d==='bpReads'){ g=gradeBpReads(P); return strip3([{k:'Reads',v:g.total?g.acc+'%':'—'},{k:'FB Attack EV',v:g.fbEvAvg||'—'},{k:'Reps',v:g.total}]); }
+  if(d==='adjustment'){ g=gradeAdjustment(P); return strip3([{k:'Aggression',v:g.total?g.aggression+'%':'—'},{k:'Contact',v:g.swings?g.contactRate+'%':'—'},{k:'Contact EV',v:g.evAvg||'—'}]); }
+  if(d==='lockedIn'){ g=gradeLockedIn(P); return strip3([{k:'Avg EV',v:g.avgEV||'—'},{k:'Best Release',v:g.bestRel?g.bestRel:'—'},{k:'Reps',v:g.total}]); }
+  if(d==='sevenBall'){ g=gradeSevenBall(P); return strip3([{k:'Exact',v:g.total?g.exactPct+'%':'—'},{k:'Within 1',v:g.total?g.within1Pct+'%':'—'},{k:'2+ Off',v:g.off2}]); }
+  var cs=careerStats(p); g=gradeZeroStrike(P,cs.maxEV||0); return strip3([{k:'Discipline',v:g.total?g.acc+'%':'—'},{k:'Great ABs',v:g.great},{k:'Chases',v:g.chase}]);
+}
+function cardBpReads(i,pt,num){
+  var needEV=(pt.type==='FB'&&pt.action==='swing'), done=pt.type&&pt.action;
+  var good=done&&((pt.type==='FB'&&pt.action==='swing')||(pt.type==='CB'&&pt.action==='take'));
+  var cls=done?(good?'correct':'wrong'):'empty';
+  return '<div class="swing '+cls+'">'
+    +'<div class="sh"><span class="n">Pitch · #'+(num||i+1)+'</span><span class="tag round">'+(pt.type==='FB'?'Fastball':pt.type==='CB'?'Curveball':'set pitch')+'</span></div>'
+    +'<div class="lab">Pitch Type</div><div class="segrow">'
+      +'<button class="seg '+(pt.type==='FB'?'on':'')+'" onclick="dSet('+i+',\'type\',\'FB\')">Fastball</button>'
+      +'<button class="seg '+(pt.type==='CB'?'on':'')+'" onclick="dSet('+i+',\'type\',\'CB\')">Curveball</button></div>'
+    +'<div class="lab">Decision'+(pt.type?' · '+(pt.type==='CB'?'should TAKE':'should SWING'):'')+'</div><div class="segrow">'
+      +'<button class="seg take-n '+(pt.action==='take'?'on':'')+'" onclick="dSet('+i+',\'action\',\'take\')">Took</button>'
+      +'<button class="seg swing-y '+(pt.action==='swing'?'on':'')+'" onclick="dSet('+i+',\'action\',\'swing\')">Swung</button></div>'
+    +(needEV?dEvRow(i,pt):'')
+  +'</div>';
+}
+function cardAdjustment(i,pt){
+  var done=!!pt.result, needEV=(pt.result==='contact');
+  var cls=!done?'empty':pt.result==='contact'?'correct':pt.result==='take'?'wrong':'';
+  return '<div class="swing '+cls+'">'
+    +'<div class="sh"><span class="n">R'+pt.round+' · #'+(num||i+1)+'</span><span class="tag round">'+(pt.type==='FB'?'Fastball':'Curveball')+'</span></div>'
+    +'<div class="lab">Result</div><div class="segrow">'
+      +'<button class="seg '+(pt.result==='contact'?'on':'')+'" onclick="dSet('+i+',\'result\',\'contact\')">Contact</button>'
+      +'<button class="seg '+(pt.result==='whiff'?'on':'')+'" onclick="dSet('+i+',\'result\',\'whiff\')">Whiff</button>'
+      +'<button class="seg take-n '+(pt.result==='take'?'on':'')+'" onclick="dSet('+i+',\'result\',\'take\')">Take</button></div>'
+    +(needEV?dEvRow(i,pt):'')
+  +'</div>';
+}
+function cardSevenBall(i,pt,num){
+  var done=pt.actual!=null&&pt.called!=null, diff=done?Math.abs(pt.actual-pt.called):null;
+  var cls=!done?'empty':diff===0?'correct':diff>=2?'wrong':'';
+  function grid(field){ var out=''; for(var n=1;n<=7;n++){ out+='<button class="seg'+(pt[field]===n?' on':'')+'" style="flex:1;min-width:0;padding:10px 0;font-family:\'Anton\';font-style:italic;font-size:16px" onclick="dSet('+i+',\''+field+'\','+n+')">'+n+'</button>'; } return '<div class="segrow" style="gap:5px">'+out+'</div>'; }
+  return '<div class="swing '+cls+'">'
+    +'<div class="sh"><span class="n">Ball · #'+(num||i+1)+'</span>'+(done?'<span class="tag round">'+pt.actual+' → '+pt.called+'</span>':'')+'</div>'
+    +'<div class="lab">Actual number (coach)</div>'+grid('actual')
+    +'<div class="lab">Player called</div>'+grid('called')
+  +'</div>';
+}
+function cardZeroStrike(i,pt,num){
+  var done=pt.zone&&pt.action, needEV=(pt.action==='swing');
+  var good=done&&((pt.zone==='in'&&pt.action==='swing')||(pt.zone==='out'&&pt.action==='take'));
+  var cls=done?(good?'correct':'wrong'):'empty';
+  return '<div class="swing '+cls+'">'
+    +'<div class="sh"><span class="n">Pitch · #'+(num||i+1)+'</span><span class="tag round">'+(pt.zone==='in'?'In Zone':pt.zone==='out'?'Out of Zone':'set zone')+'</span></div>'
+    +'<div class="lab">Location</div><div class="segrow">'
+      +'<button class="seg '+(pt.zone==='in'?'on':'')+'" onclick="dSet('+i+',\'zone\',\'in\')">In Zone</button>'
+      +'<button class="seg '+(pt.zone==='out'?'on':'')+'" onclick="dSet('+i+',\'zone\',\'out\')">Out of Zone</button></div>'
+    +'<div class="lab">Decision</div><div class="segrow">'
+      +'<button class="seg take-n '+(pt.action==='take'?'on':'')+'" onclick="dSet('+i+',\'action\',\'take\')">Took</button>'
+      +'<button class="seg swing-y '+(pt.action==='swing'?'on':'')+'" onclick="dSet('+i+',\'action\',\'swing\')">Swung</button></div>'
+    +(needEV?dEvRow(i,pt):'')
+  +'</div>';
+}
+function lockedInput(i,field,val,unit,ph,na){ return '<input type="number" inputmode="decimal" placeholder="'+(na?'—':ph)+'" value="'+(na?'':(val!=null?val:''))+'"'+(na?' disabled style="opacity:.5"':'')+' oninput="dNum('+i+',\''+field+'\',this.value)"><span class="u">'+unit+'</span>'; }
+function cardLockedIn(i,pt,num){
+  var done=(pt.ev>0||pt.dist>0||pt.la>0||pt.na); var cls=done?'correct':'empty';
+  return '<div class="swing '+cls+'">'
+    +'<div class="sh"><span class="n">R'+pt.round+' · #'+(num||i+1)+' · P'+pt.pos+'</span><span class="tag round">'+(LOCKED_REL_LBL[pt.rel]||pt.rel)+'</span></div>'
+    +'<div class="lab">Exit Velo</div><div class="numrow" style="align-items:center">'+lockedInput(i,'ev',pt.ev,'mph','mph',pt.na)+'<button class="seg '+(pt.na?'on':'')+'" style="margin-left:8px;flex:0 0 auto;padding:8px 12px" onclick="dNA('+i+')">NA</button></div>'
+    +'<div class="lab">Distance</div><div class="numrow" style="align-items:center">'+lockedInput(i,'dist',pt.dist,'ft','ft',pt.na)+'</div>'
+    +'<div class="lab">Launch Angle</div><div class="numrow" style="align-items:center">'+lockedInput(i,'la',pt.la,'°','°',pt.na)+'</div>'
+  +'</div>';
+}
+function viewDrill(){
+  var p=curPlayer(); if(!p) return viewLogin();
+  if(!DRILL||DRILL.drill!==DB.ctx.drill){ DRILL={drill:DB.ctx.drill, playerId:p.id, pitches:newDrillPitches(DB.ctx.drill), eid:null, round:1, loc:(DRILL_LOCS[DB.ctx.drill]?DRILL_LOCS[DB.ctx.drill][0]:null)}; }
+  var d=DRILL.drill, m=DRILL_META[d]||{name:'Drill'};
+  var filledN=DRILL.pitches.filter(function(pt){return drillFilled(d,pt);}).length, total=DRILL.pitches.length;
+  function card(i,pt,num){ return d==='bpReads'?cardBpReads(i,pt,num):d==='adjustment'?cardAdjustment(i,pt):d==='lockedIn'?cardLockedIn(i,pt,num):d==='sevenBall'?cardSevenBall(i,pt,num):cardZeroStrike(i,pt,num); }
+  var subtabs='', list='', curPitches=DRILL.pitches;
+  if(d==='adjustment'||d==='lockedIn'){
+    var r=DRILL.round||1;
+    subtabs='<div class="subtabs">'+[1,2].map(function(x){return '<button class="'+(x===r?'on':'')+'" onclick="setDrillRound('+x+')">Round '+x+'</button>';}).join('')+'</div>';
+    var nr=0;
+    list=DRILL.pitches.map(function(pt,i){return {pt:pt,i:i};}).filter(function(o){return o.pt.round===r;}).map(function(o){nr++;return card(o.i,o.pt,nr);}).join('');
+  } else if(DRILL_LOCS[d]){
+    var loc=DRILL.loc||DRILL_LOCS[d][0];
+    subtabs='<div class="subtabs">'+DRILL_LOCS[d].map(function(L){return '<button class="'+(L===loc?'on':'')+'" onclick="setDrillLoc(\''+L+'\')">'+LOC_LABEL[L]+'</button>';}).join('')+'</div>';
+    curPitches=DRILL.pitches.filter(function(pt){return pt.loc===loc;});
+    var nloc=0;
+    list=DRILL.pitches.map(function(pt,i){return {pt:pt,i:i};}).filter(function(o){return o.pt.loc===loc;}).map(function(o){nloc++;return card(o.i,o.pt,nloc);}).join('');
+  } else {
+    list=DRILL.pitches.map(function(pt,i){return card(i,pt);}).join('');
+  }
+  var desc=d==='adjustment'?'2 rounds × 9 pitches · guided FB/CB order':d==='lockedIn'?'2 rounds × 9 pitches · High / Side / Short-arm release':(DRILL_LOCS[d]?(DRILL_LOCS[d].length+' locations × 10 reps · pick how the ball is thrown'):'10 pitches');
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="drillCancel(\''+p.id+'\')" title="Back">'+IC.back+'</button>')
+    +'<div class="logger-head"><h2>'+esc(m.name).toUpperCase()+'</h2><div class="desc">'+esc(p.first)+' '+esc(p.last)+' · '+desc+(DRILL.eid?' · resuming':'')+'</div></div>'
+    +'<div class="wk-note" style="display:flex;align-items:center;justify-content:space-between"><span>Recorded <b>'+filledN+' / '+total+'</b> — Save &amp; Finish Later and come back anytime.</span></div>'
+    +subtabs
+    +(DRILL_LOCS[d]?'<div class="wk-note" style="margin-bottom:6px">Logging <b>'+esc(LOC_LABEL[DRILL.loc||DRILL_LOCS[d][0]])+'</b> — this tab\'s score. Fill all '+DRILL_LOCS[d].length+' location tabs.</div>':'')
+    +drillStrip(d,p,curPitches)
+    +'<div class="swing-list">'+list+'</div>'
+    +'<div class="save-bar" style="display:flex;gap:8px"><button class="btn ghost" style="flex:1" onclick="saveDrill(false)">Save &amp; Finish Later</button><button class="btn" style="flex:1" onclick="saveDrill(true)">Finish &amp; See Results</button></div>'
+  +'</div>';
+}
+function viewDrillMenu(){
+  var p=curPlayer(); if(!p) return viewLogin();
+  var drills=(p.drills||[]).slice().reverse();
+  var cards=Object.keys(DRILL_META).map(function(k){ var m=DRILL_META[k];
+    return '<button class="hub-card" onclick="startDrill(\''+k+'\')">'+drillIcon(k)+'<h3>'+esc(m.name)+'</h3><p>'+esc(m.blurb)+'</p></button>';
+  }).join('');
+  var hist=drills.length?drills.map(function(e){ var mm=DRILL_META[e.drill]||{name:e.drill};
+      var inprog=e.status==='inprogress';
+      var reps=(e.pitches||[]).filter(function(pt){return drillFilled(e.drill,pt);}).length;
+      var tap=inprog?('resumeDrill(\''+p.id+'\',\''+e.id+'\')'):('go(\'drillResult\',{playerId:\''+p.id+'\',entryId:\''+e.id+'\'})');
+      return '<div class="drill-card" style="display:flex;align-items:center;gap:8px">'
+        +'<div style="flex:1;cursor:pointer" onclick="'+tap+'">'
+          +'<div class="dc-top"><div class="dc-ic">'+drillIcon(e.drill)+'</div>'
+          +'<div class="dc-name"><h4>'+esc(mm.name)+(inprog?' <span style="color:var(--amber);font-weight:700;font-size:11px">· IN PROGRESS</span>':'')+'</h4>'
+          +'<div class="st">'+e.date+' · '+reps+' reps'+(inprog?' · tap to resume':'')+'</div></div></div></div>'
+        +'<button class="icon-btn" style="flex:0 0 auto;color:#ff7b6b;font-size:15px" title="Delete drill" onclick="deleteDrill(\''+p.id+'\',\''+e.id+'\')">✕</button>'
+      +'</div>';
+    }).join(''):'<div class="lb-empty">No drills logged yet. Pick one above to start.</div>';
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>')
+    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+esc(p.first)+' '+esc(p.last)+'</p><h2>HITTING <em>DRILLS</em></h2></div></div>'
+    +'<div class="hub-grid">'+cards+'</div>'
+    +'<div class="section-lbl">Drill History</div>'
+    +'<div style="padding:0 0 22px">'+hist+'</div>'
+    +'</div>';
+}
+function viewDrillResult(){
+  var p=curPlayer(); if(!p) return viewLogin();
+  var isCoach=DB.user&&DB.user.role==='coach';
+  var e=(p.drills||[]).filter(function(x){return x.id===DB.ctx.entryId;})[0];
+  if(!e) return viewDrillMenu();
+  var m=DRILL_META[e.drill]||{name:e.drill}, cs=careerStats(p);
+  var body=e.drill==='bpReads'?resBpReads(e,cs):e.drill==='adjustment'?resAdjustment(e,cs):e.drill==='lockedIn'?resLockedIn(e,cs):e.drill==='sevenBall'?resSevenBall(e,cs):e.drill==='zeroStrike'?resZeroStrike(e,cs):'';
+  return '<div class="scroll">'
+    +topbar('<button class="icon-btn" onclick="go(\'drillMenu\',{playerId:\''+p.id+'\'})" title="Back">'+IC.back+'</button>')
+    +'<div class="pad" style="padding-bottom:2px"><div class="hello"><p>'+e.date+' · '+(e.pitches||[]).length+' reps</p><h2>'+esc(m.name).toUpperCase()+'</h2></div></div>'
+    +body
+    +(isCoach?'<div class="pad"><button class="btn ghost" style="border-color:var(--red);color:#ff7b6b" onclick="deleteDrill(\''+p.id+'\',\''+e.id+'\')">Delete Drill</button></div>':'')
+    +'<div style="height:16px"></div></div>';
+}
+function wellWork(wells,works){
+  return '<div class="section-lbl">What We Did Well</div>'
+    +(wells.length?wells.map(function(t){return insight(true,t);}).join(''):'<div class="insight">Log more reps to surface strengths.</div>')
+    +'<div class="section-lbl">What To Work On</div>'
+    +(works.length?works.map(function(t){return insight(false,t);}).join(''):insight(true,'Clean session — nothing flagged.'));
+}
+function strip3(a){ return '<div class="score-strip">'+a.map(function(s){return '<div class="sc '+(s.cls||'')+'"><div class="k">'+s.k+'</div><div class="v">'+s.v+'</div></div>';}).join('')+'</div>'; }
+function drillLocStrips(e,cs){
+  var locs=DRILL_LOCS[e.drill]; if(!locs) return '';
+  if(!(e.pitches||[]).some(function(p){return p.loc;})) return '';
+  var out='<div class="section-lbl">By Location</div>';
+  locs.forEach(function(L){
+    var P=(e.pitches||[]).filter(function(p){return p.loc===L;}); if(!P.length) return;
+    var strip;
+    if(e.drill==='bpReads'){ var g=gradeBpReads(P); strip=strip3([{k:'Reads',v:g.total?g.acc+'%':'—',cls:g.acc>=70?'pass':'fail'},{k:'FB EV',v:g.fbEvAvg||'—'},{k:'Reps',v:g.total}]); }
+    else if(e.drill==='sevenBall'){ var g2=gradeSevenBall(P); strip=strip3([{k:'Exact',v:g2.total?g2.exactPct+'%':'—',cls:g2.exactPct>=50?'pass':'fail'},{k:'Within 1',v:g2.total?g2.within1Pct+'%':'—'},{k:'2+ Off',v:g2.off2,cls:g2.off2?'fail':'pass'}]); }
+    else { var g3=gradeZeroStrike(P,(cs&&cs.maxEV)||0); strip=strip3([{k:'Discipline',v:g3.total?g3.acc+'%':'—',cls:g3.acc>=70?'pass':'fail'},{k:'Great ABs',v:g3.great},{k:'Chases',v:g3.chase,cls:g3.chase?'fail':'pass'}]); }
+    out+='<div class="wk-note" style="margin:8px 0 3px;font-weight:700;color:#cfd8cf">'+esc(LOC_LABEL[L])+'</div>'+strip;
+  });
+  return out;
+}
+function resBpReads(e,cs){
+  var g=gradeBpReads(e.pitches), wells=[], works=[];
+  if(g.acc>=80) wells.push('Sharp reads — <b>'+g.acc+'%</b> correct on FB vs CB.');
+  if(g.cbSwings===0&&g.total) wells.push('No chase — took every curveball.');
+  if(g.fbSwings) wells.push('Attacked fastballs at <b>'+g.fbEvAvg+'</b> mph avg (max '+g.fbEvMax+').');
+  if(g.cbSwings>0) works.push('Chased <b>'+g.cbSwings+'</b> curveball'+(g.cbSwings>1?'s':'')+' — lay off the CB.');
+  if(g.fbTakes>0) works.push('Took <b>'+g.fbTakes+'</b> hittable fastball'+(g.fbTakes>1?'s':'')+' — be on time to attack.');
+  if(g.acc<70) works.push('Reads at '+g.acc+'% — recognize spin out of the hand earlier.');
+  return strip3([{k:'Reads',v:g.acc+'%',cls:g.acc>=70?'pass':'fail'},{k:'FB Attack EV',v:g.fbEvAvg||'—'},{k:'Pitches',v:g.total}])+drillLocStrips(e,cs)+wellWork(wells,works);
+}
+function resAdjustment(e,cs){
+  var g=gradeAdjustment(e.pitches), base=cs.avgEV||0, wells=[], works=[];
+  if(g.aggression>=80) wells.push('On time &amp; aggressive — swung at <b>'+g.aggression+'%</b> (only '+g.take+' take'+(g.take===1?'':'s')+').');
+  if(g.contactRate>=75) wells.push('Strong barrel control — <b>'+g.contactRate+'%</b> contact on swings.');
+  if(g.cbContact>=g.fbContact&&g.cbContact) wells.push('Adjusted to spin — '+g.cbContact+'% contact on curveballs.');
+  if(g.take>0) works.push('<b>'+g.take+'</b> take'+(g.take>1?'s':'')+' — a take counts against you here; commit to swing.');
+  if(g.contactRate<60&&g.swings) works.push('Contact '+g.contactRate+'% on swings — shorten up and track longer.');
+  if(g.cbContact<g.fbContact) works.push('Curveball contact ('+g.cbContact+'%) trails fastball ('+g.fbContact+'%) — stay back on spin.');
+  // timing-adjustment insights (EV by pitch position in each 3-pitch run)
+  if(base&&g.posN1){
+    if(g.posEV1>=0.97*base) wells.push('Elite adjustment — Pitch 1 of a new type at <b>'+g.posEV1+'</b> mph, matching your '+base+' assessment avg.');
+    else works.push('Pitch-1 EV <b>'+g.posEV1+'</b> vs your '+base+' avg — get on time from the very first pitch of a new type.');
+  }
+  if(g.posN1&&g.posN3){
+    if(g.posEV1>=g.posEV3) wells.push('No ramp-up needed — Pitch 1 EV ('+g.posEV1+') already at/above Pitch 3 ('+g.posEV3+').');
+    else if(g.posEV3-g.posEV1>=3) works.push('Slow to adjust — Pitch 1 '+g.posEV1+' → Pitch 3 '+g.posEV3+' mph. You find it by Pitch 3; goal is to hit that on Pitch 1.');
+  }
+  var posBlock = g.evN ? (
+    '<div class="section-lbl">Timing Adjustment · EV by Pitch in Run</div>'
+    +'<div class="wk-note">Each run is 3 of one pitch type. Pitch 1 = first look at a new type. Goal: match your assessment avg EV'+(base?(' ('+base+' mph)'):'')+' on Pitch 1.</div>'
+    +strip3([
+       {k:'Pitch 1',v:g.posN1?g.posEV1:'—',cls:(base&&g.posN1&&g.posEV1>=0.97*base)?'pass':(g.posN1?'fail':'')},
+       {k:'Pitch 2',v:g.posN2?g.posEV2:'—'},
+       {k:'Pitch 3',v:g.posN3?g.posEV3:'—'}
+    ])
+  ) : '';
+  return strip3([{k:'Aggression',v:g.aggression+'%',cls:g.aggression>=70?'pass':'fail'},{k:'Contact',v:g.contactRate+'%',cls:g.contactRate>=60?'pass':'fail'},{k:'Contact EV',v:g.evAvg||'—'}])+posBlock+wellWork(wells,works);
+}
+function resLockedIn(e,cs){
+  var g=gradeLockedIn(e.pitches), rels=['High','Side','Short'], wells=[], works=[];
+  var tbl='<div class="section-lbl">By Release Angle</div><div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:11.5px;background:#141614;border:1px solid #2a2e2a;border-radius:10px">'
+    +'<thead><tr style="background:rgba(131,245,44,.1);color:var(--green);font-family:\'Barlow Semi Condensed\';text-transform:uppercase;font-size:10px;letter-spacing:.4px"><th style="padding:8px 8px;text-align:left">Release</th><th style="padding:8px 6px">Avg EV</th><th style="padding:8px 6px">Max EV</th><th style="padding:8px 6px">Avg Dist</th><th style="padding:8px 6px">Avg LA</th></tr></thead><tbody>';
+  rels.forEach(function(r){ var b=g.rels[r]; var isB=(g.bestRel===r); tbl+='<tr style="border-top:1px solid #2a2e2a"><td style="padding:8px 8px;text-align:left'+(isB?';color:var(--green);font-weight:700':'')+'">'+LOCKED_REL_LBL[r]+(isB?' ★':'')+'</td><td style="padding:8px 6px;text-align:center">'+(b.n?b.avgEV:'—')+'</td><td style="padding:8px 6px;text-align:center">'+(b.n?b.maxEV:'—')+'</td><td style="padding:8px 6px;text-align:center">'+(b.avgDist||'—')+'</td><td style="padding:8px 6px;text-align:center">'+(b.avgLA?b.avgLA+'°':'—')+'</td></tr>'; });
+  tbl+='</tbody></table></div>';
+  var adj='<div class="section-lbl">Adjustment · Pitch 1 → 3</div><div class="wk-note">Each release runs 3 straight. Goal: your first-pitch EV should already match your third — on time from the first look.</div>';
+  rels.forEach(function(r){ var b=g.rels[r]; if(!b.n1||!b.n3) return; var d=+(b.p3EV-b.p1EV).toFixed(1);
+    adj+='<div class="wk-note" style="margin:8px 0 3px;font-weight:700;color:#cfd8cf">'+LOCKED_REL_LBL[r]+'</div>'+strip3([{k:'Pitch 1',v:b.p1EV||'—',cls:(b.p1EV&&b.p1EV>=b.p3EV)?'pass':'fail'},{k:'Pitch 3',v:b.p3EV||'—'},{k:'Δ EV',v:(d>0?'+':'')+d,cls:d<=0?'pass':'fail'}]);
+    if(b.p1EV>=b.p3EV&&b.p1EV) wells.push('<b>'+LOCKED_REL_LBL[r]+'</b>: locked in from pitch 1 (P1 '+b.p1EV+' ≥ P3 '+b.p3EV+' mph).');
+    else if(b.p3EV-b.p1EV>=3) works.push('<b>'+LOCKED_REL_LBL[r]+'</b>: slow to adjust — P1 '+b.p1EV+' → P3 '+b.p3EV+' mph. Be on time from the first pitch.');
+  });
+  if(g.bestRel) wells.push('Best release read: <b>'+LOCKED_REL_LBL[g.bestRel]+'</b> at '+g.rels[g.bestRel].avgEV+' mph avg.');
+  if(g.worstRel&&g.worstRel!==g.bestRel) works.push('Weakest release: <b>'+LOCKED_REL_LBL[g.worstRel]+'</b> ('+g.rels[g.worstRel].avgEV+' mph) — add reps recognizing that release.');
+  return strip3([{k:'Avg EV',v:g.avgEV||'—'},{k:'Max EV',v:g.maxEV||'—'},{k:'Reps',v:g.total}])+tbl+adj+wellWork(wells,works);
+}
+function resSevenBall(e,cs){
+  var g=gradeSevenBall(e.pitches), wells=[], works=[];
+  if(g.exactPct>=60) wells.push('Dialed-in recognition — <b>'+g.exactPct+'%</b> called exactly.');
+  if(g.within1Pct>=85) wells.push('Reliable location read — <b>'+g.within1Pct+'%</b> within one ball.');
+  if(g.off2===0&&g.total) wells.push('Never more than one off — no big misreads.');
+  if(g.off2>0) works.push('<b>'+g.off2+'</b> call'+(g.off2>1?'s':'')+' 2+ balls off — poor recognition on those; track release longer.');
+  if(g.exactPct<40) works.push('Exact reads at '+g.exactPct+'% — work on pinpointing location, not just side.');
+  return strip3([{k:'Exact',v:g.exactPct+'%',cls:g.exactPct>=50?'pass':'fail'},{k:'Within 1',v:g.within1Pct+'%',cls:g.within1Pct>=80?'pass':''},{k:'2+ Off',v:g.off2,cls:g.off2?'fail':'pass'}])+drillLocStrips(e,cs)+wellWork(wells,works);
+}
+function resZeroStrike(e,cs){
+  var mx=cs.maxEV||0, g=gradeZeroStrike(e.pitches,mx), wells=[], works=[];
+  if(g.acc>=80) wells.push('Elite discipline — <b>'+g.acc+'%</b> correct swing/take decisions.');
+  if(g.chase===0&&g.total) wells.push('Zero chase — never swung outside the zone.');
+  if(g.great>0) wells.push('<b>'+g.great+'</b> great AB'+(g.great>1?'s':'')+' (≥ 90% of max EV).');
+  if(g.chase>0) works.push('Chased <b>'+g.chase+'</b> pitch'+(g.chase>1?'es':'')+' out of the zone — a swing at a ball is a bad decision.');
+  if(g.tookStrike>0) works.push('Took <b>'+g.tookStrike+'</b> hittable strike'+(g.tookStrike>1?'s':'')+' — be ready to fire in the zone.');
+  if(g.fail>0&&mx) works.push('<b>'+g.fail+'</b> swing'+(g.fail>1?'s':'')+' under 80% of max EV — failed to execute; drive through contact.');
+  return strip3([{k:'Discipline',v:g.acc+'%',cls:g.acc>=75?'pass':'fail'},{k:'Great ABs',v:mx?g.great:'—'},{k:'Chases',v:g.chase,cls:g.chase?'fail':'pass'}])+drillLocStrips(e,cs)+wellWork(wells,works);
+}
 function viewReport(){
   var p=curPlayer(); if(!p) return viewLogin();
   var cs=careerStats(p);
-  var assess=[]; p.blocks.forEach(function(b){ var e=lastRap(b); if(e){ assess.push({label:b.label, date:e.date, rap:e.rap}); } });
+  var assess=[]; p.blocks.forEach(function(b){ var ag=blockAgg(b, cs.maxEV||0); if(ag.has){ assess.push({label:b.label, date:ag.date, rap:ag, n:ag.n}); } });
   var lastScores=null; p.blocks.forEach(function(b){ var t=lastTest(b); if(t) lastScores=t.scores; });
   var hasRap=assess.length>0;
   if(!hasRap && !cs.hasTests){ return '<div class="scroll">'+topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'+IC.back+'</button>')
@@ -1339,10 +2384,10 @@ function viewReport(){
     +'<div style="font-family:\'Anton\';font-style:italic;font-size:24px;margin:5px 0 4px">'+v+'</div>'
     +'<div style="font-size:9.5px;color:'+(subcls==='up'?'var(--green)':(subcls==='down'?'#ff7b6b':'var(--grey)'))+';font-weight:600">'+sub+'</div></div>'; }
   var rows=assess.map(function(x){ return '<tr>'
-    +'<td style="padding:8px 6px">'+x.label+'</td><td style="padding:8px 6px">'+fmtDate(x.date)+'</td>'
-    +'<td style="padding:8px 6px;text-align:center">'+(x.rap.maxEV||0)+'</td><td style="padding:8px 6px;text-align:center">'+(x.rap.avgEV||0)+'</td>'
-    +'<td style="padding:8px 6px;text-align:center">'+(x.rap.hardHitPct||0)+'%</td><td style="padding:8px 6px;text-align:center">'+(x.rap.maxDist||0)+'</td>'
-    +'<td style="padding:8px 6px;text-align:center">'+(x.rap.avgLA||0)+'°</td></tr>'; }).join('');
+    +'<td style="padding:8px 6px">'+x.label+'</td><td style="padding:8px 6px">'+fmtDate(x.date)+(x.n>1?' <span style="color:var(--grey)">· '+x.n+' tests</span>':'')+'</td>'
+    +'<td style="padding:8px 6px;text-align:center">'+(x.rap.maxEV||'—')+'</td><td style="padding:8px 6px;text-align:center">'+(x.rap.avgEV||'—')+'</td>'
+    +'<td style="padding:8px 6px;text-align:center">'+(x.rap.hardHitPct||0)+'%</td><td style="padding:8px 6px;text-align:center">'+(x.rap.maxDist||'—')+'</td>'
+    +'<td style="padding:8px 6px;text-align:center">'+(x.rap.avgLA?x.rap.avgLA+'°':'—')+'</td></tr>'; }).join('');
   function para(title,body){ return '<div style="margin:14px 0 0"><div style="display:inline-block;border-left:4px solid var(--green);background:rgba(131,245,44,.08);padding:5px 10px;font-family:\'Barlow Semi Condensed\';font-weight:700;font-size:13px">'+title+'</div><p style="font-size:12.5px;line-height:1.55;color:#cfcfcf;margin:7px 2px 0">'+body+'</p></div>'; }
   var ec=evCategoryStats(p);
   var evSection='';
@@ -1406,8 +2451,8 @@ function viewReport(){
       +(cs.hasTests?(
           '<div class="section-lbl" style="margin:20px 2px 8px">Swing Decisions &amp; Pitch Recognition <span style="font-weight:400;color:var(--grey);font-size:11px">· across all '+cs.testCount+' test'+(cs.testCount!==1?'s':'')+'</span></div>'
           +'<div style="display:flex;flex-wrap:wrap;gap:8px">'
-            +card('Color Read',(cs.colorAcc||0)+'%',cs.colorCorrect+'/'+cs.colorN+' correct',cs.colorAcc>=80?'up':'')
-            +card('Swing Decisions',(cs.decAcc||0)+'%',cs.decCorrect+'/'+cs.decN+' correct',cs.decAcc>=80?'up':'')
+            +card('Color Read',cs.colorN?((cs.colorAcc||0)+'%'):'NA',cs.colorN?(cs.colorCorrect+'/'+cs.colorN+' correct'):'No color balls',cs.colorN&&cs.colorAcc>=80?'up':'')
+            +card('Swing Decisions',cs.decN?((cs.decAcc||0)+'%'):'NA',cs.decN?(cs.decCorrect+'/'+cs.decN+' correct'):'No color balls',cs.decN&&cs.decAcc>=80?'up':'')
           +'</div>'
           +'<div class="section-lbl" style="margin:16px 2px 8px">By Test Section — Correct Colors, Swing Decisions &amp; EV</div>'
           +'<div style="overflow-x:auto">'+sectionTable(cs.sections,'#141614')+'</div>'
@@ -1464,7 +2509,9 @@ function render(){
     else if(v==='confirm') h=viewConfirm();
     else if(v==='resetSent') h=viewResetSent();
     else if(v==='newPassword') h=viewNewPassword();
+    else if(v==='home') h=viewHome();
     else if(v==='roster') h=viewRoster();
+    else if(v==='addToRoster') h=viewAddToRoster();
     else if(v==='coaches') h=viewCoaches();
     else if(v==='profile') h=viewProfile();
     else if(v==='editProfile') h=viewEditProfile();
@@ -1474,6 +2521,16 @@ function render(){
     else if(v==='results') h=viewResults();
     else if(v==='report') h=viewReport();
     else if(v==='info') h=viewInfo();
+    else if(v==='leaderboard') h=viewLeaderboard();
+    else if(v==='development') h=viewDevelopment();
+    else if(v==='drillMenu') h=viewDrillMenu();
+    else if(v==='drill') h=viewDrill();
+    else if(v==='drillResult') h=viewDrillResult();
+    else if(v==='workout') h=viewWorkout();
+    else if(v==='workoutSetup') h=viewWorkoutSetup();
+    else if(v==='settings') h=viewSettings();
+    else if(v==='unassigned') h=viewUnassigned();
+    else if(v==='facilityWoW') h=viewFacilityWoW();
     else h=viewLogin();
     vp.innerHTML=h; bindDynamic();
     var nowScroll=vp.querySelector?vp.querySelector('.scroll'):null;
