@@ -1828,21 +1828,22 @@ function devStats(p){
 }
 /* Aggregate every test in a block: Max EV & Max Distance = the best across all tests that week; everything else = the average across all tests. */
 function blockAgg(b,H){
-  var maxEVs=[],avgEVs=[],hhs=[],maxDs=[],avgDs=[],las=[],dates=[],cnt=0;
+  var maxEVs=[],avgEVs=[],hhs=[],maxDs=[],avgDs=[],las=[],dates=[],hCnt=0,rCnt=0;
   blockEntries(b).forEach(function(e){
     if(e.type==='test'&&e.status!=='inprogress'&&e.test){
       var evs=[]; ['frontToss','bp','machine'].forEach(function(k){ (e.test[k]||[]).forEach(function(pt){ if(pt.ev>0&&pt.color!=='Red') evs.push(pt.ev); }); });
-      if(evs.length){ cnt++; maxEVs.push(Math.max.apply(null,evs)); avgEVs.push(+(evs.reduce(function(a,c){return a+c;},0)/evs.length).toFixed(1)); if(H>0) hhs.push(Math.round(evs.filter(function(x){return x>=0.8*H;}).length/evs.length*100)); if(e.date)dates.push(e.date); }
+      if(evs.length){ hCnt++; maxEVs.push(Math.max.apply(null,evs)); avgEVs.push(+(evs.reduce(function(a,c){return a+c;},0)/evs.length).toFixed(1)); if(H>0) hhs.push(Math.round(evs.filter(function(x){return x>=0.8*H;}).length/evs.length*100)); if(e.date)dates.push(e.date); }
     } else if(e.type==='rapsodo'&&e.rap){
       var R=e.rap,got=false;
       if(R.maxEV>0){maxEVs.push(R.maxEV);got=true;} if(R.avgEV>0)avgEVs.push(R.avgEV); if(R.hardHitPct>0)hhs.push(R.hardHitPct);
       if(R.maxDist>0){maxDs.push(R.maxDist);got=true;} if(R.avgDist>0)avgDs.push(R.avgDist); if(R.avgLA>0)las.push(R.avgLA);
-      if(got){cnt++; if(e.date)dates.push(e.date);}
+      if(got){rCnt++; if(e.date)dates.push(e.date);}
     }
   });
   function mean(a){ return a.length?+(a.reduce(function(x,y){return x+y;},0)/a.length).toFixed(1):0; }
   function mx(a){ return a.length?Math.max.apply(null,a):0; }
   dates.sort();
+  var cnt=Math.max(hCnt,rCnt);
   return { maxEV:mx(maxEVs), avgEV:mean(avgEVs), hardHitPct:Math.round(mean(hhs)), maxDist:mx(maxDs), avgDist:mean(avgDs), avgLA:mean(las), n:cnt, date:dates[dates.length-1]||'', has:cnt>0 };
 }
 async function loadLeaderboard(){
@@ -2137,7 +2138,7 @@ function cardBpReads(i,pt,num){
     +(needEV?dEvRow(i,pt):'')
   +'</div>';
 }
-function cardAdjustment(i,pt){
+function cardAdjustment(i,pt,num){
   var done=!!pt.result, needEV=(pt.result==='contact');
   var cls=!done?'empty':pt.result==='contact'?'correct':pt.result==='take'?'wrong':'';
   return '<div class="swing '+cls+'">'
@@ -2189,7 +2190,7 @@ function viewDrill(){
   if(!DRILL||DRILL.drill!==DB.ctx.drill){ DRILL={drill:DB.ctx.drill, playerId:p.id, pitches:newDrillPitches(DB.ctx.drill), eid:null, round:1, loc:(DRILL_LOCS[DB.ctx.drill]?DRILL_LOCS[DB.ctx.drill][0]:null)}; }
   var d=DRILL.drill, m=DRILL_META[d]||{name:'Drill'};
   var filledN=DRILL.pitches.filter(function(pt){return drillFilled(d,pt);}).length, total=DRILL.pitches.length;
-  function card(i,pt,num){ return d==='bpReads'?cardBpReads(i,pt,num):d==='adjustment'?cardAdjustment(i,pt):d==='lockedIn'?cardLockedIn(i,pt,num):d==='sevenBall'?cardSevenBall(i,pt,num):cardZeroStrike(i,pt,num); }
+  function card(i,pt,num){ return d==='bpReads'?cardBpReads(i,pt,num):d==='adjustment'?cardAdjustment(i,pt,num):d==='lockedIn'?cardLockedIn(i,pt,num):d==='sevenBall'?cardSevenBall(i,pt,num):cardZeroStrike(i,pt,num); }
   var subtabs='', list='', curPitches=DRILL.pitches;
   if(d==='adjustment'||d==='lockedIn'){
     var r=DRILL.round||1;
