@@ -607,7 +607,10 @@ function handWord(h){ return h==='S'?'Switch Hitter': h==='L'?'Left-Handed':'Rig
 function playerById(id){ return DB.players.find(p=>p.id===id); }
 function curPlayer(){ return playerById(DB.ctx.playerId); }
 function toast(msg){ const t=$('#toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(t._t); t._t=setTimeout(()=>{ t.classList.remove('show'); }, 1900); }
-function go(view,ctx={}){ DB.view=view; DB.ctx={...DB.ctx,...ctx}; render(); $('#vp').scrollTop=0; }
+var _histLock=false;
+function go(view,ctx={}){ DB.view=view; DB.ctx={...DB.ctx,...ctx}; render(); var _vp=$('#vp'); if(_vp)_vp.scrollTop=0; if(!_histLock){ try{ history.pushState({v:view,c:DB.ctx},''); }catch(e){} } }
+async function appRefresh(){ toast('Refreshing…'); try{ if(typeof loadPlayers==='function' && DB.user){ await loadPlayers(); } }catch(e){} render(); toast('Up to date'); }
+if(typeof window!=='undefined'){ window.addEventListener('popstate',function(ev){ _histLock=true; try{ if(ev.state&&ev.state.v){ DB.view=ev.state.v; DB.ctx=ev.state.c||DB.ctx; render(); } else { history.pushState({v:DB.view,c:DB.ctx},''); } }catch(e){} _histLock=false; }); }
 const IC={
   user:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>',
   search:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>',
@@ -716,6 +719,7 @@ async function enterApp(user){
     else { DB.view='login'; }
   }
   render();
+  try{ history.replaceState({v:DB.view,c:DB.ctx},''); }catch(e){}
 }
 /* ---------- auth (Supabase) ---------- */
 var authMode='login', loginRole='player', pendingEmail='', signupSport='baseball';
@@ -786,7 +790,7 @@ async function submitNewPassword(){
 }
 
 /* ---------- shared bits ---------- */
-function topbar(right){ return '<div class="topbar"><div class="brand">'+logoSVG(34)+'<h1>HPL <em>HITTERS</em></h1></div>'+(right||'')+'</div>'; }
+function topbar(right){ return '<div class="topbar"><div class="brand">'+logoSVG(34)+'<h1>HPL <em>HITTERS</em></h1></div><div style="display:flex;gap:8px;align-items:center">'+'<button class="icon-btn" onclick="appRefresh()" title="Refresh" style="font-size:15px">'+IC.sync+'</button>'+(right||'')+'</div></div>'; }
 function bindDynamic(){}
 function rn(k,v,u){ var show=(v||v===0)&&v!==''; return '<div class="rn"><div class="k">'+k+'</div><div class="v">'+(show?v:'—')+'<small> '+u+'</small></div></div>'; }
 function miniStat(k,v,u){ var show=(v||v===0)&&v!==''; return '<div style="flex:1;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:8px 5px;text-align:center">'
@@ -1649,7 +1653,7 @@ async function saveTest(finalize){
   }
   await savePlayer(p);
   if(finalize){ var eid=TEST_EID; TEST_EID=null; toast('Test saved'); go('results',{blockN:n, entryId:eid}); }
-  else{ toast('Saved — you can finish this test later'); go('block',{playerId:p.id, blockN:n}); }
+  else{ go('block',{playerId:p.id, blockN:n}); toast('✓ Test saved — resume it anytime from this block'); }
 }
 
 /* ================= RESULTS ================= */
@@ -2089,7 +2093,7 @@ async function saveDrill(finalize){
   var eid=DRILL.eid, pid=p.id;
   await savePlayer(p);
   if(finalize){ DRILL=null; toast('Drill saved'); go('drillResult',{playerId:pid, entryId:eid}); }
-  else{ toast('Saved — finish later anytime'); go('drillMenu',{playerId:pid}); }
+  else{ go('drillMenu',{playerId:pid}); toast('✓ Drill saved — resume it anytime from Drills'); }
 }
 function setDrillRound(r){ if(!DRILL)return; DRILL.round=r; render(); }
 function setDrillLoc(L){ if(!DRILL)return; DRILL.loc=L; render(); }
