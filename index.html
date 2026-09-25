@@ -1276,7 +1276,7 @@ function wkGenerate(o){var blk=wkResolveBlock(o.programLength,o.weekNo);var out=
   out.areas.tee=tee;
   if(cfg.noFrontToss){ out.areas.frontToss=null; }
   else { var ft={label:'',drills:[],note:''};
-    if(o.isBatSpeed){ if(count===2)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(wkAddon(wk),{addon:true})]; else if(count===3)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(rot[2],{rep:'bs'})]; else if(count===4)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD('Pick 1 Flip')]; ft.note='Green “Bat Speed” drills = 5 heavy · 5 light · 5 normal each. Any drill without the green tag is NOT bat speed — 1 set of 8.'; }
+    if(o.isBatSpeed){ if(count===2)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(wkAddon(wk),{addon:true})]; else if(count===3)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD(wkAddon(wk),{addon:true})]; else if(count===4)ft.drills=[wkD(rot[0],{rep:'bs'}),wkD(rot[1],{rep:'bs'}),wkD('Pick 1 Flip')]; ft.note='Green “Bat Speed” drills = 5 heavy · 5 light · 5 normal each. Any drill without the green tag is NOT bat speed — 1 set of 8.'; }
     else if(noPelo){ ft.label=null;ft.drills=wkNoPeloFlips(wk,dayIdx,o.equip,3).map(function(n){return wkD(n);});ft.note='Do 3 flip drills — 1 set of 8 each. If a flip drill is overload/underload, ask your instructor for a replacement.'; }
     else { ft.label='Pelotero Flip';ft.note='Do 3 Pelotero flip drills — 1 set of 8 each. If a flip drill is overload/underload, ask your instructor for a replacement.'; }
     (o.drillNeeds||[]).forEach(function(n){ft.drills.push(wkD(n,{need:true}));});
