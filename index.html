@@ -581,6 +581,7 @@
 /* ===== SUPABASE CLOUD LAYER ===== */
 const SB_URL="https://evoahwtitcyfbjgiaxkf.supabase.co";
 const SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2b2Fod3RpdGN5ZmJqZ2lheGtmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNDk5NDIsImV4cCI6MjA5ODgyNTk0Mn0.zby-k9XX-hKkbGnTb8hLaLr9IK7vAELbTyWuIlAdggI";
+const IS_RECOVERY = (typeof location!=="undefined") && (((location.hash||"").indexOf("type=recovery")>=0) || ((location.search||"").indexOf("type=recovery")>=0));
 const SBc = (window.supabase&&window.supabase.createClient)? window.supabase.createClient(SB_URL,SB_KEY) : null;
 
 /* ===== reused framework helpers (from HPL Youth) ===== */
@@ -711,6 +712,7 @@ async function ensureAccount(user){
 }
 async function cloudBoot(){
   if(!SBc){ DB.view='login'; render(); return; }
+  if(IS_RECOVERY){ DB.view='newPassword'; DB.ctx={}; render(); return; }
   try{ var s=await SBc.auth.getSession(); if(s.data&&s.data.session&&s.data.session.user){ await enterApp(s.data.session.user); return; } }
   catch(e){ console.warn(e); }
   DB.view='login'; render();
@@ -780,6 +782,7 @@ function viewNewPassword(){
     +'<div class="logo-wrap">'+logoSVG(80)+'</div>'
     +'<h2>SET NEW <em>PASSWORD</em></h2>'
     +'<p class="sub">Choose a new password for your account.</p>'
+    +'<p class="hint" style="margin:0 0 12px;line-height:1.6">After you set it, open the HPL app on your home screen and log in with your email and this new password.</p>'
     +'<div class="field"><label>New Password</label><input id="np1" type="password" placeholder="••••••"></div>'
     +'<div class="field"><label>Confirm Password</label><input id="np2" type="password" placeholder="••••••"></div>'
     +'<button class="btn" onclick="submitNewPassword()">Update Password</button>'
