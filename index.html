@@ -663,6 +663,67 @@ var POSITIONS=['P','C','1B','2B','3B','SS','LF','CF','RF','OF','DH','UTIL'];
 var BLOCK_LABELS=['Weeks 1–5','Weeks 6–10','Weeks 11–15','Weeks 16–20','Weeks 21–25'];
 function emptyRap(){ return {maxEV:0,avgEV:0,maxDist:0,avgDist:0,avgLA:0,hardHitPct:0}; }
 function emptyBlocks(){ return BLOCK_LABELS.map(function(l,i){ return {n:i+1,label:l,date:null,entries:[]}; }); }
+
+/* ===== SWITCH-HITTER per-hand support ===== */
+function otherSide(s){ return s==='L'?'R':'L'; }
+function sideLabel(s){ return s==='L'?'LH':'RH'; }
+function sideWord(s){ return s==='L'?'Left-Handed':'Right-Handed'; }
+function actSide(p){ return (p&&p.activeSide)||'R'; }
+function ensureSides(p){
+  if(!p||p.hand!=='S') return;
+  if(!p.activeSide) p.activeSide='R';
+  if(!p.alt||typeof p.alt!=='object') p.alt={ blocks:emptyBlocks(), rap:emptyRap(), maxEV:0, avgEV:0, maxDist:0, avgDist:0 };
+  if(!p.alt.blocks) p.alt.blocks=emptyBlocks();
+  if(!p.alt.rap) p.alt.rap=emptyRap();
+}
+function switchSide(p, side){
+  if(!p||p.hand!=='S') return;
+  ensureSides(p);
+  if(p.activeSide===side) return;
+  var cur={ blocks:p.blocks, rap:p.rap, maxEV:p.maxEV, avgEV:p.avgEV, maxDist:p.maxDist, avgDist:p.avgDist };
+  var alt=p.alt||{ blocks:emptyBlocks(), rap:emptyRap() };
+  p.blocks=alt.blocks||emptyBlocks(); p.rap=alt.rap||emptyRap();
+  p.maxEV=alt.maxEV||0; p.avgEV=alt.avgEV||0; p.maxDist=alt.maxDist||0; p.avgDist=alt.avgDist||0;
+  p.alt=cur; p.activeSide=side;
+}
+function selSide(side){
+  var p=curPlayer(); if(!p) return;
+  switchSide(p, side); savePlayer(p); render();
+}
+function careerStatsSide(p, side){
+  if(!p) return careerStats({blocks:[]});
+  if(p.hand!=='S') return careerStats(p);
+  ensureSides(p);
+  if(side===actSide(p)) return careerStats(p);
+  return careerStats({ blocks:(p.alt&&p.alt.blocks)||[] });
+}
+function sideToggleBar(p){
+  if(!p||p.hand!=='S') return '';
+  var a=actSide(p);
+  return '<div style="display:flex;gap:8px;margin:10px 16px 6px">'
+   +'<button class="seg big'+(a==='R'?' on':'')+'" style="flex:1" onclick="selSide(\'R\')">Right-Handed</button>'
+   +'<button class="seg big'+(a==='L'?' on':'')+'" style="flex:1" onclick="selSide(\'L\')">Left-Handed</button>'
+   +'</div>';
+}
+function sideRapHtml(p, side){
+  var cs=careerStatsSide(p,side);
+  var pr=(p.hand==='S') ? (side===actSide(p)?(p.rap||{}):((p.alt&&p.alt.rap)||{})) : (p.rap||{});
+  var mEV=cs.maxEV||pr.maxEV||0, aEV=cs.avgEV||pr.avgEV||0, hh=cs.hardHitPct||pr.hardHitPct||0,
+      mD=cs.maxDist||pr.maxDist||0, aD=cs.avgDist||pr.avgDist||0, aLA=cs.avgLA||pr.avgLA||0;
+  return '<div class="rap-numbers" style="grid-template-columns:1fr 1fr 1fr">'
+    +rnAgg('Max EV',mEV,'mph','best')+rnAgg('Avg EV',aEV,'mph','avg')+rnAgg('Hard Hit',hh,'%','all swings')
+    +rnAgg('Max Dist',mD,'ft','best')+rnAgg('Avg Dist',aD,'ft','avg')+rnAgg('Avg LA',aLA,'°','avg')
+  +'</div>';
+}
+function profileRapsodo(p, isCoach){
+  var editLink=isCoach?' <span class="link" onclick="go(\'editProfile\',{playerId:\''+p.id+'\'})">Edit</span>':'';
+  if(p.hand!=='S'){
+    return '<div class="section-lbl">Rapsodo Numbers · All Tests'+editLink+'</div>'+sideRapHtml(p,actSide(p));
+  }
+  return '<div class="section-lbl">Rapsodo Numbers · Right-Handed'+editLink+'</div>'+sideRapHtml(p,'R')
+       +'<div class="section-lbl">Rapsodo Numbers · Left-Handed</div>'+sideRapHtml(p,'L');
+}
+
 /* session accessors (each block holds many dated entries: hitting tests + rapsodo) */
 function blockEntries(b){ return (b&&b.entries)||[]; }
 function lastRap(b){ var r=null; blockEntries(b).forEach(function(e){ if(e.type==='rapsodo') r=e; }); return r; }
@@ -678,7 +739,7 @@ async function loadPlayers(){
   try{
     var res=await SBc.from('hitters').select('id,owner,state').order('created_at',{ascending:true});
     if(res.error){ console.warn(res.error); return; }
-    DB.players=(res.data||[]).map(function(r){ return Object.assign({}, r.state||{}, {id:r.id, owner:r.owner}); });
+    DB.players=(res.data||[]).map(function(r){ var pp=Object.assign({}, r.state||{}, {id:r.id, owner:r.owner}); ensureSides(pp); return pp; });
   }catch(e){ console.warn(e); }
   try{ var fe=await SBc.from('hitters_facility').select('facility,equip'); if(fe&&fe.data){ FAC_EQUIP={}; fe.data.forEach(function(row){ FAC_EQUIP[row.facility]=row.equip||{}; }); } }catch(e){ console.warn(e); }
 }
@@ -1167,22 +1228,19 @@ function viewProfile(){
       +'<div class="prof-name">'+esc(p.first)+' <em>'+esc(p.last)+'</em></div>'
       +'<div class="prof-sub">'+(p.position||'—')+'<span class="dot">•</span>'+(p.gradClass?('Class of '+p.gradClass):'—')+'<span class="dot">•</span>'+(p.age||ageFrom(p.birthdate)||'—')+' yrs</div>'
     +'</div>'
+    +sideToggleBar(p)
     +'<div class="section-lbl" style="margin-top:14px">Measurables</div>'
     +'<div style="display:flex;gap:8px;padding:0 16px 2px">'
       +miniStat('Height',p.height,'')+miniStat('Weight',p.weight,'lb')
       +miniStat('Grip R',p.gripRH,'lb')+miniStat('Grip L',p.gripLH,'lb')
     +'</div>'
-    +'<div class="section-lbl">Rapsodo Numbers · All Tests'+(isCoach?' <span class="link" onclick="go(\'editProfile\',{playerId:\''+p.id+'\'})">Edit</span>':'')+'</div>'
-    +'<div class="rap-numbers" style="grid-template-columns:1fr 1fr 1fr">'
-      +rnAgg('Max EV',gMaxEV,'mph','best')+rnAgg('Avg EV',gAvgEV,'mph','avg')+rnAgg('Hard Hit',gHH,'%','all swings')
-      +rnAgg('Max Dist',gMaxDist,'ft','best')+rnAgg('Avg Dist',gAvgDist,'ft','avg')+rnAgg('Avg LA',gAvgLA,'°','avg')
-    +'</div>'
+    +profileRapsodo(p,isCoach)
     +'<div class="pad" style="padding-bottom:0">'
       +'<button class="btn" style="background:linear-gradient(180deg,var(--green),var(--green-deep));color:#0a0b0a;font-family:\'Anton\';font-style:italic;font-size:18px;letter-spacing:.5px" onclick="openWorkout(\''+p.id+'\')">TODAY\'S WORKOUT'+(wkProfileStatus(p)?'<span style="display:block;font-family:\'Barlow Semi Condensed\';font-style:normal;font-size:12px;font-weight:600;margin-top:3px;opacity:.75">'+esc(wkProfileStatus(p))+'</span>':'')+'</button>'
       +(isCoach?'<button class="btn ghost" style="margin-top:8px" onclick="openWorkoutSetup(\''+p.id+'\')">Workout Program</button>':'')
       +'<div style="text-align:center;margin-top:11px;color:var(--grey);font-size:12.5px;font-weight:600">Workouts completed: <span style="color:var(--green);font-weight:800;font-size:14px">'+((p.workoutLog||[]).length)+'</span></div>'
     +'</div>'
-    +'<div class="section-lbl">Test Blocks · 25-Week Program</div>'
+    +'<div class="section-lbl">Test Blocks'+((p.hand==='S')?' · '+sideWord(actSide(p)):'')+' · 25-Week Program</div>'
     +'<div class="wk-note" style="margin-bottom:6px">Tap a block to log a hitting test or Rapsodo results.</div>'
     +'<div class="assess" style="flex-wrap:wrap;gap:8px">'
       +p.blocks.map(function(b){ var cnt=(b.entries||[]).length; return '<button class="a '+(cnt?'cur':'')+'" style="cursor:pointer;width:auto;flex:1 1 30%;min-width:88px" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+b.n+'})">'
@@ -1475,6 +1533,7 @@ async function saveProfile(){
   var p=EP||curPlayer(); if(!p){ toast('No player'); return; }
   if(!p.first||!p.last){ toast('Enter first and last name'); return; }
   p.weight=+p.weight||p.weight; p.age=ageFrom(p.birthdate);
+  if(p.hand==='S') ensureSides(p);
   await savePlayer(p); toast('Profile saved');
   if(DB.user&&DB.user.role==='coach') go('roster'); else go('profile',{playerId:p.id});
 }
@@ -1526,6 +1585,7 @@ function viewBlock(){
   var entries=blockEntries(b).slice().reverse();
   return '<div class="scroll">'
     +topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'+IC.back+'</button>')
+    +sideToggleBar(p)
     +'<div class="logger-head"><h2>BLOCK '+b.n+' · <em>'+b.label+'</em></h2>'
       +'<div class="desc">'+(entries.length?(entries.length+' session'+(entries.length>1?'s':'')+' logged in this block'):'No sessions yet — log your first below.')+'</div></div>'
     +'<div class="pad">'
@@ -1900,13 +1960,27 @@ async function loadLeaderboard(){
   catch(e){ console.warn(e); return null; }
 }
 function lbLoad(raw){
-  return (raw||[]).map(function(r){
-    var p={ id:r.id, first:r.first, last:r.last, blocks:r.blocks||[] };
-    var cs=careerStats(p);
-    cs.workouts=(typeof r.workouts==='number')?r.workouts:((r.workout_count!=null)?(+r.workout_count||0):0);
-    return { id:r.id, name:((r.first||'')+' '+(r.last||'')).trim()||'Unnamed', sport:(r.sport||'baseball'), facility:(r.facility||''), cs:cs, dev:devStats(p) };
+  var out=[];
+  (raw||[]).forEach(function(r){
+    var baseName=((r.first||'')+' '+(r.last||'')).trim()||'Unnamed';
+    var workouts=(typeof r.workouts==='number')?r.workouts:((r.workout_count!=null)?(+r.workout_count||0):0);
+    function entry(blocks, sd){
+      var pp={ id:r.id, first:r.first, last:r.last, blocks:blocks||[] };
+      var cs=careerStats(pp); cs.workouts=workouts;
+      var nm=baseName+(sd?(' ('+(sd==='L'?'LH':'RH')+')'):'');
+      return { id:r.id+(sd?(':'+sd):''), baseId:r.id, side:sd||null, name:nm, sport:(r.sport||'baseball'), facility:(r.facility||''), cs:cs, dev:devStats(pp) };
+    }
+    if(r.hand==='S'){
+      var aSide=(r.active_side==='L')?'L':'R';
+      out.push(entry(r.blocks||[], aSide));
+      out.push(entry(r.alt_blocks||[], aSide==='L'?'R':'L'));
+    } else {
+      out.push(entry(r.blocks||[], null));
+    }
   });
+  return out;
 }
+
 async function openLeaderboard(pid){
   toast('Loading leaderboard…');
   var raw=await loadLeaderboard();
@@ -1928,24 +2002,26 @@ function viewLeaderboard(){
   var mk=DB.lbMetric||'maxEV';
   var def=LB_METRICS.filter(function(m){return m.k===mk;})[0]||LB_METRICS[0];
   var stats=DB.lbStats||[];
-  var meRow=meId?stats.filter(function(r){return r.id===meId;})[0]:null;
+  var meRow=meId?stats.filter(function(r){return r.baseId===meId;})[0]:null;
   var lbSport=meRow?(meRow.sport||'baseball'):(DB.sport||'baseball');
   stats=stats.filter(function(r){return (r.sport||'baseball')===lbSport;});
+  var _seenW={};
   var elig=stats.filter(function(r){
     var v=r.cs[def.k]||0;
     if(v<=0) return false;
     if(def.k==='colorAcc' && !(r.cs.colorN>0)) return false;
     if(def.k==='decAcc' && !(r.cs.decN>0)) return false;
+    if(def.k==='workouts'){ if(_seenW[r.baseId]) return false; _seenW[r.baseId]=1; }
     return true;
   }).sort(function(a,b){ return (b.cs[def.k]||0)-(a.cs[def.k]||0); });
   var top=elig.slice(0,10);
   var myRank=0, myVal=0;
-  if(meId){ for(var i=0;i<elig.length;i++){ if(elig[i].id===meId){ myRank=i+1; myVal=elig[i].cs[def.k]||0; break; } } }
+  if(meId){ for(var i=0;i<elig.length;i++){ if(elig[i].baseId===meId){ myRank=i+1; myVal=elig[i].cs[def.k]||0; break; } } }
   var chips=LB_METRICS.map(function(m){ return '<button class="lb-chip '+(m.k===mk?'on':'')+'" onclick="setLbMetric(\''+m.k+'\')">'+m.lbl+'</button>'; }).join('');
   var list = top.length ? top.map(function(r,idx){
-      var rk=idx+1; var cls='lb-row'+(r.id===meId?' me':'')+(rk===1?' top1':rk===2?' top2':rk===3?' top3':'');
+      var rk=idx+1; var cls='lb-row'+(r.baseId===meId?' me':'')+(rk===1?' top1':rk===2?' top2':rk===3?' top3':'');
       return '<div class="'+cls+'"><div class="rk">'+rk+'</div>'
-        +'<div class="nm">'+esc(r.name)+(r.id===meId?' <small>You</small>':'')+'</div>'
+        +'<div class="nm">'+esc(r.name)+(r.baseId===meId?' <small>You</small>':'')+'</div>'
         +'<div class="loc">'+esc(facilityName(r.facility))+'</div>'
         +'<div class="vl">'+lbFmt(r.cs[def.k]||0,def.dec)+'<small> '+def.unit+'</small></div></div>';
     }).join('') : '<div class="lb-empty">No results in this category yet. Rankings fill in as tests are logged.</div>';
@@ -1973,20 +2049,20 @@ function viewDevelopment(){
   var mk=DB.devMetric||'maxEV';
   var def=LB_METRICS.filter(function(m){return m.k===mk;})[0]||LB_METRICS[0];
   var stats=DB.lbStats||[];
-  var meRow=meId?stats.filter(function(r){return r.id===meId;})[0]:null;
+  var meRow=meId?stats.filter(function(r){return r.baseId===meId;})[0]:null;
   var devSport=meRow?(meRow.sport||'baseball'):(DB.sport||'baseball');
   stats=stats.filter(function(r){return (r.sport||'baseball')===devSport;});
   var elig=stats.filter(function(r){ return r.dev && r.dev[def.k]; })
                 .sort(function(a,b){ return (b.dev[def.k].delta)-(a.dev[def.k].delta); });
   var top=elig.slice(0,5);
   var myRank=0, myD=null;
-  if(meId){ for(var i=0;i<elig.length;i++){ if(elig[i].id===meId){ myRank=i+1; myD=elig[i].dev[def.k]; break; } } }
+  if(meId){ for(var i=0;i<elig.length;i++){ if(elig[i].baseId===meId){ myRank=i+1; myD=elig[i].dev[def.k]; break; } } }
   function dStr(d){ return (d>=0?'+':'')+lbFmt(d,def.dec); }
   var chips=LB_METRICS.filter(function(m){return m.k!=='workouts';}).map(function(m){ return '<button class="lb-chip '+(m.k===mk?'on':'')+'" onclick="setDevMetric(\''+m.k+'\')">'+m.lbl+'</button>'; }).join('');
   var list = top.length ? top.map(function(r,idx){
-      var rk=idx+1; var d=r.dev[def.k]; var cls='lb-row'+(r.id===meId?' me':'')+(rk===1?' top1':rk===2?' top2':rk===3?' top3':'');
+      var rk=idx+1; var d=r.dev[def.k]; var cls='lb-row'+(r.baseId===meId?' me':'')+(rk===1?' top1':rk===2?' top2':rk===3?' top3':'');
       return '<div class="'+cls+'"><div class="rk">'+rk+'</div>'
-        +'<div class="nm">'+esc(r.name)+(r.id===meId?' <small>You</small>':'')
+        +'<div class="nm">'+esc(r.name)+(r.baseId===meId?' <small>You</small>':'')
           +'<small class="ft">'+lbFmt(d.first,def.dec)+' → '+lbFmt(d.last,def.dec)+' '+def.unit+'</small></div>'
         +'<div class="loc">'+esc(facilityName(r.facility))+'</div>'
         +'<div class="vl '+(d.delta>=0?'up':'down')+'">'+dStr(d.delta)+'<small> '+def.unit+'</small></div></div>';
@@ -2464,9 +2540,10 @@ function viewReport(){
       +(corr?'<div style="margin-top:10px;background:rgba(131,245,44,.08);border:1px solid rgba(131,245,44,.3);border-radius:12px;padding:11px 13px;font-size:12px;line-height:1.5;color:#cdeeb0">'+corr+'</div>':'')
       +trend;
   }
-  var nm=esc(p.first)+' '+esc(p.last);
+  var nm=esc(p.first)+' '+esc(p.last)+((p.hand==='S')?' ('+sideLabel(actSide(p))+')':'');
   return '<div class="scroll" id="reportScroll">'
     +topbar('<button class="icon-btn" onclick="go(\'profile\',{playerId:\''+p.id+'\'})">'+IC.back+'</button>')
+    +sideToggleBar(p)
     +'<div class="pad" id="reportSheet">'
       +'<div style="background:#0d0f0d;border:1px solid #2a2e2a;border-bottom:3px solid var(--green);border-radius:14px;padding:16px 15px;display:flex;align-items:center;gap:14px">'
         +logoSVG(56)
