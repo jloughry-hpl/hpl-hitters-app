@@ -801,7 +801,7 @@ async function cloudBoot(){
 async function enterApp(user){
   var acc=await ensureAccount(user);
   var role=(acc&&acc.role)||'player';
-  DB.user={ id:user.id, email:user.email, role:role, name:(acc&&acc.name)||user.email };
+  DB.user={ id:user.id, email:user.email, role:role, name:(acc&&acc.name)||user.email, signupCoach:!!(user.user_metadata && user.user_metadata.role==='coach') };
   await loadPlayers();
   if(role==='coach'){ DB.view='home'; DB.ctx={}; }
   else {
@@ -1274,7 +1274,7 @@ function viewProfile(){
       +'<button class="btn ghost" style="margin-top:8px" onclick="openLeaderboard(\''+p.id+'\')">View Leaderboard</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="openDevelopment(\''+p.id+'\')">Development Leaders</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
-      +(!isCoach?'<button class="btn ghost" style="margin-top:8px;border-color:var(--green);color:var(--green)" onclick="promptCoachCode()">Are you a coach? Enter access code</button>':'')
+      +((!isCoach && DB.user && DB.user.signupCoach)?'<button class="btn ghost" style="margin-top:8px;border-color:var(--green);color:var(--green)" onclick="promptCoachCode()">Are you a coach? Enter access code</button>':'')
       +(isCoach?('<button class="btn" style="margin-top:14px;background:rgba(226,59,59,.12);border:1px solid var(--red);color:#ff7b6b" onclick="deletePlayer(\''+p.id+'\')">Delete Player</button>'):'')
     +'</div></div>';
 }
