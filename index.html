@@ -1637,14 +1637,15 @@ function viewBlock(){
 /* ================= TEST LOGGER ================= */
 var TEST=null;
 var TEST_EID=null;
+var TEST_ORIG_STATUS=null;
 function secMeta(s){ return s==='frontToss'?{name:'Front Toss',nc:10,nn:5}:(s==='bp'?{name:'BP',nc:5,nn:10}:{name:'Machine',nc:5,nn:10}); }
 function mkPitches(nc,nn){ var a=[],i; for(i=0;i<nc;i++)a.push({kind:'color',color:null,pick:null,ev:null,swing:null,na:false}); for(i=0;i<nn;i++)a.push({kind:'normal',color:null,pick:null,ev:null,swing:null,na:false}); return a; }
 function initTest(p){ if(p&&!wkEquip(p).colorBalls){ return { section:'frontToss', noColor:true, frontToss:mkPitches(0,15), bp:mkPitches(0,15), machine:mkPitches(0,15) }; } return { section:'frontToss', frontToss:mkPitches(10,5), bp:mkPitches(5,10), machine:mkPitches(5,10) }; }
 function startTest(pid){ go('block',{playerId:pid,blockN:1}); }
-function startBlockTest(pid,n){ DB.ctx.playerId=pid; TEST=initTest(playerById(pid)); TEST_EID=null; DB.ctx.blockN=n; go('test'); }
+function startBlockTest(pid,n){ DB.ctx.playerId=pid; TEST=initTest(playerById(pid)); TEST_EID=null; TEST_ORIG_STATUS=null; DB.ctx.blockN=n; go('test'); }
 function continueTest(pid,n,eid){ DB.ctx.playerId=pid; DB.ctx.blockN=n; var p=curPlayer(); var b=p&&p.blocks[n-1]; var e=b&&entryById(b,eid);
   if(!e||!e.test){ toast('Could not open test'); return; }
-  TEST=e.test; if(!TEST.section) TEST.section='frontToss'; TEST_EID=eid; go('test');
+  TEST=e.test; if(!TEST.section) TEST.section='frontToss'; TEST_EID=eid; TEST_ORIG_STATUS=e.status||null; go('test');
 }
 function setSection(s){ TEST.section=s; render(); }
 function setPitchColor(sec,i,field,c){ TEST[sec][i][field]=c; render(); }
@@ -1785,7 +1786,7 @@ function pitchCard(sec,i,pt){
 async function saveTest(finalize){
   var p=curPlayer(); var n=DB.ctx.blockN; var b=p.blocks[n-1]; var a=analyzeTest(TEST);
   var scores={ colorAcc:a.colorAcc, decAcc:a.decAcc, redDiscipline:a.redDiscipline, nonRedSwingPct:a.nonRedSwingPct, sections:a.sections };
-  var status=finalize?'complete':'inprogress';
+  var status=finalize?'complete':(TEST_ORIG_STATUS==='complete'?'complete':'inprogress');
   if(!b.entries) b.entries=[];
   var existing=TEST_EID?entryById(b,TEST_EID):null;
   if(existing){ existing.test=TEST; existing.scores=scores; existing.status=status; b.date=existing.date; }
@@ -1794,7 +1795,7 @@ async function saveTest(finalize){
     b.entries.push(entry); b.date=entry.date; TEST_EID=entry.id;
   }
   await savePlayer(p);
-  if(finalize){ var eid=TEST_EID; TEST_EID=null; toast('Test saved'); go('results',{blockN:n, entryId:eid}); }
+  if(finalize){ var eid=TEST_EID; TEST_EID=null; TEST_ORIG_STATUS=null; toast('Test saved'); go('results',{blockN:n, entryId:eid}); }
   else{ go('block',{playerId:p.id, blockN:n}); toast('✓ Test saved — resume it anytime from this block'); }
 }
 
