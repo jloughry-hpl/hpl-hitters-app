@@ -754,13 +754,21 @@ async function savePlayer(p){
 async function ensureAccount(user){
   var acc=null;
   try{ var r=await SBc.from('hitter_accounts').select('role,name,email,hitter_id').eq('id',user.id).maybeSingle(); acc=r.data; }catch(e){}
-  if(acc) return acc;
   var meta=user.user_metadata||{};
+  var wantCoach = meta.role==='coach' && !!meta.coach_code;
+  var codeNorm = meta.coach_code ? String(meta.coach_code).trim().toLowerCase() : '';
+  if(acc){
+    /* self-heal: a coach who got saved as a player retries their code on login */
+    if(acc.role!=='coach' && wantCoach){
+      try{ var rr=await SBc.rpc('claim_coach',{p_code:codeNorm}); if(rr && !rr.error && rr.data==='coach'){ acc.role='coach'; toast('Coach access restored'); } }catch(e){ console.warn('claim-retry',e); }
+    }
+    return acc;
+  }
   var name=meta.full_name||user.email;
   var role='player';
   try{ await SBc.from('hitter_accounts').insert({id:user.id, role:'player', name:name, email:user.email}); }catch(e){ console.warn('acc',e); }
-  if(meta.role==='coach' && meta.coach_code){
-    try{ var rc=await SBc.rpc('claim_coach',{p_code:meta.coach_code}); if(rc && !rc.error && rc.data==='coach'){ role='coach'; } else { toast('Invalid coach code — added as a player'); } }catch(e){ console.warn('claim',e); }
+  if(wantCoach){
+    try{ var rc=await SBc.rpc('claim_coach',{p_code:codeNorm}); if(rc && !rc.error && rc.data==='coach'){ role='coach'; } else { toast('Coach code didn\'t match — added as a player for now. Log out and back in to retry.'); } }catch(e){ console.warn('claim',e); }
   }
   if(role==='player'){
     var parts=String(name||'').split(' ');
@@ -803,7 +811,7 @@ async function doAuth(){
     if(pass.length<6){ toast('Password must be at least 6 characters'); return; }
     var name=fval('f_name')||email;
     var opts={ data:{ role:loginRole, full_name:name, sport:(loginRole==='player'?signupSport:'baseball') } };
-    if(loginRole==='coach'){ var code=fval('f_code'); if(!code){ toast('Enter the coach code'); return; } opts.data.coach_code=code; }
+    if(loginRole==='coach'){ var code=fval('f_code'); if(!code){ toast('Enter the coach code'); return; } opts.data.coach_code=String(code).trim().toLowerCase(); }
     if(typeof location!=='undefined' && String(location.protocol).indexOf('http')===0) opts.emailRedirectTo=location.origin;
     var su=await SBc.auth.signUp({ email:email, password:pass, options:opts });
     if(su.error){ toast(su.error.message); return; }
@@ -943,7 +951,7 @@ function viewLogin(){
     +(su?'<div class="field"><label>Full Name</label><input id="f_name" placeholder="First Last"></div>':'')
     +'<div class="field"><label>Email</label><input id="f_email" type="email" placeholder="you@email.com"></div>'
     +'<div class="field"><label>Password</label><input id="f_pass" type="password" placeholder="'+(su?'Create a password (6+ characters)':'Your password')+'"></div>'
-    +((su&&coach)?'<div class="field"><label>Coach Access Code</label><input id="f_code" type="password" placeholder="Code from HPL"></div>':'')
+    +((su&&coach)?'<div class="field"><label>Coach Access Code</label><input id="f_code" type="password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Code from HPL"></div>':'')
     +(!su?'<div style="text-align:right;margin:-6px 2px 10px"><a onclick="forgotPassword()" style="color:var(--green);font-size:12px;cursor:pointer">Forgot password?</a></div>':'')
     +'<button class="btn" onclick="doAuth()">'+(su?'Create Account':'Log In')+'</button>'
     +'<p class="hint">'+(su?(coach?'Coaches: enter the access code HPL gave you.':'Players: create your account, then build your profile.'):'Log in to your HPL Hitters account.')+'</p>'
