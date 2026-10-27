@@ -996,14 +996,15 @@ function clearRosterSearch(){
   var c=document.getElementById('rosterCount'); if(c) c.textContent=rosterCountLabel();
   var x=document.getElementById('rosterClear'); if(x) x.style.display='none';
 }
-var FACILITIES=[{k:'lex',name:'HPL Lex'},{k:'marion',name:'HPL Marion'},{k:'bright',name:'Bright Academy'},{k:'morse',name:'Morse Academy'},{k:'columbus',name:'HPL Columbus'},{k:'remote',name:'Remote'}];
+var FACILITIES=[{k:'lex',name:'HPL Lex'},{k:'louisville',name:'HPL Louisville'},{k:'marion',name:'HPL Marion'},{k:'bright',name:'Bright Academy'},{k:'morse',name:'Morse Academy'},{k:'columbus',name:'HPL Columbus'},{k:'remote',name:'Remote'}];
 var WK_WOW_FACILITIES=['bright','marion','morse'];
 /* ---- Facility equipment availability ---- */
 var WK_EQUIP_KEYS=[{k:'pelotero',lbl:'Pelotero'},{k:'colorBalls',lbl:'Color Balls'},{k:'smallBalls',lbl:'Small Balls'},{k:'skinnyTrainer',lbl:'Skinny / Short Trainer Bat'},{k:'tap',lbl:'Tap Trainer'},{k:'machine',lbl:'Pitching Machine'}];
 var WK_EQUIP_DEFAULTS={morse:{pelotero:false}};
 var FAC_EQUIP={}; /* facility -> equip, loaded from hitters_facility on boot */
+function facEquipFor(fac){ return FAC_EQUIP[fac] || (fac==='louisville' ? FAC_EQUIP['lex'] : undefined) || {}; }
 function wkEquipBase(fac){return Object.assign({pelotero:true,colorBalls:true,smallBalls:true,skinnyTrainer:true,tap:true,machine:true},WK_EQUIP_DEFAULTS[fac]||{});}
-function wkEquip(p){var fac=(p&&p.facility)||'';var sport=((p&&p.sport)==='softball')?'softball':'baseball';var base=wkEquipBase(fac);if(fac==='remote')return Object.assign(base,(p&&p.facilityEquip)||{});var fe=FAC_EQUIP[fac]||{};var sportEq;if(fe.baseball||fe.softball){sportEq=fe[sport]||{};}else{sportEq=(sport==='baseball')?fe:{};}return Object.assign(base,sportEq);}
+function wkEquip(p){var fac=(p&&p.facility)||'';var sport=((p&&p.sport)==='softball')?'softball':'baseball';var base=wkEquipBase(fac);if(fac==='remote')return Object.assign(base,(p&&p.facilityEquip)||{});var fe=facEquipFor(fac);var sportEq;if(fe.baseball||fe.softball){sportEq=fe[sport]||{};}else{sportEq=(sport==='baseball')?fe:{};}return Object.assign(base,sportEq);}
 var ADD_SEL={};
 function facilityName(k){ var f=FACILITIES.filter(function(x){return x.k===k;})[0]; return f?f.name:'Unassigned'; }
 function alphaCmp(a,b){ return ((a.first||'')+' '+(a.last||'')).toLowerCase().localeCompare(((b.first||'')+' '+(b.last||'')).toLowerCase()); }
@@ -1461,7 +1462,7 @@ function viewWorkoutSetup(){if(!(DB.user&&DB.user.role==='coach'))return viewPro
 /* ================= EQUIPMENT SETTINGS (facility-level) ================= */
 var WK_SET_COLS=[{k:'pelotero',lbl:'Pelotero'},{k:'colorBalls',lbl:'Color Balls'},{k:'smallBalls',lbl:'Small Balls'},{k:'skinnyTrainer',lbl:'Skinny Bat'},{k:'tap',lbl:'Tap'},{k:'machine',lbl:'Machine'}];
 var SET_EQUIP=null;
-function openSettings(){ if(!(DB.user&&DB.user.role==='coach'))return; SET_EQUIP={}; FACILITIES.filter(function(f){return f.k!=='remote';}).forEach(function(f){ var fe=FAC_EQUIP[f.k]||{}; var nested=(fe.baseball||fe.softball); var bb=nested?(fe.baseball||{}):fe; var sb=nested?(fe.softball||{}):{}; SET_EQUIP[f.k]={ baseball:Object.assign(wkEquipBase(f.k),bb), softball:Object.assign(wkEquipBase(f.k),sb), softballOffered:(fe.softballOffered!==false) }; }); go('settings'); }
+function openSettings(){ if(!(DB.user&&DB.user.role==='coach'))return; SET_EQUIP={}; FACILITIES.filter(function(f){return f.k!=='remote';}).forEach(function(f){ var fe=facEquipFor(f.k); var nested=(fe.baseball||fe.softball); var bb=nested?(fe.baseball||{}):fe; var sb=nested?(fe.softball||{}):{}; SET_EQUIP[f.k]={ baseball:Object.assign(wkEquipBase(f.k),bb), softball:Object.assign(wkEquipBase(f.k),sb), softballOffered:(fe.softballOffered!==false) }; }); go('settings'); }
 function setEquipToggle(sport,fac,k){ if(!SET_EQUIP||!SET_EQUIP[fac]||!SET_EQUIP[fac][sport])return; SET_EQUIP[fac][sport][k]=(SET_EQUIP[fac][sport][k]===false); render(); }
 function setSoftballOffered(fac){ if(!SET_EQUIP||!SET_EQUIP[fac])return; SET_EQUIP[fac].softballOffered=(SET_EQUIP[fac].softballOffered===false); render(); }
 async function settingsSave(){ if(!SET_EQUIP)return; var facs=Object.keys(SET_EQUIP); var rows=facs.map(function(f){return {facility:f,equip:{baseball:SET_EQUIP[f].baseball,softball:SET_EQUIP[f].softball,softballOffered:SET_EQUIP[f].softballOffered},updated_at:new Date().toISOString()};}); try{ var r=await SBc.from('hitters_facility').upsert(rows); if(r.error){ toast('Save failed: '+(r.error.message||'')); return; } facs.forEach(function(f){ FAC_EQUIP[f]={baseball:SET_EQUIP[f].baseball,softball:SET_EQUIP[f].softball,softballOffered:SET_EQUIP[f].softballOffered}; }); toast('Changes saved'); }catch(e){ toast('Save failed'); } }
