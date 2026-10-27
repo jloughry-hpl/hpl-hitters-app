@@ -1576,7 +1576,7 @@ function entryRow(p,b,e){
   return '<div class="drill-card"><div class="dc-top">'
     +'<div class="dc-ic" onclick="'+open+'" style="cursor:pointer'+(inProg?';background:#ffb020;color:#0a0b0a':'')+'">'+(isTest?(inProg?'…':'T'):'R')+'</div>'
     +'<div class="dc-name" onclick="'+open+'" style="cursor:pointer"><h4>'+title+'</h4><div class="st">'+fmtDate(e.date)+' · '+sub+'</div></div>'
-    +(isCoach?('<button title="Edit session" onclick="editEntry(\''+p.id+'\','+b.n+',\''+e.id+'\')" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:rgba(131,245,44,.12);border:1px solid rgba(131,245,44,.4);color:var(--green);font-size:15px;cursor:pointer;margin-right:6px">✎</button><button title="Delete session" onclick="deleteEntry(\''+p.id+'\','+b.n+',\''+e.id+'\')" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:rgba(255,80,80,.14);border:1px solid rgba(255,80,80,.4);color:#ff6b6b;font-size:14px;cursor:pointer">🗑</button>'):('<span onclick="'+open+'" style="cursor:pointer">'+IC.chev+'</span>'))
+    +(isCoach?('<button title="Edit session" onclick="editEntry(\''+p.id+'\','+b.n+',\''+e.id+'\')" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:rgba(131,245,44,.12);border:1px solid rgba(131,245,44,.4);color:var(--green);font-size:15px;cursor:pointer">✎</button>'):('<span onclick="'+open+'" style="cursor:pointer">'+IC.chev+'</span>'))
   +'</div></div>';
 }
 async function deleteEntry(pid,n,eid){
@@ -1836,7 +1836,7 @@ function viewResults(){
         +rn('Max EV',R.maxEV,'mph')+rn('Avg EV',R.avgEV,'mph')+rn('Hard Hit',R.hardHitPct,'%')
         +rn('Max Dist',R.maxDist,'ft')+rn('Avg Dist',R.avgDist,'ft')+rn('Avg LA',R.avgLA,'°')
       +'</div>'
-      +'<div class="pad"><button class="btn ghost" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button></div>'
+      +'<div class="pad"><button class="btn ghost" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'+((DB.user&&DB.user.role==='coach')?'<button class="btn ghost" style="margin-top:8px;color:#ff6b6b;border-color:rgba(255,80,80,.4)" onclick="deleteEntry(\''+p.id+'\','+n+',\''+e.id+'\')">Delete This Session</button>':'')+'</div>'
     +'</div>';
   }
   var a=analyzeTest(e.test, playerMaxEV(p));
