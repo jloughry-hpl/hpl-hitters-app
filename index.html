@@ -779,6 +779,18 @@ async function ensureAccount(user){
   }
   return {role:role,name:name,email:user.email};
 }
+async function promptCoachCode(){
+  var code=(typeof window!=='undefined'&&window.prompt)?window.prompt('Enter your HPL coach access code:'):'';
+  if(code===null||code===undefined) return;
+  code=String(code).trim().toLowerCase();
+  if(!code) return;
+  toast('Checking code\u2026');
+  try{
+    var rc=await SBc.rpc('claim_coach',{p_code:code});
+    if(rc && !rc.error && rc.data==='coach'){ toast('Coach access granted!'); setTimeout(function(){ location.reload(); },900); }
+    else { toast("That code didn't match \u2014 double-check with HPL."); }
+  }catch(e){ console.warn('promptCoach',e); toast('Could not verify \u2014 try again.'); }
+}
 async function cloudBoot(){
   if(!SBc){ DB.view='login'; render(); return; }
   if(IS_RECOVERY){ DB.view='newPassword'; DB.ctx={}; render(); return; }
@@ -951,7 +963,7 @@ function viewLogin(){
     +(su?'<div class="field"><label>Full Name</label><input id="f_name" placeholder="First Last"></div>':'')
     +'<div class="field"><label>Email</label><input id="f_email" type="email" placeholder="you@email.com"></div>'
     +'<div class="field"><label>Password</label><input id="f_pass" type="password" placeholder="'+(su?'Create a password (6+ characters)':'Your password')+'"></div>'
-    +((su&&coach)?'<div class="field"><label>Coach Access Code</label><input id="f_code" type="password" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Code from HPL"></div>':'')
+    +((su&&coach)?'<div class="field"><label>Coach Access Code</label><input id="f_code" type="text" autocapitalize="none" autocorrect="off" spellcheck="false" placeholder="Code from HPL"></div>':'')
     +(!su?'<div style="text-align:right;margin:-6px 2px 10px"><a onclick="forgotPassword()" style="color:var(--green);font-size:12px;cursor:pointer">Forgot password?</a></div>':'')
     +'<button class="btn" onclick="doAuth()">'+(su?'Create Account':'Log In')+'</button>'
     +'<p class="hint">'+(su?(coach?'Coaches: enter the access code HPL gave you.':'Players: create your account, then build your profile.'):'Log in to your HPL Hitters account.')+'</p>'
@@ -1262,6 +1274,7 @@ function viewProfile(){
       +'<button class="btn ghost" style="margin-top:8px" onclick="openLeaderboard(\''+p.id+'\')">View Leaderboard</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="openDevelopment(\''+p.id+'\')">Development Leaders</button>'
       +'<button class="btn ghost" style="margin-top:8px" onclick="go(\'info\')">What Do These Numbers Mean?</button>'
+      +(!isCoach?'<button class="btn ghost" style="margin-top:8px;border-color:var(--green);color:var(--green)" onclick="promptCoachCode()">Are you a coach? Enter access code</button>':'')
       +(isCoach?('<button class="btn" style="margin-top:14px;background:rgba(226,59,59,.12);border:1px solid var(--red);color:#ff7b6b" onclick="deletePlayer(\''+p.id+'\')">Delete Player</button>'):'')
     +'</div></div>';
 }
