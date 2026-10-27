@@ -911,9 +911,10 @@ function rnBest(k,bm,u){ var show=(bm&&bm.value!=null&&bm.value!==0); var v=show
 function rnAgg(k,val,u,kind){ var show=(val>0); return '<div class="rn"><div class="k">'+k+'</div><div class="v">'+(show?val:'—')+'<small> '+u+'</small></div>'+(show&&kind?'<div style="font-size:9px;color:var(--grey);letter-spacing:.3px;margin-top:3px">'+kind+'</div>':'')+'</div>'; }
 /* test-page Rapsodo input (bound to TEST.rap for this session) */
 var RAP=null;
+var RAP_EID=null;
 function rapField(lbl,key,u){ var v=(RAP&&RAP[key])?RAP[key]:''; return '<div class="field" style="flex:1"><label>'+lbl+' ('+u+')</label><input type="number" step="0.1" value="'+v+'" oninput="setRap(\''+key+'\',this.value)"></div>'; }
 function setRap(key,v){ if(RAP) RAP[key]=(v===''?0:+v); }
-function startRapsodo(pid,n){ DB.ctx.playerId=pid; DB.ctx.blockN=n; RAP=emptyRap(); RAP._fromTest=false;
+function startRapsodo(pid,n){ DB.ctx.playerId=pid; DB.ctx.blockN=n; RAP=emptyRap(); RAP._fromTest=false; RAP_EID=null;
   var p=curPlayer(); var b=p&&p.blocks&&p.blocks[n-1]; var t=b&&lastTest(b);
   if(t&&t.test){ try{ var a=analyzeTest(t.test, playerMaxEV(p)); if(a){ RAP.maxEV=a.maxEV||0; RAP.avgEV=a.avgEV||0; RAP.hardHitPct=a.hardHitPct||0; RAP._fromTest=(a.maxEV>0||a.avgEV>0); RAP._testDate=t.date; } }catch(_){} }
   go('rapsodo');
@@ -934,10 +935,11 @@ function viewRapsodo(){
 async function saveRapsodo(){
   var p=curPlayer(); var n=DB.ctx.blockN; var b=p.blocks[n-1];
   var rap={maxEV:+RAP.maxEV||0,avgEV:+RAP.avgEV||0,maxDist:+RAP.maxDist||0,avgDist:+RAP.avgDist||0,avgLA:+RAP.avgLA||0,hardHitPct:+RAP.hardHitPct||0};
-  var entry={ id:nid(), type:'rapsodo', date:new Date().toISOString().slice(0,10), rap:rap };
-  if(!b.entries) b.entries=[]; b.entries.push(entry); b.date=entry.date;
+  var eid;
+  if(RAP_EID){ var ex=entryById(b,RAP_EID); if(ex){ ex.rap=rap; eid=ex.id; } RAP_EID=null; }
+  if(!eid){ if(!b.entries) b.entries=[]; var entry={ id:nid(), type:'rapsodo', date:new Date().toISOString().slice(0,10), rap:rap }; b.entries.push(entry); b.date=entry.date; eid=entry.id; }
   p.rap=Object.assign({}, rap);
-  await savePlayer(p); toast('Rapsodo results saved'); go('results',{blockN:n, entryId:entry.id});
+  await savePlayer(p); toast('Rapsodo results saved'); go('results',{blockN:n, entryId:eid});
 }
 
 /* ================= LOGIN ================= */
@@ -1574,7 +1576,7 @@ function entryRow(p,b,e){
   return '<div class="drill-card"><div class="dc-top">'
     +'<div class="dc-ic" onclick="'+open+'" style="cursor:pointer'+(inProg?';background:#ffb020;color:#0a0b0a':'')+'">'+(isTest?(inProg?'…':'T'):'R')+'</div>'
     +'<div class="dc-name" onclick="'+open+'" style="cursor:pointer"><h4>'+title+'</h4><div class="st">'+fmtDate(e.date)+' · '+sub+'</div></div>'
-    +(isCoach?('<button title="Delete session" onclick="deleteEntry(\''+p.id+'\','+b.n+',\''+e.id+'\')" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:rgba(255,80,80,.14);border:1px solid rgba(255,80,80,.4);color:#ff6b6b;font-size:14px;cursor:pointer">🗑</button>'):('<span onclick="'+open+'" style="cursor:pointer">'+IC.chev+'</span>'))
+    +(isCoach?('<button title="Edit session" onclick="editEntry(\''+p.id+'\','+b.n+',\''+e.id+'\')" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:rgba(131,245,44,.12);border:1px solid rgba(131,245,44,.4);color:var(--green);font-size:15px;cursor:pointer;margin-right:6px">✎</button><button title="Delete session" onclick="deleteEntry(\''+p.id+'\','+b.n+',\''+e.id+'\')" style="flex:0 0 auto;width:34px;height:34px;border-radius:9px;background:rgba(255,80,80,.14);border:1px solid rgba(255,80,80,.4);color:#ff6b6b;font-size:14px;cursor:pointer">🗑</button>'):('<span onclick="'+open+'" style="cursor:pointer">'+IC.chev+'</span>'))
   +'</div></div>';
 }
 async function deleteEntry(pid,n,eid){
@@ -1585,6 +1587,20 @@ async function deleteEntry(pid,n,eid){
   b.entries=(b.entries||[]).filter(function(x){return x.id!==eid;});
   if(TEST_EID===eid){ TEST_EID=null; }
   await savePlayer(p); toast('Session deleted'); go('block',{playerId:pid,blockN:n});
+}
+function editEntry(pid,n,eid){
+  if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
+  var p=playerById(pid); var b=p&&p.blocks[n-1]; var e=b&&entryById(b,eid);
+  if(!e){ toast('Session not found'); return; }
+  if(e.type==='rapsodo'){ editRapsodoEntry(pid,n,eid); }
+  else { continueTest(pid,n,eid); }
+}
+function editRapsodoEntry(pid,n,eid){
+  DB.ctx.playerId=pid; DB.ctx.blockN=n;
+  var p=curPlayer(); var b=p&&p.blocks[n-1]; var e=b&&entryById(b,eid);
+  if(!e||!e.rap){ toast('Not found'); return; }
+  RAP=Object.assign({}, e.rap); RAP._fromTest=false; RAP_EID=eid;
+  go('rapsodo');
 }
 async function deletePlayer(pid){
   if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
@@ -1813,7 +1829,7 @@ function viewResults(){
   var backR='<button class="icon-btn" onclick="go(\'block\',{playerId:\''+p.id+'\',blockN:'+n+'})">'+IC.back+'</button>';
   if(e.type==='rapsodo'){
     var R=e.rap||{};
-    return '<div class="scroll">'+topbar(backR)
+    return '<div class="scroll">'+topbar((DB.user&&DB.user.role==='coach'?'<button class="icon-btn" title="Edit" onclick="editEntry(\''+p.id+'\','+n+',\''+e.id+'\')" style="color:var(--green);font-size:16px">✎</button>':'')+backR)
       +'<div class="logger-head"><h2>RAPSODO <em>RESULTS</em></h2><div class="desc">Block '+n+' · '+b.label+' · '+fmtDate(e.date)+'</div></div>'
       +'<div class="rap-numbers" style="grid-template-columns:1fr 1fr 1fr">'
         +rn('Max EV',R.maxEV,'mph')+rn('Avg EV',R.avgEV,'mph')+rn('Hard Hit',R.hardHitPct,'%')
@@ -1827,7 +1843,7 @@ function viewResults(){
   var cols=['Green','Black','Blue'].filter(function(c){return a.perColor[c].n;});
   var worst=cols.slice().sort(function(x,y){return a.perColor[x].avg-a.perColor[y].avg;})[0];
   return '<div class="scroll">'
-    +topbar(backR)
+    +topbar((DB.user&&DB.user.role==='coach'?'<button class="icon-btn" title="Edit" onclick="editEntry(\''+p.id+'\','+n+',\''+e.id+'\')" style="color:var(--green);font-size:16px">✎</button>':'')+backR)
     +'<div class="logger-head"><h2>TEST <em>RESULTS</em></h2><div class="desc">Block '+n+' · '+b.label+' · '+fmtDate(e.date)+'</div></div>'
     +'<div class="stat-row">'
       +'<div class="stat"><div class="k">Max EV</div><div class="v">'+a.maxEV+'<small> mph</small></div></div>'
