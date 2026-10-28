@@ -743,8 +743,24 @@ async function loadPlayers(){
   }catch(e){ console.warn(e); }
   try{ var fe=await SBc.from('hitters_facility').select('facility,equip'); if(fe&&fe.data){ FAC_EQUIP={}; fe.data.forEach(function(row){ FAC_EQUIP[row.facility]=row.equip||{}; }); } }catch(e){ console.warn(e); }
 }
+async function _fetchPlayerBlocks(id){
+  try{ var r=await SBc.from('hitters').select('state').eq('id',id).maybeSingle(); return (r&&r.data&&r.data.state&&Array.isArray(r.data.state.blocks))?r.data.state.blocks:null; }catch(e){ return null; }
+}
+function _mergeBlocks(dbB, memB){
+  if(!Array.isArray(dbB)) return memB;
+  if(!Array.isArray(memB)) return dbB;
+  return memB.map(function(mb,i){
+    var db=dbB[i]; if(!db||!Array.isArray(db.entries)||!db.entries.length) return mb;
+    var byId={}, order=[];
+    (db.entries||[]).forEach(function(e){ if(e&&e.id){ if(!(e.id in byId)) order.push(e.id); byId[e.id]=e; } });
+    ((mb&&mb.entries)||[]).forEach(function(e){ if(e&&e.id){ if(!(e.id in byId)) order.push(e.id); byId[e.id]=e; } });
+    return Object.assign({}, mb||{}, {entries:order.map(function(k){return byId[k];})});
+  });
+}
 async function savePlayer(p){
   if(!SBc||!p) return;
+  /* stale-write protection: a save can only ADD or UPDATE sessions, never drop ones already in the database */
+  try{ var dbBlocks=await _fetchPlayerBlocks(p.id); if(dbBlocks){ p.blocks=_mergeBlocks(dbBlocks, p.blocks); } }catch(e){ console.warn('merge',e); }
   var state=Object.assign({}, p); delete state.id; delete state.owner;
   var row={ id:p.id, first_name:p.first||null, last_name:p.last||null, position:p.position||null, grad_class:p.gradClass||null, state:state, updated_at:new Date().toISOString() };
   if(p.owner) row.owner=p.owner;
