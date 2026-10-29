@@ -1618,6 +1618,39 @@ function editRapsodoEntry(pid,n,eid){
   RAP=Object.assign({}, e.rap); RAP._fromTest=false; RAP_EID=eid;
   go('rapsodo');
 }
+function moveControl(p, n, eid){
+  if(!(DB.user&&DB.user.role==='coach')) return '';
+  var btns=(p.blocks||[]).map(function(b){ if(b.n===n) return ''; return '<button class="btn ghost" style="margin-top:6px;padding:10px;font-size:13px" onclick="moveSession(\''+p.id+'\','+n+','+b.n+',\''+eid+'\')">→ Move to Block '+b.n+' · '+(b.label||'').replace('Weeks ','Wk ')+'</button>'; }).join('');
+  return '<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><div class="muted" style="font-size:12px;margin-bottom:2px">Logged in the wrong block? Move this session:</div>'+btns+'</div>';
+}
+async function moveSession(pid, fromN, toN, eid){
+  if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
+  if(fromN===toN) return;
+  if(!SBc){ toast('Not connected'); return; }
+  var okc=(typeof window!=='undefined'&&window.confirm)?window.confirm('Move this session from Block '+fromN+' to Block '+toN+'?'):true;
+  if(!okc) return;
+  toast('Moving…');
+  try{
+    var r=await SBc.from('hitters').select('state').eq('id',pid).maybeSingle();
+    if(r.error||!r.data||!r.data.state){ toast('Could not read record'); return; }
+    var st=r.data.state;
+    if(!Array.isArray(st.blocks)||!st.blocks[fromN-1]||!st.blocks[toN-1]){ toast('Blocks not found'); return; }
+    var fromB=st.blocks[fromN-1], toB=st.blocks[toN-1];
+    var fe=fromB.entries||[]; var idx=-1;
+    for(var i=0;i<fe.length;i++){ if(fe[i]&&fe[i].id===eid){ idx=i; break; } }
+    if(idx<0){ toast('Session not found in Block '+fromN); return; }
+    var entry=fe[idx];
+    fe.splice(idx,1); fromB.entries=fe;
+    if(!Array.isArray(toB.entries)) toB.entries=[];
+    toB.entries.push(entry); toB.date=entry.date||toB.date;
+    var w=await SBc.from('hitters').update({state:st, updated_at:new Date().toISOString()}).eq('id',pid);
+    if(w.error){ toast('Move failed: '+(w.error.message||'')); return; }
+    var pm=playerById(pid); if(pm){ pm.blocks=st.blocks; }
+    toast('Moved to Block '+toN);
+    go('block',{playerId:pid, blockN:toN});
+  }catch(e){ console.warn('move',e); toast('Move failed'); }
+}
+
 async function deletePlayer(pid){
   if(!(DB.user&&DB.user.role==='coach')){ toast('Coaches only'); return; }
   var p=playerById(pid); if(!p){ toast('Player not found'); return; }
@@ -1852,7 +1885,7 @@ function viewResults(){
         +rn('Max EV',R.maxEV,'mph')+rn('Avg EV',R.avgEV,'mph')+rn('Hard Hit',R.hardHitPct,'%')
         +rn('Max Dist',R.maxDist,'ft')+rn('Avg Dist',R.avgDist,'ft')+rn('Avg LA',R.avgLA,'°')
       +'</div>'
-      +'<div class="pad"><button class="btn ghost" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'+((DB.user&&DB.user.role==='coach')?'<button class="btn ghost" style="margin-top:8px;color:#ff6b6b;border-color:rgba(255,80,80,.4)" onclick="deleteEntry(\''+p.id+'\','+n+',\''+e.id+'\')">Delete This Session</button>':'')+'</div>'
+      +'<div class="pad"><button class="btn ghost" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'+((DB.user&&DB.user.role==='coach')?'<button class="btn ghost" style="margin-top:8px;color:#ff6b6b;border-color:rgba(255,80,80,.4)" onclick="deleteEntry(\''+p.id+'\','+n+',\''+e.id+'\')">Delete This Session</button>':'')+moveControl(p,n,e.id)+'</div>'
     +'</div>';
   }
   var a=analyzeTest(e.test, playerMaxEV(p));
@@ -1893,7 +1926,7 @@ function viewResults(){
     +'</div>'
     +(worst?'<div class="insight">Weakest color contact: <b>'+worst+'</b> at '+a.perColor[worst].avg+' mph avg. Add reps on '+worst+' recognition.</div>':'')))
     +'<div class="pad"><button class="btn ghost" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
-      +((DB.user&&DB.user.role==='coach')?'<button class="btn ghost" style="margin-top:8px;color:#ff6b6b;border-color:rgba(255,80,80,.4)" onclick="deleteEntry(\''+p.id+'\','+n+',\''+e.id+'\')">Delete This Test</button>':'')
+      +((DB.user&&DB.user.role==='coach')?'<button class="btn ghost" style="margin-top:8px;color:#ff6b6b;border-color:rgba(255,80,80,.4)" onclick="deleteEntry(\''+p.id+'\','+n+',\''+e.id+'\')">Delete This Test</button>':'')+moveControl(p,n,e.id)
     +'</div>'
   +'</div>';
 }
