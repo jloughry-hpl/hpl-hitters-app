@@ -1286,6 +1286,7 @@ function viewProfile(){
         +'<div class="wk">Block '+b.n+'</div><div class="dt">'+b.label.replace('Weeks ','Wk ')+'</div>'
         +'<div class="ev">'+(cnt?(cnt+' log'+(cnt>1?'s':'')):'—')+'</div></button>'; }).join('')
     +'</div>'
+    +movementCard(p)
     +'<div class="pad">'
       +'<button class="btn" onclick="go(\'report\',{playerId:\''+p.id+'\'})">Generate HPL Report</button>'
       +((isCoach && (p.sport||'baseball')!=='softball')?'<button class="btn ghost" style="margin-top:8px" onclick="go(\'drillMenu\',{playerId:\''+p.id+'\'})">Drills</button>':'')
@@ -1496,15 +1497,15 @@ function viewWorkoutSetup(){if(!(DB.user&&DB.user.role==='coach'))return viewPro
     +'<div class="section-lbl" style="margin:16px 0 8px">Drill Needs (append to Front Toss)</div><div style="display:flex;gap:8px"><input class="dev-in" placeholder="Drill name" value="'+esc(s.needInput||'')+'" oninput="wsNeedInput(this.value)"><button class="btn" style="flex:0 0 auto;width:auto;padding:0 16px" onclick="wsAddNeed()">Add</button></div><div style="margin-top:8px">'+needs+'</div>'
     +(p.facility==='remote'?('<div class="section-lbl" style="margin:18px 0 8px">Player Equipment · Remote</div>'
     +'<div class="wk-note" style="margin:0 0 8px">Remote players are set individually. Turn off anything this player doesn\'t have at home — their workouts and assessment adapt automatically.</div>'
-    +WK_EQUIP_KEYS.map(function(k){var on=s.equip[k.k]!==false;return '<button class="seg'+(on?' on':'')+'" style="width:100%;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center" onclick="wsToggleEquip(\''+k.k+'\')"><span>'+esc(k.lbl)+'</span><span style="font-size:11px;opacity:.85">'+(on?'✓ Have it':'✕ Not available')+'</span></button>';}).join('')):'')
+    +WK_EQUIP_KEYS.map(function(k){var on=s.equip[k.k]!==false;return '<button class="seg'+(on?' on':'')+'" style="width:100%;margin-bottom:6px;display:flex;justify-content:space-between;align-items:center" onclick="wsToggleEquip(\''+k.k+'\')"><span>'+esc(k.lbl)+'</span><span style="font-size:11px;opacity:.85">'+(on?'✓ Have it':'✕ Not available')+'</span></button>';}).join('')+'<div class="section-lbl" style="margin:14px 0 8px">Movement Assessment</div>'+'<button class="seg'+(s.equip.movementAssessment?' on':'')+'" style="width:100%;display:flex;justify-content:space-between;align-items:center" onclick="wsToggleEquip(\'movementAssessment\')"><span>Movement Assessment</span><span style="font-size:11px;opacity:.85">'+(s.equip.movementAssessment?'✓ On':'✕ Off')+'</span></button>'):'')
     +'<button class="btn" style="margin-top:18px" onclick="wsSave()">Save Program</button><div style="height:16px"></div></div></div>';}
 /* ================= EQUIPMENT SETTINGS (facility-level) ================= */
 var WK_SET_COLS=[{k:'pelotero',lbl:'Pelotero'},{k:'colorBalls',lbl:'Color Balls'},{k:'smallBalls',lbl:'Small Balls'},{k:'skinnyTrainer',lbl:'Skinny Bat'},{k:'tap',lbl:'Tap'},{k:'machine',lbl:'Machine'}];
 var SET_EQUIP=null;
-function openSettings(){ if(!(DB.user&&DB.user.role==='coach'))return; SET_EQUIP={}; FACILITIES.filter(function(f){return f.k!=='remote';}).forEach(function(f){ var fe=facEquipFor(f.k); var nested=(fe.baseball||fe.softball); var bb=nested?(fe.baseball||{}):fe; var sb=nested?(fe.softball||{}):{}; SET_EQUIP[f.k]={ baseball:Object.assign(wkEquipBase(f.k),bb), softball:Object.assign(wkEquipBase(f.k),sb), softballOffered:(fe.softballOffered!==false) }; }); go('settings'); }
+function openSettings(){ if(!(DB.user&&DB.user.role==='coach'))return; SET_EQUIP={}; FACILITIES.filter(function(f){return f.k!=='remote';}).forEach(function(f){ var fe=facEquipFor(f.k); var nested=(fe.baseball||fe.softball); var bb=nested?(fe.baseball||{}):fe; var sb=nested?(fe.softball||{}):{}; SET_EQUIP[f.k]={ baseball:Object.assign(wkEquipBase(f.k),bb), softball:Object.assign(wkEquipBase(f.k),sb), softballOffered:(fe.softballOffered!==false), movementAssessment:((FAC_EQUIP[f.k]&&typeof FAC_EQUIP[f.k].movementAssessment!=='undefined')?!!FAC_EQUIP[f.k].movementAssessment:(f.k==='lex')) }; }); go('settings'); }
 function setEquipToggle(sport,fac,k){ if(!SET_EQUIP||!SET_EQUIP[fac]||!SET_EQUIP[fac][sport])return; SET_EQUIP[fac][sport][k]=(SET_EQUIP[fac][sport][k]===false); render(); }
 function setSoftballOffered(fac){ if(!SET_EQUIP||!SET_EQUIP[fac])return; SET_EQUIP[fac].softballOffered=(SET_EQUIP[fac].softballOffered===false); render(); }
-async function settingsSave(){ if(!SET_EQUIP)return; var facs=Object.keys(SET_EQUIP); var rows=facs.map(function(f){return {facility:f,equip:{baseball:SET_EQUIP[f].baseball,softball:SET_EQUIP[f].softball,softballOffered:SET_EQUIP[f].softballOffered},updated_at:new Date().toISOString()};}); try{ var r=await SBc.from('hitters_facility').upsert(rows); if(r.error){ toast('Save failed: '+(r.error.message||'')); return; } facs.forEach(function(f){ FAC_EQUIP[f]={baseball:SET_EQUIP[f].baseball,softball:SET_EQUIP[f].softball,softballOffered:SET_EQUIP[f].softballOffered}; }); toast('Changes saved'); }catch(e){ toast('Save failed'); } }
+async function settingsSave(){ if(!SET_EQUIP)return; var facs=Object.keys(SET_EQUIP); var rows=facs.map(function(f){return {facility:f,equip:{baseball:SET_EQUIP[f].baseball,softball:SET_EQUIP[f].softball,softballOffered:SET_EQUIP[f].softballOffered,movementAssessment:!!SET_EQUIP[f].movementAssessment},updated_at:new Date().toISOString()};}); try{ var r=await SBc.from('hitters_facility').upsert(rows); if(r.error){ toast('Save failed: '+(r.error.message||'')); return; } facs.forEach(function(f){ FAC_EQUIP[f]={baseball:SET_EQUIP[f].baseball,softball:SET_EQUIP[f].softball,softballOffered:SET_EQUIP[f].softballOffered,movementAssessment:!!SET_EQUIP[f].movementAssessment}; }); toast('Changes saved'); }catch(e){ toast('Save failed'); } }
 function equipCellBtn(onclick,on){ return '<button onclick="'+onclick+'" style="width:32px;height:32px;border-radius:9px;border:1.5px solid '+(on?'var(--green)':'rgba(255,90,90,.5)')+';background:'+(on?'rgba(131,245,44,.16)':'rgba(255,90,90,.10)')+';color:'+(on?'var(--green)':'#ff7b6b')+';font-size:14px;font-weight:800;cursor:pointer">'+(on?'✓':'✕')+'</button>'; }
 function equipTable(sport){ var facs=FACILITIES.filter(function(f){return f.k!=='remote';}); var offeredCol=(sport==='softball');
   var head='<tr><th style="text-align:left;padding:8px 10px">Facility</th>'+(offeredCol?'<th style="padding:8px 5px;font-size:9.5px;font-weight:700">Softball?</th>':'')+WK_SET_COLS.map(function(c){return '<th style="padding:8px 5px;font-size:9.5px;font-weight:700">'+esc(c.lbl)+'</th>';}).join('')+'</tr>';
@@ -1513,11 +1514,52 @@ function equipTable(sport){ var facs=FACILITIES.filter(function(f){return f.k!==
     var cells=WK_SET_COLS.map(function(c){ var on=eq[c.k]!==false; return '<td style="padding:6px 5px;text-align:center'+(dim?';opacity:.35':'')+'">'+equipCellBtn('setEquipToggle(\''+sport+'\',\''+f.k+'\',\''+c.k+'\')',on)+'</td>'; }).join('');
     return '<tr style="border-top:1px solid #2a2e2a"><td style="padding:9px 10px;font-weight:700;white-space:nowrap;font-size:12.5px'+(dim?';opacity:.5':'')+'">'+esc(f.name)+'</td>'+offCell+cells+'</tr>'; }).join('');
   return '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch"><table style="border-collapse:collapse;width:100%;min-width:'+(offeredCol?'480':'430')+'px;background:#141614;border:1px solid #2a2e2a;border-radius:10px;font-size:12px"><thead style="background:rgba(131,245,44,.08);color:var(--green);text-transform:uppercase;letter-spacing:.3px">'+head+'</thead><tbody>'+body+'</tbody></table></div>'; }
+/* ===== Movement Assessment (location-gated) ===== */
+function hasMovementAssessment(p){
+  if(!p) return false;
+  var fac=p.facility||'';
+  if(fac==='remote') return !!(p.facilityEquip&&p.facilityEquip.movementAssessment);
+  var fe=FAC_EQUIP[fac]||{};
+  if(typeof fe.movementAssessment!=='undefined') return !!fe.movementAssessment;
+  return fac==='lex';
+}
+function setMovementAssessment(fac){ if(!SET_EQUIP||!SET_EQUIP[fac])return; SET_EQUIP[fac].movementAssessment=!SET_EQUIP[fac].movementAssessment; render(); }
+function movementSettingsTable(){
+  var facs=FACILITIES.filter(function(f){return f.k!=='remote';});
+  var body=facs.map(function(f){ var on=!!(SET_EQUIP[f.k]&&SET_EQUIP[f.k].movementAssessment);
+    return '<tr style="border-top:1px solid #2a2e2a"><td style="padding:9px 10px;font-weight:700;white-space:nowrap;font-size:12.5px">'+esc(f.name)+'</td><td style="padding:6px 5px;text-align:center">'+equipCellBtn('setMovementAssessment(\''+f.k+'\')',on)+'</td></tr>'; }).join('');
+  return '<div style="overflow-x:auto"><table style="border-collapse:collapse;width:100%;background:#141614;border:1px solid #2a2e2a;border-radius:10px;font-size:12px"><thead style="background:rgba(131,245,44,.08);color:var(--green);text-transform:uppercase;letter-spacing:.3px"><tr><th style="text-align:left;padding:8px 10px">Facility</th><th style="padding:8px 10px;font-size:9.5px;font-weight:700">Movement Assessment</th></tr></thead><tbody>'+body+'</tbody></table></div>';
+}
+var MA_EDIT=null;
+function editMovement(){var p=curPlayer();if(!p)return;MA_EDIT={notes:p.movementNotes||''};render();}
+function cancelMovement(){MA_EDIT=null;render();}
+async function saveMovement(){var p=curPlayer();if(!p)return;p.movementNotes=((MA_EDIT&&MA_EDIT.notes)||'').trim();MA_EDIT=null;await savePlayer(p);toast('Movement assessment saved');render();}
+function movementCard(p){
+  if(!hasMovementAssessment(p)) return '';
+  var coach=DB.user&&DB.user.role==='coach';
+  if(MA_EDIT && coach){
+    return '<div class="section-lbl">Movement Assessment</div>'
+      +'<div class="detail-card" style="display:block;padding:12px">'
+      +'<textarea class="dev-in" style="width:100%;min-height:120px;resize:vertical" placeholder="Movement assessment notes (your sports-performance trainers will define the full fields here)" oninput="MA_EDIT.notes=this.value">'+esc(MA_EDIT.notes)+'</textarea>'
+      +'<div class="save-bar" style="display:flex;gap:10px;margin-top:10px"><button class="btn" style="flex:1" onclick="saveMovement()">Save</button><button class="btn ghost" style="flex:1" onclick="cancelMovement()">Cancel</button></div>'
+      +'</div>';
+  }
+  return '<div class="section-lbl">Movement Assessment'+(coach?' <span class="link" onclick="editMovement()">✎ Edit</span>':'')+'</div>'
+    +'<div class="detail-card" style="display:block;padding:12px">'
+    +(p.movementNotes?('<div style="white-space:pre-wrap;font-size:13px;line-height:1.55;color:#e6e6e6">'+esc(p.movementNotes)+'</div>'):('<div class="muted" style="font-size:12.5px">Movement screen for HPL Lex athletes — your sports-performance trainers will define the fields here.'+(coach?' Tap Edit to add notes for now.':'')+'</div>'))
+    +'</div>';
+}
+function movementReportSection(p){
+  if(!hasMovementAssessment(p)||!p.movementNotes) return '';
+  return '<div class="section-lbl" style="margin:20px 2px 8px">Movement Assessment</div>'
+    +'<div style="background:#141614;border:1px solid #2a2e2a;border-left:3px solid var(--green);border-radius:12px;padding:13px 14px;font-size:12.5px;line-height:1.55;color:#cfcfcf;white-space:pre-wrap">'+esc(p.movementNotes)+'</div>';
+}
+
 function viewSettings(){ if(!(DB.user&&DB.user.role==='coach'))return viewHome(); if(!SET_EQUIP)openSettings();
   return '<div class="scroll">'+topbar('<button class="icon-btn" onclick="go(\'home\')" title="Back">'+IC.back+'</button>')+'<div class="pad"><div class="hello"><p>Coach dashboard</p><h2>EQUIPMENT <em>SETTINGS</em></h2></div><div class="wk-note" style="margin:2px 0 12px">Mark what each facility has: green ✓ = available, red ✕ = not. Workouts and the assessment adapt for every player at that facility. Remote players are set on their own profile.</div>'
   +'<div class="section-lbl" style="margin:6px 0 8px">Baseball</div>'+equipTable('baseball')
   +'<div class="section-lbl" style="margin:18px 0 8px">Softball</div><div class="wk-note" style="margin:0 0 8px">Unmark <b>Softball?</b> for any location that doesn\'t run softball right now.</div>'+equipTable('softball')
-  +'<button class="btn" style="margin-top:16px" onclick="settingsSave()">Save Changes</button><div style="height:24px"></div></div></div>'; }
+  +'<div class="section-lbl" style="margin:18px 0 8px">Movement Assessment</div><div class="wk-note" style="margin:0 0 8px">Turn on for locations that run the movement screen (HPL Lex by default). Remote players are set on their own profile.</div>'+movementSettingsTable()+'<button class="btn" style="margin-top:16px" onclick="settingsSave()">Save Changes</button><div style="height:24px"></div></div></div>'; }
 
 /* ================= EDIT PROFILE ================= */
 var EP=null;
@@ -2672,6 +2714,7 @@ function viewReport(){
       +'<div style="margin-top:16px;background:rgba(131,245,44,.08);border:1px solid rgba(131,245,44,.3);border-radius:12px;padding:13px 14px">'
         +'<div style="font-family:\'Barlow Semi Condensed\';font-weight:700;font-size:13px;color:var(--green);text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px">Areas to Continue Working On</div>'
         +'<div style="font-size:12px;line-height:1.5;color:#cdeeb0">• <b>Exit velo floor</b> — close the gap between max ('+vMaxEV+') and avg ('+vAvgEV+') EV.<br>• <b>Hard-hit consistency</b> — push hard-hit rate higher by staying in the zone.<br>• <b>Launch angle</b> — keep avg LA locked in the 10–25° zone.</div></div>'
+      +movementReportSection(p)
       +'<div style="text-align:center;color:var(--grey-d);font-size:10px;margin-top:16px;line-height:1.5">949 National Ave, Suite 115 · Lexington, KY 40502<br>hpllex.com · info@hpllex.com</div>'
       +'<button class="btn" style="margin-top:16px" onclick="window.print()">Save / Print PDF</button>'
       +'<div style="height:20px"></div>'
